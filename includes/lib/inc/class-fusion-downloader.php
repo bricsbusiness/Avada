@@ -7,11 +7,6 @@
  * @since 1.8
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Downloads files.
  *
@@ -36,6 +31,15 @@ class Fusion_Downloader {
 	 * @var string
 	 */
 	protected $folder_name;
+
+	/**
+	 * The folder-URL.
+	 *
+	 * @access protected
+	 * @since 1.8
+	 * @var string
+	 */
+	protected $folder_url;
 
 	/**
 	 * The folder-path where we want to save our file.
@@ -78,7 +82,8 @@ class Fusion_Downloader {
 		// Populate the object properties.
 		$this->url         = $url;
 		$this->folder_name = $folder_name;
-		$this->folder_path = self::get_root_path( $folder_name );
+		$this->folder_path = self::get_root_path( $this->folder_name );
+		$this->folder_url  = self::get_root_url( $this->folder_name );
 		$this->filename    = $filename ? $filename : self::get_filename_from_url( $url );
 		$this->path        = $this->folder_path . '/' . $this->filename;
 	}
@@ -211,5 +216,16 @@ class Fusion_Downloader {
 		$folder_name_parts = explode( '/', $folder_name );
 		$filter_name       = str_replace( '-', '_', $folder_name_parts[0] ) . '_root_url';
 		return apply_filters( $filter_name, untrailingslashit( esc_url_raw( $url ) ) . '/' . $folder_name );
+	}
+
+	/**
+	 * Return the new file URL.
+	 *
+	 * @access public
+	 * @since 2.2.0
+	 * @return string
+	 */
+	public function get_new_url() {
+		return trailingslashit( $this->folder_url ) . $this->filename;
 	}
 }

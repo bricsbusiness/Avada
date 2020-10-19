@@ -30,12 +30,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<h3><?php esc_html_e( 'Helpful Links', 'Avada' ); ?></h3>
 						<?php
 						// Get needed checklist default settings.
-						$checklist_icons_color   = Avada()->settings->get( 'checklist_icons_color' );
-						$checklist_circle_color  = Avada()->settings->get( 'checklist_circle_color' );
-						$circle_class            = ( Avada()->settings->get( 'checklist_circle' ) ) ? 'circle-yes' : 'circle-no';
-						$font_size               = Fusion_Sanitize::convert_font_size_to_px( Avada()->settings->get( 'checklist_item_size' ), Avada()->settings->get( 'body_typography', 'font-size' ) );
-						$checklist_divider       = ( 'yes' === Avada()->settings->get( 'checklist_divider' ) ) ? ' fusion-checklist-divider' : '';
-						$checklist_divider_color = Avada()->settings->get( 'checklist_divider_color' );
+						$circle_class             = ( Avada()->settings->get( 'checklist_circle' ) ) ? 'circle-yes' : 'circle-no';
+						$checklist_base_font_size = Avada()->settings->get( 'checklist_item_size' );
+						$body_font_size           = Avada()->settings->get( 'body_typography', 'font-size' );
+						$font_size                = $checklist_base_font_size ? Fusion_Sanitize::convert_font_size_to_px( $checklist_base_font_size, $body_font_size ) : Fusion_Sanitize::convert_font_size_to_px( $body_font_size, $body_font_size );
+						$checklist_divider        = ( 'yes' === Avada()->settings->get( 'checklist_divider' ) ) ? ' fusion-checklist-divider' : '';
 
 						// Calculated derived values.
 						$circle_yes_font_size    = $font_size * 0.88;
@@ -47,12 +46,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						// Set markup depending on icon circle being used or not.
 						if ( Avada()->settings->get( 'checklist_circle' ) ) {
-							$before = '<span class="icon-wrapper circle-yes" style="background-color:' . $checklist_circle_color . ';font-size:' . $font_size . 'px;height:' . $line_height . 'px;width:' . $line_height . 'px;margin-' . $icon_margin_position . ':' . $icon_margin . 'px;" ><i class="fusion-li-icon fa fa-angle-right" style="color:' . $checklist_icons_color . ';"></i></span><div class="fusion-li-item-content" style="margin-' . $content_margin_position . ':' . $content_margin . 'px;">';
+							$before = '<span class="icon-wrapper circle-yes" style="background-color:var(--checklist_circle_color);font-size:' . $font_size . 'px;height:' . $line_height . 'px;width:' . $line_height . 'px;margin-' . $icon_margin_position . ':' . $icon_margin . 'px;" ><i class="fusion-li-icon fa fa-angle-right" style="color:var(--checklist_icons_color);" aria-hidden="true"></i></span><div class="fusion-li-item-content" style="margin-' . $content_margin_position . ':' . $content_margin . 'px;">';
 						} else {
-							$before = '<span class="icon-wrapper circle-no" style="font-size:' . $font_size . 'px;height:' . $line_height . 'px;width:' . $line_height . 'px;margin-' . $icon_margin_position . ':' . $icon_margin . 'px;" ><i class="fusion-li-icon fa fa-angle-right" style="color:' . $checklist_icons_color . ';"></i></span><div class="fusion-li-item-content" style="margin-' . $content_margin_position . ':' . $content_margin . 'px;">';
+							$before = '<span class="icon-wrapper circle-no" style="font-size:' . $font_size . 'px;height:' . $line_height . 'px;width:' . $line_height . 'px;margin-' . $icon_margin_position . ':' . $icon_margin . 'px;" ><i class="fusion-li-icon fa fa-angle-right" style="color:var(--checklist_icons_color);" aria-hidden="true"></i></span><div class="fusion-li-item-content" style="margin-' . $content_margin_position . ':' . $content_margin . 'px;">';
 						}
 
-						$error_page_menu_args = array(
+						$error_page_menu_args = [
 							'theme_location' => '404_pages',
 							'depth'          => 1,
 							'container'      => false,
@@ -64,7 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'echo'           => 0,
 							'item_spacing'   => 'discard',
 							'fallback_cb'    => 'fusion_error_page_menu_fallback',
-						);
+						];
 
 						// Get the menu markup with correct containers.
 						$error_page_menu = wp_nav_menu( $error_page_menu_args );
@@ -88,10 +87,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						// Make sure divider lines have correct color.
 						if ( $checklist_divider ) {
-							$error_page_menu = str_replace( 'class="menu-item ', 'style="border-bottom-color:' . $checklist_divider_color . ';" class="menu-item ', $error_page_menu );
+							$error_page_menu = str_replace( 'class="menu-item ', 'style="border-bottom-color:var(--checklist_divider_color);" class="menu-item ', $error_page_menu );
 						}
 
-						echo $error_page_menu; // WPCS: XSS ok.
+						echo $error_page_menu; // phpcs:ignore WordPress.Security.EscapeOutput
 						?>
 					</div>
 					<div class="fusion-column col-lg-4 col-md-4 col-sm-4 fusion-error-page-search">
@@ -106,7 +105,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 </section>
-<?php
-get_footer();
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */
+<?php get_footer(); ?>

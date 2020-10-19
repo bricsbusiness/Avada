@@ -4,16 +4,11 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.8
  */
-
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
 
 /**
  * Handle PWA implementation.
@@ -38,7 +33,7 @@ class Avada_PWA {
 	 * @since 5.8
 	 * @var array
 	 */
-	private $cache_first = array();
+	private $cache_first = [];
 
 	/**
 	 * Network-first items.
@@ -47,7 +42,7 @@ class Avada_PWA {
 	 * @since 5.8
 	 * @var array
 	 */
-	private $network_first = array();
+	private $network_first = [];
 
 	/**
 	 * Stale-while-revalidate items.
@@ -56,7 +51,7 @@ class Avada_PWA {
 	 * @since 5.8
 	 * @var array
 	 */
-	private $stale_while_revalidate = array();
+	private $stale_while_revalidate = [];
 
 	/**
 	 * The default manifest icon sizes.
@@ -68,7 +63,7 @@ class Avada_PWA {
 	 * @since 5.8
 	 * @var int[]
 	 */
-	public $default_manifest_icon_sizes = array( 192, 512 );
+	public $default_manifest_icon_sizes = [ 192, 512 ];
 
 	/**
 	 * The class constructor.
@@ -90,12 +85,17 @@ class Avada_PWA {
 			$this->add_service_workers();
 
 			// Filter the webapp manifest.
-			add_filter( 'web_app_manifest', array( $this, 'web_app_manifest' ) );
-			add_filter( 'option_site_icon', array( $this, 'site_icon' ) );
+			add_filter( 'web_app_manifest', [ $this, 'web_app_manifest' ] );
+			add_filter( 'option_site_icon', [ $this, 'site_icon' ] );
 		}
 
 		add_filter( 'wp_service_worker_integrations_enabled', '__return_true' );
-		add_filter( 'wp_service_worker_navigation_preload', '__return_false' );
+
+		// This filter is not necessary in PWA plugin versions greater than 0.3.
+		// If site is using an older PWA version add the filter.
+		if ( ! defined( 'PWA_VERSION' ) || version_compare( PWA_VERSION, '0.3.0' ) < 0 ) {
+			add_filter( 'wp_service_worker_navigation_preload', '__return_false' );
+		}
 
 		// Add theme-support for theme-color.
 		$this->add_theme_supports();
@@ -165,63 +165,63 @@ class Avada_PWA {
 		if ( ! $this->filetypes ) {
 			$this->filetypes = apply_filters(
 				'avada_pwa_filetypes',
-				array(
-					'images'  => array(
+				[
+					'images'  => [
 						'label' => esc_html__( 'Images', 'Avada' ),
 						'rule'  => '^https\:\/\/.*\.(?:png|gif|jpg|jpeg|svg|webp)(\?.*)?$',
-						'args'  => array(
+						'args'  => [
 							'cacheName' => 'fusion_all_images',
-							'plugins'   => array(
-								'expiration' => array(
+							'plugins'   => [
+								'expiration' => [
 									'maxEntries'        => 60,
 									'maxAgeSeconds'     => MONTH_IN_SECONDS,
 									'purgeOnQuotaError' => true,
-								),
-							),
-						),
-					),
-					'fonts'   => array(
+								],
+							],
+						],
+					],
+					'fonts'   => [
 						'label' => esc_html__( 'Fonts', 'Avada' ),
 						'rule'  => '(^https\:\/\/.*(?:googleapis|gstatic)\.com\/.*)|(^https\:\/\/.*\.(?:woff|woff2|ttf|eot)(\?.*)?$)',
-						'args'  => array(
+						'args'  => [
 							'cacheName' => 'fusion_all_fonts',
-							'plugins'   => array(
-								'expiration' => array(
+							'plugins'   => [
+								'expiration' => [
 									'maxEntries'        => 60,
 									'maxAgeSeconds'     => MONTH_IN_SECONDS,
 									'purgeOnQuotaError' => true,
-								),
-							),
-						),
-					),
-					'scripts' => array(
+								],
+							],
+						],
+					],
+					'scripts' => [
 						'label' => esc_html__( 'Scripts', 'Avada' ),
 						'rule'  => '^https\:\/\/.*\.(?:js)(\?.*)?$',
-						'args'  => array(
+						'args'  => [
 							'cacheName' => 'fusion_all_scripts',
-							'plugins'   => array(
-								'expiration' => array(
+							'plugins'   => [
+								'expiration' => [
 									'maxEntries'        => 60,
 									'maxAgeSeconds'     => MONTH_IN_SECONDS,
 									'purgeOnQuotaError' => true,
-								),
-							),
-						),
-					),
-					'styles'  => array(
+								],
+							],
+						],
+					],
+					'styles'  => [
 						'label' => esc_html__( 'Styles', 'Avada' ),
 						'rule'  => '^https\:\/\/.*\.(?:css)(\?.*)?$',
-						'args'  => array(
+						'args'  => [
 							'cacheName' => 'fusion_all_styles',
-							'plugins'   => array(
-								'expiration' => array(
+							'plugins'   => [
+								'expiration' => [
 									'maxEntries'        => 60,
 									'maxAgeSeconds'     => MONTH_IN_SECONDS,
 									'purgeOnQuotaError' => true,
-								),
-							),
-						),
-					),
+								],
+							],
+						],
+					],
 					/**
 					 * Disable caching the content.
 					 * This causes the login page to become inoperable
@@ -242,7 +242,7 @@ class Avada_PWA {
 						),
 					),
 					*/
-				)
+				]
 			);
 		}
 		return $this->filetypes;
@@ -330,9 +330,9 @@ class Avada_PWA {
 				$args['rule'],
 				array_merge(
 					$args['args'],
-					array(
+					[
 						'strategy' => $strategy,
-					)
+					]
 				)
 			);
 		}
@@ -367,15 +367,15 @@ class Avada_PWA {
 			return null;
 		}
 
-		$icons     = array();
+		$icons     = [];
 		$mime_type = get_post_mime_type( $site_icon_id );
 		foreach ( $this->default_manifest_icon_sizes as $size ) {
-			$size_data = ( $size >= 512 ) ? 'full' : array( $size, $size );
-			$icons[]   = array(
+			$size_data = ( $size >= 512 ) ? 'full' : [ $size, $size ];
+			$icons[]   = [
 				'src'   => wp_get_attachment_image_url( $site_icon_id, $size_data ),
 				'sizes' => sprintf( '%1$dx%1$d', $size ),
 				'type'  => $mime_type,
-			);
+			];
 		}
 		return $icons;
 	}

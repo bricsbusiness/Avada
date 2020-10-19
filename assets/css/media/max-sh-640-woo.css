@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .post-content .wooslider .wooslider-control-thumbs {
   margin-top: -10px;
 }
@@ -5,8 +6,7 @@ body .wooslider .overlay-full.layout-text-left .slide-excerpt {
   padding: 20px !important;
 }
 .products-slider .es-nav span {
-  -ms-transform: scale(0.5) !important;
-      transform: scale(0.5) !important;
+  transform: scale(0.5) !important;
 }
 .shop_table .filler-td {
   display: none;
@@ -35,7 +35,7 @@ body .wooslider .overlay-full.layout-text-left .slide-excerpt {
   max-width: 100%;
   margin-top: 0;
 }
-.group_table .quantity {
+.fusion-body .group_table .quantity {
   width: 78px;
 }
 .group_table td.label {

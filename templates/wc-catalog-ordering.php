@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.1.0
@@ -18,10 +18,10 @@ if ( isset( $_SERVER['QUERY_STRING'] ) ) {
 }
 
 // Replace it with theme option.
-$per_page = ( Avada()->settings->get( 'woo_items' ) ) ? Avada()->settings->get( 'woo_items' ) : 12; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+$per_page = ( Avada()->settings->get( 'woo_items' ) ) ? Avada()->settings->get( 'woo_items' ) : 12; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 
 // Use "relevance" as default if we're on the search page.
-$default_orderby = ( is_search() ) ? 'relevance' : get_option( 'woocommerce_default_catalog_orderby' );
+$default_orderby = is_search() ? 'relevance' : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
 
 $pob = ! empty( $params['product_orderby'] ) ? $params['product_orderby'] : $default_orderby;
 
@@ -86,7 +86,7 @@ $pc = ! empty( $params['product_count'] ) ? $params['product_count'] : $per_page
 								<a href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_orderby', 'relevance' ) ); ?>"><?php printf( esc_html__( 'Sort by %s', 'Avada' ), '<strong>' . esc_attr__( 'Relevance', 'Avada' ) . '</strong>' ); ?></a>
 							</li>
 						<?php endif; ?>
-						<?php if ( 'menu_order' === get_option( 'woocommerce_default_catalog_orderby' ) ) : ?>
+						<?php if ( 'menu_order' === apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', 'menu_order' ) ) ) : ?>
 							<li class="<?php echo ( 'menu_order' === $pob ) ? 'current' : ''; ?>">
 								<?php /* translators: Name, Price, Date etc. */ ?>
 								<a href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_orderby', 'default' ) ); ?>"><?php printf( esc_html__( 'Sort by %s', 'Avada' ), '<strong>' . esc_attr__( 'Default Order', 'Avada' ) . '</strong>' ); ?></a>
@@ -121,9 +121,9 @@ $pc = ! empty( $params['product_count'] ) ? $params['product_count'] : $per_page
 			<ul class="order">
 				<?php if ( isset( $po ) ) : ?>
 					<?php if ( 'desc' === $po ) : ?>
-						<li class="desc"><a aria-label="<?php esc_attr_e( 'Ascending order', 'Avada' ); ?>" aria-haspopup="true" href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_order', 'asc' ) ); ?>"><i class="fusion-icon-arrow-down2 icomoon-up"></i></a></li>
+						<li class="desc"><a aria-label="<?php esc_attr_e( 'Ascending order', 'Avada' ); ?>" aria-haspopup="true" href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_order', 'asc' ) ); ?>"><i class="fusion-icon-arrow-down2 icomoon-up" aria-hidden="true"></i></a></li>
 					<?php else : ?>
-						<li class="asc"><a aria-label="<?php esc_attr_e( 'Descending order', 'Avada' ); ?>" aria-haspopup="true" href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_order', 'desc' ) ); ?>"><i class="fusion-icon-arrow-down2"></i></a></li>
+						<li class="asc"><a aria-label="<?php esc_attr_e( 'Descending order', 'Avada' ); ?>" aria-haspopup="true" href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_order', 'desc' ) ); ?>"><i class="fusion-icon-arrow-down2" aria-hidden="true"></i></a></li>
 					<?php endif; ?>
 				<?php endif; ?>
 			</ul>
@@ -131,20 +131,50 @@ $pc = ! empty( $params['product_count'] ) ? $params['product_count'] : $per_page
 
 		<ul class="sort-count order-dropdown">
 			<li>
-				<?php /* translators: Number. */ ?>
-				<span class="current-li"><a aria-haspopup="true"><?php printf( __( 'Show <strong>%s Products</strong>', 'Avada' ), (int) $per_page ); // WPCS: XSS ok. ?></a></span>
+				<span class="current-li">
+					<a aria-haspopup="true">
+						<?php
+						printf(
+							/* translators: Number. */
+							__( 'Show <strong>%s Products</strong>', 'Avada' ), // phpcs:ignore WordPress.Security.EscapeOutput
+							(int) $per_page
+						);
+						?>
+						</a>
+					</span>
 				<ul>
 					<li class="<?php echo ( $pc == $per_page ) ? 'current' : ''; ?>">
-						<?php /* translators: Number. */ ?>
-						<a href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_count', $per_page ) ); ?>"><?php printf( __( 'Show <strong>%s Products</strong>', 'Avada' ), (int) $per_page ); // WPCS: XSS ok. ?></a>
+						<a href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_count', $per_page ) ); ?>">
+							<?php
+							printf(
+								/* translators: Number of products. */
+								__( 'Show <strong>%s Products</strong>', 'Avada' ), // phpcs:ignore WordPress.Security.EscapeOutput
+								(int) $per_page
+							);
+							?>
+						</a>
 					</li>
 					<li class="<?php echo ( $pc == $per_page * 2 ) ? 'current' : ''; ?>">
-						<?php /* translators: Number. */ ?>
-						<a href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_count', $per_page * 2 ) ); ?>"><?php printf( __( 'Show <strong>%s Products</strong>', 'Avada' ), (int) $per_page * 2 ); // WPCS: XSS ok. ?></a>
+						<a href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_count', $per_page * 2 ) ); ?>">
+							<?php
+							printf(
+								/* translators: Number of products.*/
+								__( 'Show <strong>%s Products</strong>', 'Avada' ), // phpcs:ignore WordPress.Security.EscapeOutput
+								(int) $per_page * 2
+							);
+							?>
+						</a>
 					</li>
 					<li class="<?php echo ( $pc == $per_page * 3 ) ? 'current' : ''; ?>">
-						<?php /* translators: Number. */ ?>
-						<a href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_count', $per_page * 3 ) ); ?>"><?php printf( __( 'Show <strong>%s Products</strong>', 'Avada' ), (int) $per_page * 3 ); // WPCS: XSS ok. ?></a>
+						<a href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_count', $per_page * 3 ) ); ?>">
+							<?php
+							printf(
+								/* translators: Number of products.*/
+								__( 'Show <strong>%s Products</strong>', 'Avada' ), // phpcs:ignore WordPress.Security.EscapeOutput
+								(int) $per_page * 3
+							);
+							?>
+						</a>
 					</li>
 				</ul>
 			</li>
@@ -162,10 +192,10 @@ $pc = ! empty( $params['product_count'] ) ? $params['product_count'] : $per_page
 	<?php if ( $woocommerce_toggle_grid_list ) : ?>
 		<ul class="fusion-grid-list-view">
 			<li class="fusion-grid-view-li<?php echo ( 'grid' === $product_view ) ? ' active-view' : ''; ?>">
-				<a class="fusion-grid-view" aria-label="<?php esc_attr_e( 'View as grid', 'Avada' ); ?>" aria-haspopup="true" href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_view', 'grid' ) ); ?>"><i class="fusion-icon-grid icomoon-grid"></i></a>
+				<a class="fusion-grid-view" aria-label="<?php esc_attr_e( 'View as grid', 'Avada' ); ?>" aria-haspopup="true" href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_view', 'grid' ) ); ?>"><i class="fusion-icon-grid icomoon-grid" aria-hidden="true"></i></a>
 			</li>
-			<li class="fusion-list-view-li<?php echo ( 'list' == $product_view ) ? ' active-view' : ''; ?>">
-				<a class="fusion-list-view" aria-haspopup="true" aria-label="<?php esc_attr_e( 'View as list', 'Avada' ); ?>" href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_view', 'list' ) ); ?>"><i class="fusion-icon-list icomoon-list"></i></a>
+			<li class="fusion-list-view-li<?php echo ( 'list' === $product_view ) ? ' active-view' : ''; ?>">
+				<a class="fusion-list-view" aria-haspopup="true" aria-label="<?php esc_attr_e( 'View as list', 'Avada' ); ?>" href="<?php echo esc_url_raw( fusion_add_url_parameter( $query_string, 'product_view', 'list' ) ); ?>"><i class="fusion-icon-list icomoon-list" aria-hidden="true"></i></a>
 			</li>
 		</ul>
 	<?php endif; ?>

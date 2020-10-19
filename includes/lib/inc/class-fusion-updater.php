@@ -5,11 +5,6 @@
  * @package Fusion_Updater
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Creates the Envato API connection.
  *
@@ -26,7 +21,7 @@ final class Fusion_Updater {
 	 * @since 1.0.0
 	 * @var array
 	 */
-	private $args = array();
+	private $args = [];
 
 	/**
 	 * An instance of the Fusion_Product_Registration class.
@@ -49,21 +44,21 @@ final class Fusion_Updater {
 		$this->args         = $registration->get_args();
 
 		// Check for theme & plugin updates.
-		add_filter( 'http_request_args', array( $this, 'update_check' ), 5, 2 );
+		add_filter( 'http_request_args', [ $this, 'update_check' ], 5, 2 );
 
 		// Inject theme updates into the response array.
-		add_filter( 'pre_set_site_transient_update_themes', array( $this, 'update_themes' ) );
-		add_filter( 'pre_set_transient_update_themes', array( $this, 'update_themes' ) );
+		add_filter( 'pre_set_site_transient_update_themes', [ $this, 'update_themes' ] );
+		add_filter( 'pre_set_transient_update_themes', [ $this, 'update_themes' ] );
 
 		// Inject plugin updates into the response array.
-		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_plugins' ) );
-		add_filter( 'pre_set_transient_update_plugins', array( $this, 'update_plugins' ) );
+		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'update_plugins' ] );
+		add_filter( 'pre_set_transient_update_plugins', [ $this, 'update_plugins' ] );
 
 		// Inject plugin information into the API calls.
-		add_filter( 'plugins_api', array( $this, 'plugins_api' ), 10, 3 );
+		add_filter( 'plugins_api', [ $this, 'plugins_api' ], 10, 3 );
 
 		// Deferred Download.
-		add_action( 'upgrader_package_options', array( $this, 'maybe_deferred_download' ), 99 );
+		add_action( 'upgrader_package_options', [ $this, 'maybe_deferred_download' ], 99 );
 
 	}
 
@@ -80,10 +75,10 @@ final class Fusion_Updater {
 			return '';
 		}
 
-		$args = array(
+		$args = [
 			'deferred_download' => true,
-			'item_id' => $id,
-		);
+			'item_id'           => $id,
+		];
 		return add_query_arg( $args, esc_url( admin_url( 'admin.php?page=avada' ) ) );
 	}
 
@@ -96,12 +91,12 @@ final class Fusion_Updater {
 	 * @param  array $args The arguments passed to `wp_remote_get`.
 	 * @return bool|array The HTTP response.
 	 */
-	public function download( $id, $args = array() ) {
+	public function download( $id, $args = [] ) {
 		if ( empty( $id ) ) {
 			return false;
 		}
 
-		$url = 'https://api.envato.com/v2/market/buyer/download?item_id=' . $id . '&shorten_url=true';
+		$url      = 'https://api.envato.com/v2/market/buyer/download?item_id=' . $id . '&shorten_url=true';
 		$response = $this->registration->envato_api()->request( $url, $args );
 
 		// @todo Find out which errors could be returned & handle them in the UI.
@@ -139,12 +134,12 @@ final class Fusion_Updater {
 			$themes = $this->registration->envato_api()->themes();
 
 			// Get latest Avada version.
-			$latest_avada = array(
+			$latest_avada = [
 				'id'      => '',
 				'name'    => '',
 				'url'     => '',
 				'version' => '',
-			);
+			];
 			foreach ( $themes as $theme ) {
 				if ( isset( $theme['name'] ) && 'avada' === strtolower( $theme['name'] ) ) {
 					$latest_avada = $theme;
@@ -152,14 +147,20 @@ final class Fusion_Updater {
 				}
 			}
 
+			$_theme = [
+				'theme'       => $latest_avada['name'],
+				'new_version' => $latest_avada['version'],
+				'url'         => 'https://theme-fusion.com/avada-documentation/changelog.txt',
+				'package'     => '',
+			];
+
 			if ( version_compare( $current_avada_version, Fusion_Helper::normalize_version( $latest_avada['version'] ), '<' ) ) {
-				$transient->response[ $latest_avada['name'] ] = array(
-					'theme'       => $latest_avada['name'],
-					'new_version' => $latest_avada['version'],
-					'url'         => 'https://theme-fusion.com/avada-documentation/changelog.txt',
-					'package'     => $this->deferred_download( $latest_avada['id'] ),
-				);
-			}
+				$_theme['package'] = $this->deferred_download( $latest_avada['id'] );
+
+				$transient->response[ $latest_avada['name'] ] = $_theme;
+			} else {
+				$transient->no_update[ $latest_avada['name'] ] = $_theme;  
+			}           
 		}
 
 		return $transient;
@@ -175,11 +176,11 @@ final class Fusion_Updater {
 	public function update_plugins( $transient ) {
 
 		// Get the array of arguments.
-		$bundled_plugins = array();
-		$plugins = array();
+		$bundled_plugins = [];
+		$plugins         = [];
 
 		if ( class_exists( 'Avada' ) ) {
-			$plugins_info = Avada::get_bundled_plugins();
+			$plugins_info    = Avada::get_bundled_plugins();
 			$bundled_plugins = $this->args['bundled'];
 
 			if ( ! function_exists( 'get_plugins' ) ) {
@@ -188,48 +189,68 @@ final class Fusion_Updater {
 			$plugins = get_plugins();
 		}
 
-		// Get an array of premium plugins from the Envato API.
-		/* $premiums = $this->registration->envato_api()->plugins(); */
-
 		// Loop available plugins.
 		if ( isset( $plugins ) && ! empty( $plugins ) && isset( $bundled_plugins ) && ! empty( $bundled_plugins ) ) {
 			foreach ( $plugins as $plugin_file => $plugin ) {
+
+				if ( 'Fusion Core' === $plugin['Name'] ) {
+					$plugin['Name'] = 'Avada Core';
+				} elseif ( 'Fusion Builder' === $plugin['Name'] ) {
+					$plugin['Name'] = 'Avada Builder';
+				}
+
 				// Process bundled plugin updates.
 				foreach ( $bundled_plugins as $bundled_plugin_slug => $bundled_plugin_name ) {
-					if ( $plugin['Name'] === $bundled_plugin_name && isset( $plugins_info[ $bundled_plugin_slug ] ) && version_compare( $plugin['Version'], $plugins_info[ $bundled_plugin_slug ]['version'], '<' ) && class_exists( 'Avada' ) ) {
-						$_plugin = array(
+					if ( $plugin['Name'] === $bundled_plugin_name && isset( $plugins_info[ $bundled_plugin_slug ] ) && class_exists( 'Avada' ) ) {
+
+						$_plugin = [
+							'id'          => $plugin_file,
 							'slug'        => dirname( $plugin_file ),
-							'plugin'      => $plugin,
+							'plugin'      => $plugin_file,
 							'new_version' => $plugins_info[ $bundled_plugin_slug ]['version'],
 							'url'         => '',
-							'package'     => Avada()->remote_install->get_package( $bundled_plugin_name ),
-							'icons'       => array(
+							'package'     => '',
+							'icons'       => [
 								'1x' => esc_url_raw( $plugins_info[ $bundled_plugin_slug ]['icon'] ),
 								'2x' => esc_url_raw( $plugins_info[ $bundled_plugin_slug ]['icon'] ),
-							),
-						);
+							],
+						];
 						if ( $plugins_info[ $bundled_plugin_slug ]['banner'] ) {
-							$_plugin['banners'] = array(
+							$_plugin['banners'] = [
 								'2x'      => esc_url_raw( $plugins_info[ $bundled_plugin_slug ]['banner'] ),
 								'default' => esc_url_raw( $plugins_info[ $bundled_plugin_slug ]['banner'] ),
-							);
+							];
 						}
-						$transient->response[ $plugin_file ] = (object) $_plugin;
+
+						if ( version_compare( $plugin['Version'], $plugins_info[ $bundled_plugin_slug ]['version'], '<' ) ) {
+							$_plugin['package'] = Avada()->remote_install->get_package( $bundled_plugin_name );
+
+							$transient->response[ $plugin_file ] = (object) $_plugin;
+						} else {
+							$transient->no_update[ $plugin_file ] = (object) $_plugin;  
+						}
 					}
 				}
 
-				/*
-				WIP
-				// Process premium plugin updates.
+
+				/**
+				 * WIP
+				 * Get an array of premium plugins from the Envato API.
+				$premiums = $this->registration->envato_api()->plugins();
+				*/              
+
+				/**
+				 * WIP
+				 * Process premium plugin updates.
 				foreach ( $premiums as $premium ) {
 					if ( $plugin['Name'] === $premium['name'] && version_compare( $plugin['Version'], $premium['version'], '<' ) ) {
-						$_plugin = array(
+						$_plugin = [
 							'slug'        => dirname( $plugin_file ),
 							'plugin'      => $plugin,
 							'new_version' => $premium['version'],
 							'url'         => $premium['url'],
 							'package'     => $this->deferred_download( $premium['id'] ),
-						);
+						];
 						$transient->response[ $plugin_file ] = (object) $_plugin;
 					}
 				}
@@ -290,7 +311,7 @@ final class Fusion_Updater {
 		if ( false !== strrpos( $package, 'deferred_download' ) && false !== strrpos( $package, 'item_id' ) ) {
 			parse_str( wp_parse_url( $package, PHP_URL_QUERY ), $vars );
 			if ( $vars['item_id'] ) {
-				$args = $this->set_bearer_args();
+				$args               = $this->set_bearer_args();
 				$options['package'] = $this->download( $vars['item_id'], $args );
 			}
 		}
@@ -304,16 +325,16 @@ final class Fusion_Updater {
 	 * @return array
 	 */
 	public function set_bearer_args() {
-		$args = array();
+		$args  = [];
 		$token = $this->registration->get_token();
 		if ( ! empty( $token ) ) {
-			$args = array(
-				'headers' => array(
+			$args = [
+				'headers' => [
 					'Authorization' => 'Bearer ' . $token,
 					'User-Agent'    => 'WordPress - ThemeFusion',
-				),
+				],
 				'timeout' => 20,
-			);
+			];
 		}
 		return $args;
 	}
@@ -334,7 +355,7 @@ final class Fusion_Updater {
 			$installed = $this->registration->envato_api()->plugins();
 			foreach ( $installed as $slug => $plugin ) {
 				if ( dirname( $slug ) === $args->slug ) {
-					$response = new stdClass();
+					$response                 = new stdClass();
 					$response->slug           = $args->slug;
 					$response->plugin         = $slug;
 					$response->plugin_name    = $plugin['name'];
@@ -346,9 +367,9 @@ final class Fusion_Updater {
 					$response->tested         = $plugin['tested'];
 					$response->downloaded     = $plugin['number_of_sales'];
 					$response->last_updated   = $plugin['updated_at'];
-					$response->sections       = array(
+					$response->sections       = [
 						'description' => $plugin['description'],
-					);
+					];
 					$response->banners['low'] = $plugin['landscape_url'];
 					$response->rating         = $plugin['rating']['rating'] / 5 * 100;
 					$response->num_ratings    = $plugin['rating']['count'];

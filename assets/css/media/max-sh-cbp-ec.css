@@ -1,53 +1,4 @@
-#tribe-bar-form.tribe-bar-collapse {
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
-}
-#tribe-bar-form.tribe-bar-collapse:before,
-#tribe-bar-form.tribe-bar-collapse:after,
-#tribe-bar-form.tribe-bar-collapse .tribe-clearfix:before,
-#tribe-bar-form.tribe-bar-collapse .tribe-clearfix:after {
-  display: none;
-}
-#tribe-bar-form.tribe-bar-collapse #tribe-bar-filters-wrap {
-  width: 100%;
-}
-#tribe-bar-form.tribe-bar-collapse #tribe-bar-collapse-toggle {
-  padding: 15px;
-  margin: 0;
-}
-#tribe-bar-form.tribe-bar-collapse #tribe-bar-views {
-  margin-top: 0;
-  width: 100%;
-}
-#tribe-bar-form.tribe-bar-collapse #tribe-bar-views .tribe-bar-views-inner {
-  padding: 5px 0 7px;
-}
-#tribe-bar-form.tribe-bar-collapse #tribe-bar-views .tribe-bar-views-option,
-#tribe-bar-form.tribe-bar-collapse #tribe-bar-views .tribe-bar-views-toggle {
-  padding: 8px 15px;
-}
-#tribe-bar-form.tribe-bar-collapse #tribe-bar-views .tribe-bar-views-toggle:after {
-  right: 15px;
-  border-width: 8px;
-}
-#tribe-bar-form.tribe-bar-collapse .tribe-bar-filters {
-  padding: 10px 0;
-  box-shadow: none;
-}
-body:not(.has-sidebar) #tribe-bar-form.tribe-bar-collapse .tribe-bar-filters {
-  margin: 0;
-}
-#tribe-bar-form.tribe-bar-collapse .tribe-bar-filters-inner {
-  display: block;
-}
-#tribe-events-bar #tribe-bar-form.tribe-bar-collapse .tribe-bar-filters-inner > div {
-  padding: 15px 15px 5px 15px;
-  width: 100%;
-}
-#tribe-bar-form.tribe-bar-collapse .tribe-bar-filters-inner .tribe-bar-submit {
-  float: right;
-  padding-top: 10px;
-}
+/* stylelint-disable no-descending-specificity */
 .tribe-events-single ul.tribe-related-events li {
   margin-right: 0;
   width: 100%;
@@ -161,7 +112,7 @@ body:not(.has-sidebar) #tribe-bar-form.tribe-bar-collapse .tribe-bar-filters {
   height: auto;
 }
 table.tribe-events-tickets > tbody tr {
-  display: block;
+  display: table-row;
   padding: 0;
   border: none;
 }
@@ -178,18 +129,35 @@ table.tribe-events-tickets tr td.add-to-cart,
 table.tribe-events-tickets tr td.tribe-tickets-attendees {
   display: inline-block;
   width: 100%;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  border-bottom: 1px solid;
 }
 table.tribe-events-tickets tr td.add-to-cart {
   border-bottom: none;
 }
+table.tribe-events-tickets tr td.tickets_submit {
+  border: none;
+}
+.fusion-body #main .tribe_events .tribe-tickets__footer {
+  flex-wrap: wrap;
+}
+.fusion-body #main .tribe_events .tribe-tickets__footer.tribe-tickets__footer--active .tribe-tickets__footer__quantity {
+  order: 1;
+}
+.fusion-body #main .tribe_events .tribe-tickets__footer.tribe-tickets__footer--active .tribe-tickets__footer__total {
+  order: 2;
+}
+.fusion-body #main .tribe_events .tribe-tickets__footer.tribe-tickets__footer--active .tribe-tickets__buy {
+  order: 3;
+  margin: 15px 50% 0 0;
+}
 .tribe-block__tickets__registration__event .tribe-block__tickets__registration__tickets__item {
-  -ms-flex-pack: normal;
-      justify-content: normal;
+  justify-content: normal;
 }
 .fusion-body .tribe-events-tickets-rsvp .quantity input {
   padding: 0;
+}
+.tribe-events .tribe-events-c-search__input-control:before {
+  padding: 0;
+}
+.tribe-events .tribe-events-c-search__button {
+  display: none;
 }

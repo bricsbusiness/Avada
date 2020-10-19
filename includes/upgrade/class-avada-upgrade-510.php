@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -37,7 +37,7 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 	 * @access  private
 	 * @var  array
 	 */
-	private static $available_languages = array();
+	private static $available_languages = [];
 
 	/**
 	 * New option name 5.1 and beyond.
@@ -57,7 +57,7 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 	protected function migration_process() {
 
 		$available_languages       = Fusion_Multilingual::get_available_languages();
-		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : array( '' );
+		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : [ '' ];
 
 		$this->copy_options();
 		$this->rename_suboptions();
@@ -81,7 +81,7 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 		$available_langs  = self::$available_languages;
 		$default_language = Fusion_Multilingual::get_default_language();
 
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 		$options = $this->update_woocommerce_single_gallery_size_option( $options );
 		$options = $this->update_repeater_field_names( $options );
 		update_option( self::$new_option_name, $options );
@@ -93,7 +93,7 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 				continue;
 			}
 
-			$options = get_option( $this->option_name . '_' . $language, array() );
+			$options = get_option( $this->option_name . '_' . $language, [] );
 
 			$options = $this->update_woocommerce_single_gallery_size_option( $options );
 			$options = $this->update_repeater_field_names( $options );
@@ -107,8 +107,8 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 	 *
 	 * @since 5.1.0
 	 * @access protected
-	 * @param array $options The Theme Options array.
-	 * @return array The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array The updated Global Options array.
 	 */
 	protected function update_woocommerce_single_gallery_size_option( $options ) {
 		$shop_single_image_size = get_option( 'shop_single_image_size', true );
@@ -125,8 +125,8 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 	 *
 	 * @since 5.1.0
 	 * @access protected
-	 * @param array $options The Theme Options array.
-	 * @return array The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array The updated Global Options array.
 	 */
 	protected function update_repeater_field_names( $options ) {
 		// Update social-media repeaters.
@@ -154,9 +154,9 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 
 		// Migrate old menus.
 		$the_query = new WP_Query(
-			array(
+			[
 				'post_type' => 'nav_menu_item',
-			)
+			]
 		);
 		$posts     = $the_query->posts;
 		$url       = get_home_url();
@@ -189,9 +189,9 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 		if ( is_array( $avada_registration ) && isset( $avada_registration['token'] ) && ! empty( $avada_registration['token'] ) ) {
 			update_option(
 				'fusion_registration',
-				array(
+				[
 					'avada' => $avada_registration,
-				)
+				]
 			);
 		}
 		$avada_registered = get_option( 'avada_registered', false );
@@ -199,9 +199,9 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 		if ( $avada_registered ) {
 			update_option(
 				'fusion_registered',
-				array(
+				[
 					'avada' => true,
-				)
+				]
 			);
 		}
 		$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_fusion_envato_api_down%'" );
@@ -261,7 +261,7 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 	 */
 	protected function migrate_css_caching_methods() {
 
-		$avada_options = get_option( self::$new_option_name, array() );
+		$avada_options = get_option( self::$new_option_name, [] );
 		$method        = 'off';
 		if ( isset( $avada_options['dynamic_css_db_caching'] ) && '1' === $avada_options['dynamic_css_db_caching'] ) {
 			$method = 'db';
@@ -285,9 +285,9 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 	 */
 	protected function rename_suboptions() {
 
-		$renamed_options  = array(
+		$renamed_options  = [
 			'dev_mode' => 'js_compiler',
-		);
+		];
 		$available_langs  = self::$available_languages;
 		$default_language = Fusion_Multilingual::get_default_language();
 		foreach ( $available_langs as $language ) {
@@ -332,7 +332,7 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 			// Copy options to the new language.
 			update_option( self::$new_option_name . '_' . $language, $options );
 
-		} // End foreach().
+		}
 	}
 
 	/**
@@ -355,7 +355,7 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 			} else {
 				$option_name = self::$new_option_name . '_' . $language;
 			}
-			$avada_options = get_option( $option_name, array() );
+			$avada_options = get_option( $option_name, [] );
 
 			if ( isset( $avada_options['layout'] ) && 'boxed' === strtolower( $avada_options['layout'] ) && isset( $avada_options['header_position'] ) && ( 'left' === strtolower( $avada_options['header_position'] ) || 'right' === strtolower( $avada_options['header_position'] ) ) && isset( $avada_options['site_width'] ) && ! empty( $avada_options['site_width'] ) && isset( $avada_options['side_header_width'] ) && ! empty( $avada_options['side_header_width'] ) ) {
 				$site_width_value  = $avada_options['site_width'];
@@ -367,10 +367,10 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 					$side_header_value .= 'px';
 				}
 				$combined_value = Fusion_Sanitize::add_css_values(
-					array(
+					[
 						$site_width_value,
 						$side_header_value,
-					)
+					]
 				);
 
 			}
@@ -378,10 +378,10 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 				$combined_value = $combined_value ? $combined_value : $avada_options['site_width'];
 				if ( false !== strpos( $combined_value, 'px' ) && false === strpos( $combined_value, 'calc' ) ) {
 					$combined_value = Fusion_Sanitize::add_css_values(
-						array(
+						[
 							$combined_value,
 							'60px',
-						)
+						]
 					);
 				}
 			}
@@ -395,7 +395,7 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 					update_option( 'avada_510_site_width_calc' . $language, true );
 				}
 			}
-		} // End foreach().
+		}
 	}
 
 	/**
@@ -417,7 +417,7 @@ class Avada_Upgrade_510 extends Avada_Upgrade_Abstract {
 			} else {
 				$option_name = self::$new_option_name . '_' . $language;
 			}
-			$avada_options = get_option( $option_name, array() );
+			$avada_options = get_option( $option_name, [] );
 
 			if ( isset( $avada_options['nav_height'] ) && isset( $avada_options['nav_highlight_border'] ) && '0' !== $avada_options['nav_highlight_border'] ) {
 				$combined_value              = intval( $avada_options['nav_height'] ) + intval( $avada_options['nav_highlight_border'] );

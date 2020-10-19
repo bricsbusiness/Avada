@@ -1,3 +1,5 @@
+/* stylelint-disable no-descending-specificity */
+/* stylelint-disable no-duplicate-selectors */
 .fusion-blog-layout-grid-6 .fusion-post-grid,
 .fusion-grid-6 .fusion-grid-column,
 .fusion-portfolio-six .fusion-portfolio-post {
@@ -246,8 +248,7 @@ body #small-nav {
   width: 100% !important;
 }
 .fusion-blog-layout-medium-alternate .fusion-post-content {
-  -ms-flex: 1 0 100%;
-      flex: 1 0 100%;
+  flex: 1 0 100%;
   width: 100%;
   padding-top: 20px;
 }
@@ -266,9 +267,6 @@ body #small-nav {
   width: 100% !important;
   box-sizing: border-box;
 }
-#nav-uber #megaMenu {
-  width: 100%;
-}
 #toTop {
   bottom: 30px;
   border-radius: 4px;
@@ -278,7 +276,7 @@ body #small-nav {
   line-height: 38px;
 }
 #toTop:hover {
-  background-color: #333333;
+  background-color: #333;
 }
 .no-mobile-totop .to-top-container {
   display: none;
@@ -471,10 +469,7 @@ body #small-nav {
   background-attachment: scroll !important;
 }
 #footer > .fusion-row,
-#header-sticky .fusion-row,
-.footer-area > .fusion-row,
-.fusion-header .fusion-row,
-.fusion-secondary-header .fusion-row {
+.footer-area > .fusion-row {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
@@ -498,4 +493,40 @@ body {
 }
 #customer_login_box .lost_password {
   float: left;
+}
+.fusion-body .fusion-page-title-bar:not(.fusion-tb-page-title-bar) {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.fusion-body.avada-has-page-title-mobile-height-auto .fusion-page-title-bar {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height: auto;
+}
+.fusion-body:not(.avada-has-page-title-mobile-height-auto) .fusion-page-title-bar:not(.fusion-tb-page-title-bar) {
+  min-height: calc(var(--page_title_mobile_height) - 10px);
+}
+.fusion-body:not(.avada-has-page-title-mobile-height-auto) .fusion-page-title-bar {
+  height: auto;
+}
+.fusion-body:not(.avada-has-page-title-mobile-height-auto) .fusion-page-title-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: calc(var(--page_title_mobile_height) - 10px);
+}
+.fusion-body:not(.avada-has-page-title-mobile-height-auto) .fusion-page-title-bar-center .fusion-page-title-row {
+  width: auto;
+}
+.fusion-body:not(.avada-has-page-title-mobile-height-auto) .fusion-page-title-captions {
+  width: 100%;
+}
+.avada-has-breadcrumb-mobile-hidden.fusion-body .fusion-page-title-bar .fusion-breadcrumbs {
+  display: none;
+}
+.avada-has-slider-fallback-image #sliders-container {
+  display: none;
+}
+.avada-has-slider-fallback-image #fallback-slide {
+  display: block;
 }

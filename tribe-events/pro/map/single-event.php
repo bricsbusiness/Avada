@@ -33,7 +33,7 @@ $organizer = tribe_get_organizer();
 	<?php if ( has_post_thumbnail() ) : ?>
 		<?php $url = wp_get_attachment_url( get_post_thumbnail_id( get_the_ID() ) ); ?>
 		<div class="fusion-tribe-primary-info">
-			<div class="hover-type-<?php echo Avada()->settings->get( 'ec_hover_type' ); ?>">
+			<div class="fusion-ec-hover-type hover-type-<?php echo Avada()->settings->get( 'ec_hover_type' ); ?>">
 				<!-- Event Title -->
 				<?php do_action( 'tribe_events_before_the_event_title' ) ?>
 				<h3 class="tribe-events-list-event-title entry-title summary">

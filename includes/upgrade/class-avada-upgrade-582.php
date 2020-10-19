@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -38,7 +38,7 @@ class Avada_Upgrade_582 extends Avada_Upgrade_Abstract {
 	 * @since 5.8.2
 	 * @var array
 	 */
-	private static $available_languages = array();
+	private static $available_languages = [];
 
 	/**
 	 * The actual migration process.
@@ -49,7 +49,7 @@ class Avada_Upgrade_582 extends Avada_Upgrade_Abstract {
 	 */
 	protected function migration_process() {
 		$available_languages       = Fusion_Multilingual::get_available_languages();
-		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : array( '' );
+		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : [ '' ];
 
 		$this->migrate_options();
 	}

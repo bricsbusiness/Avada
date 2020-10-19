@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="fusion-header-v6-content fusion-header-has-flyout-menu-content">
 			<?php
 			avada_logo();
-			$menu = avada_main_menu( true ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+			$menu = avada_main_menu( true ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 			?>
 
 			<div class="fusion-flyout-menu-icons">
@@ -53,7 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 
 		<div class="fusion-main-menu fusion-flyout-menu" role="navigation" aria-label="Main Menu">
-			<?php echo $menu; // WPCS: XSS ok. ?>
+			<?php echo $menu; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		</div>
 
 		<?php if ( Avada()->settings->get( 'main_nav_search_icon' ) || Avada()->settings->get( 'mobile_menu_search' ) ) : ?>

@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.0.0
@@ -75,7 +75,7 @@ class Fusion_Builder_Demos_Importer {
 	 * @since 5.6.2
 	 * @var array
 	 */
-	private static $demo_files = array();
+	private static $demo_files = [];
 
 	/**
 	 * Boolean to check if the demo zip is present.
@@ -117,6 +117,9 @@ class Fusion_Builder_Demos_Importer {
 
 			$this->include_demo_files();
 		}
+
+		self::import_demo_headers();
+		self::import_demo_forms();
 	}
 
 	/**
@@ -222,7 +225,7 @@ class Fusion_Builder_Demos_Importer {
 
 		$zip_file = '';
 		// Early exit if we can't write to the destination folder.
-		if ( ! $this->is_demo_folder_writeable ) {
+		if ( ! $this->is_demo_folder_writeable || get_transient( 'fusion_builder_demos_timeout' ) ) {
 			return false;
 		}
 
@@ -300,8 +303,11 @@ class Fusion_Builder_Demos_Importer {
 		$method    = ( 'ftpext' === $method ) ? 'ftpext' : 'direct';
 		$unzipfile = unzip_file( $zip_file, $this->demo_folder_path[ $method ] );
 
-		if ( $unzipfile ) {
+		if ( ! is_wp_error( $unzipfile ) ) {
 			self::$demo_files = $this->get_demo_files();
+		} else {
+			set_transient( 'fusion_builder_demos_timeout', 1, 180 );
+			$this->delete_demos();
 		}
 	}
 
@@ -314,7 +320,7 @@ class Fusion_Builder_Demos_Importer {
 	 */
 	private function include_demo_files() {
 
-		// Load Fusion Builder demos.
+		// Load Avada Builder demos.
 		foreach ( self::$demo_files as $demo_file ) {
 			include $demo_file;
 		}
@@ -339,6 +345,33 @@ class Fusion_Builder_Demos_Importer {
 
 		// Recursively delete the folder.
 		return $filesystem->delete( $dir, true );
+
+	}
+
+	/**
+	 * Import header demos.
+	 *
+	 * @static
+	 * @access public
+	 * @since 7.0
+	 */
+	public static function import_demo_headers() {
+		include Avada::$template_dir_path . '/headers/default-headers.php';
+		include Avada::$template_dir_path . '/headers/custom-headers.php';
+	}
+
+	/**
+	 * Import form demos.
+	 *
+	 * @static
+	 * @access public
+	 * @since 7.0.2
+	 */
+	public static function import_demo_forms() {
+
+		if ( defined( 'FUSION_BUILDER_PLUGIN_DIR' ) && file_exists( FUSION_BUILDER_PLUGIN_DIR . '/templates/forms/form-templates.php' ) ) {
+			include FUSION_BUILDER_PLUGIN_DIR . '/templates/forms/form-templates.php';
+		}
 
 	}
 }

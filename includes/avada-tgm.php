@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -24,7 +24,7 @@ function avada_get_required_and_recommened_plugins() {
 		include_once Avada::$template_dir_path . '/includes/importer/class-avada-importer-data.php';
 	}
 
-	$is_plugins_page = ( isset( $_GET['page'] ) && ( 'avada-plugins' === $_GET['page'] || 'install-required-plugins' === $_GET['page'] ) ); // WPCS: CSRF ok.
+	$is_plugins_page = ( isset( $_GET['page'] ) && ( 'avada-plugins' === $_GET['page'] || 'install-required-plugins' === $_GET['page'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 
 	$plugins_info = Avada::get_bundled_plugins();
 
@@ -60,7 +60,7 @@ function avada_register_required_and_recommended_plugins() {
 	 * Some of the strings are added into a sprintf, so see the comments at the
 	 * end of each line for what each argument will be.
 	 */
-	$config = array(
+	$config = [
 		'domain'       => $theme_text_domain,
 		'default_path' => '',
 		'parent_slug'  => 'avada',
@@ -68,7 +68,7 @@ function avada_register_required_and_recommended_plugins() {
 		'has_notices'  => true,
 		'is_automatic' => true,
 		'message'      => '',
-		'strings'      => array(
+		'strings'      => [
 			'page_title'                      => __( 'Install/Update Required Plugins', 'Avada' ),
 			'menu_title'                      => __( 'Install Plugins', 'Avada' ),
 			/* translators: %1$s = plugin name(s) */
@@ -77,13 +77,13 @@ function avada_register_required_and_recommended_plugins() {
 			/* translators: %1$s = plugin name(s) */
 			'notice_can_install_required'     => _n_noop( 'Avada requires the following plugin installed: %1$s.', 'Avada requires the following plugins installed: %1$s.', 'Avada' ),
 			/* translators: %1$s = plugin name(s) */
-			'notice_can_install_recommended'  => _n_noop( str_replace( '{{system-status}}', admin_url( 'admin.php?page=avada-system-status' ), 'This theme recommends the following plugin installed or updated: %1$s.<br />IMPORTANT: If your hosting plan has low resources, activating additional plugins can lead to fatal "out of memory" errors. We recommend at least 128MB of memory. Check your resources on the <a href="{{system-status}}" target="_self">System Status</a> tab.' ), str_replace( '{{system-status}}', admin_url( 'admin.php?page=avada-system-status' ), 'This theme recommends the following plugins installed or updated: %1$s.<br />IMPORTANT: If your hosting plan has low resources, activating additional plugins can lead to fatal "out of memory" errors. We recommend at least 128MB of memory. Check your resources on the <a href="{{system-status}}" target="_self">System Status</a> tab.' ), 'Avada' ), // phpcs:ignore
+			'notice_can_install_recommended'  => _n_noop( str_replace( '{{system-status}}', admin_url( 'admin.php?page=avada-status' ), 'This theme recommends the following plugin installed or updated: %1$s.<br />IMPORTANT: If your hosting plan has low resources, activating additional plugins can lead to fatal "out of memory" errors. We recommend at least 128MB of memory. Check your resources on the <a href="{{system-status}}" target="_self">Status</a> page.' ), str_replace( '{{system-status}}', admin_url( 'admin.php?page=avada-status' ), 'Avada recommends the following plugins installed or updated: %1$s.<br />IMPORTANT: If your hosting plan has low resources, activating additional plugins can lead to fatal "out of memory" errors. We recommend at least 128MB of memory. Check your resources on the <a href="{{system-status}}" target="_self">Status</a> page.' ), 'Avada' ), // phpcs:ignore
 			/* translators: %1$s = plugin name(s) */
 			'notice_cannot_install'           => _n_noop( 'Sorry, but you do not have the correct permissions to install the %s plugin. Contact the administrator of this site for help on getting the plugin installed.', 'Sorry, but you do not have the correct permissions to install the %s plugins. Contact the administrator of this site for help on getting the plugins installed.', 'Avada' ),
 			/* translators: %1$s = plugin name(s) */
 			'notice_can_activate_required'    => _n_noop( 'The following required plugin is currently inactive: %1$s.', 'The following required plugins are currently inactive: %1$s.', 'Avada' ),
 			/* translators: %1$s = plugin name(s) */
-			'notice_can_activate_recommended' => _n_noop( str_replace( '{{system-status}}', admin_url( 'admin.php?page=avada-system-status' ), 'The following recommended plugin is currently inactive: %1$s.<br />IMPORTANT: If your hosting plan has low resources, activating additional plugins can lead to fatal "out of memory" errors. We recommend at least 128MB of memory. Check your resources on the <a href="{{system-status}}" target="_self">System Status</a> tab.' ), str_replace( '{{system-status}}', admin_url( 'admin.php?page=avada-system-status' ), 'The following recommended plugins are currently inactive: %1$s.<br />IMPORTANT: If your hosting plan has low resources, activating additional plugins can lead to fatal "out of memory" errors. We recommend at least 128MB of memory. Check your resources on the <a href="{{system-status}}" target="_self">System Status</a> tab.' ), 'Avada' ), // phpcs:ignore
+			'notice_can_activate_recommended' => _n_noop( str_replace( '{{system-status}}', admin_url( 'admin.php?page=avada-status' ), 'The following recommended plugin is currently inactive: %1$s.<br />IMPORTANT: If your hosting plan has low resources, activating additional plugins can lead to fatal "out of memory" errors. We recommend at least 128MB of memory. Check your resources on the <a href="{{system-status}}" target="_self">Status</a> page.' ), str_replace( '{{system-status}}', admin_url( 'admin.php?page=avada-status' ), 'The following recommended plugins are currently inactive: %1$s.<br />IMPORTANT: If your hosting plan has low resources, activating additional plugins can lead to fatal "out of memory" errors. We recommend at least 128MB of memory. Check your resources on the <a href="{{system-status}}" target="_self">Status</a> page.' ), 'Avada' ), // phpcs:ignore
 			/* translators: %1$s = plugin name(s) */
 			'notice_cannot_activate'          => _n_noop( 'Sorry, but you do not have the correct permissions to activate the %s plugin. Contact the administrator of this site for help on getting the plugin activated.', 'Sorry, but you do not have the correct permissions to activate the %s plugins. Contact the administrator of this site for help on getting the plugins activated.', 'Avada' ),
 			/* translators: %1$s = plugin name(s) */
@@ -92,13 +92,13 @@ function avada_register_required_and_recommended_plugins() {
 			'notice_cannot_update'            => _n_noop( 'Sorry, but you do not have the correct permissions to update the %s plugin. Contact the administrator of this site for help on getting the plugin updated.', 'Sorry, but you do not have the correct permissions to update the %s plugins. Contact the administrator of this site for help on getting the plugins updated.', 'Avada' ),
 			'install_link'                    => _n_noop( 'Go Install Plugin', 'Go Install Plugins', 'Avada' ),
 			'activate_link'                   => _n_noop( 'Go Activate Plugin', 'Go Activate Plugins', 'Avada' ),
-			'return'                          => __( 'Return to Required Plugins Installer', 'Avada' ),
+			'return'                          => __( 'Return to the Avada Plugins page.', 'Avada' ),
 			'plugin_activated'                => __( 'Plugin activated successfully.', 'Avada' ),
 			/* translators: %1$s = dashboard link. */
 			'complete'                        => __( 'All plugins installed and activated successfully. %s', 'Avada' ),
 			'nag_type'                        => 'error', // Determines admin notice type - can only be 'updated' or 'error'.
-		),
-	);
+		],
+	];
 
 	avada_tgmpa( $plugins, $config );
 }

@@ -6,11 +6,6 @@
  * @subpackage Fusion-Cache
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * The cache handler.
  *
@@ -26,11 +21,11 @@ class Fusion_Cache {
 	 * @param array $delete_cache An array of caches to delete.
 	 * @return void
 	 */
-	public function reset_all_caches( $delete_cache = array() ) {
+	public function reset_all_caches( $delete_cache = [] ) {
 
 		$all_caches = apply_filters(
 			'reset_all_caches',
-			array(
+			[
 				'compiled_assets'  => true,
 				'fb_pages'         => true,
 				'gfonts'           => true,
@@ -40,7 +35,7 @@ class Fusion_Cache {
 				'transients'       => true,
 				'patcher_messages' => true,
 				'other_caches'     => true,
-			)
+			]
 		);
 
 		$delete_cache = wp_parse_args(
@@ -80,8 +75,8 @@ class Fusion_Cache {
 			$delete_css_files = $wp_filesystem->delete( $root_compiled_files_path . '/' . $styles_foldername, true, 'd' );
 
 			// Delete cached CSS in the database.
-			update_option( 'fusion_dynamic_css_posts', array() );
-			update_option( 'fusion_dynamic_css_ids', array() );
+			update_option( 'fusion_dynamic_css_posts', [] );
+			update_option( 'fusion_dynamic_css_ids', [] );
 		}
 
 		if ( true === $delete_cache['demo_data'] ) {
@@ -106,7 +101,7 @@ class Fusion_Cache {
 
 		if ( true === $delete_cache['transients'] ) {
 			// Delete transients with dynamic names.
-			$dynamic_transients = array(
+			$dynamic_transients = [
 				'_transient_fusion_dynamic_css_%',
 				'_transient_avada_%',
 				'_transient_fusion_wordpress_org_plugins',
@@ -114,10 +109,11 @@ class Fusion_Cache {
 				'_site_transient_timeout_avada_%',
 				'_site_transient_timeout_fusion_wordpress_org_plugins',
 				'_transient_fusion_fontawesome%',
-			);
+				'_site_transient_avada_welcome_video_url_%',
+			];
 			global $wpdb;
 			foreach ( $dynamic_transients as $transient ) {
-				$wpdb->query( // WPCS: cache ok.
+				$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 					$wpdb->prepare(
 						"DELETE FROM $wpdb->options WHERE option_name LIKE %s",
 						$transient
@@ -126,17 +122,21 @@ class Fusion_Cache {
 			}
 
 			// Cleanup other transients.
-			$transients = array(
+			$transients = [
 				'fusion_css_cache_cleanup',
 				'_fusion_ajax_works',
 				'fusion_builder_demos_import_skip_check',
+				'fusion_builder_demos_timeout',
 				'fusion_patches',
 				'fusion_envato_api_down',
 				'fusion_dynamic_js_filenames',
 				'fusion_patcher_check_num',
 				'fusion_dynamic_js_readable',
 				'avada_premium_plugins_info',
-			);
+				'fusion_tos',
+				'fusion_fb_tos',
+				'fusion_tos_flat',
+			];
 			foreach ( $transients as $transient ) {
 				delete_transient( $transient );
 				delete_site_transient( $transient );
@@ -245,13 +245,13 @@ class Fusion_Cache {
 
 		wp_remote_request(
 			'http://' . $purgeme,
-			array(
+			[
 				'method'  => 'PURGE',
-				'headers' => array(
+				'headers' => [
 					'host'           => $p['host'],
 					'X-Purge-Method' => $varnish_x_purgemethod,
-				),
-			)
+				],
+			]
 		);
 	}
 

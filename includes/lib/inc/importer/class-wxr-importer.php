@@ -502,7 +502,7 @@ class WXR_Importer extends WP_Importer {
 	protected function import_start( $file ) {
 		if ( ! is_file( $file ) ) {
 			// Tweaked for Avada.
-			return new WP_Error( 'wxr_importer.file_missing', sprintf( esc_attr__( '%s, please try again.', 'Avada' ), esc_attr__( 'The file does not exist', 'Avada' ) ) );
+			return new WP_Error( 'wxr_importer.file_missing', sprintf( esc_html__( '%s, please try again.', 'Avada' ), esc_html__( 'The file does not exist', 'Avada' ) ) );
 		}
 
 		// Suspend bunches of stuff in WP core

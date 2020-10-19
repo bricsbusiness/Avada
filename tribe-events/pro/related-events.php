@@ -30,11 +30,11 @@ if ( is_array( $posts ) && ! empty( $posts ) ) : ?>
 			<?php foreach ( $posts as $post ) : ?>
 			<li>
 				<?php $thumb = ( has_post_thumbnail( $post->ID ) ) ? get_the_post_thumbnail( $post->ID, 'large' ) : '<img src="' . esc_url( trailingslashit( Tribe__Events__Pro__Main::instance()->pluginUrl ) . 'src/resources/images/tribe-related-events-placeholder.png' ) . '" alt="' . the_title_attribute( array( 'echo' => false, 'post' => $post->ID ) ) . '" />'; ?>
-				<div class="tribe-related-events-thumbnail hover-type-<?php echo Avada()->settings->get( 'ec_hover_type' ); ?>">
+				<div class="fusion-ec-hover-type tribe-related-events-thumbnail hover-type-<?php echo Avada()->settings->get( 'ec_hover_type' ); ?>">
 					<a href="<?php echo esc_url( tribe_get_event_link( $post ) ); ?>" class="url" rel="bookmark"><?php echo $thumb ?></a>
 				</div>
 				<div class="tribe-related-event-info">
-					<h3 class="tribe-related-events-title summary"><a class="fusion-related-posts-title-link" href="<?php echo tribe_get_event_link( $post ); ?>" class="url" rel="bookmark"><?php echo get_the_title( $post->ID ); ?></a></h3>
+					<h3 class="tribe-related-events-title summary"><a class="fusion-related-posts-title-link" href="<?php echo tribe_get_event_link( $post ); ?>" class="url" rel="bookmark"><?php echo get_the_title( $post->ID ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a></h3>
 					<?php
 						if ( $post->post_type == Tribe__Events__Main::POSTTYPE ) {
 							echo tribe_events_event_schedule_details( $post );

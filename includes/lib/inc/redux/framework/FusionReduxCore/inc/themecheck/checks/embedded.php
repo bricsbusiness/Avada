@@ -19,12 +19,6 @@
 
 					// Check for Tracking
 					checkcount();
-					$tracking = $fusionredux['dir'] . 'inc/tracking.php';
-					if ( file_exists( $tracking ) ) {
-						$this->error[] = '<div class="fusionredux-error">' . sprintf( __('<span class="tc-lead tc-required">REQUIRED</span>: You MUST delete <strong> %s </strong>, or your theme will be rejected by WP.org theme submission because of FusionRedux.', 'Avada'), $tracking ) . '</div>';
-						$ret           = false;
-					}
-
 
 					// Embedded CDN package
 					//use_cdn

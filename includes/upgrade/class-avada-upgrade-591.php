@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -38,7 +38,7 @@ class Avada_Upgrade_591 extends Avada_Upgrade_Abstract {
 	 * @since 5.9.1
 	 * @var array
 	 */
-	private static $available_languages = array();
+	private static $available_languages = [];
 
 	/**
 	 * The actual migration process.
@@ -49,7 +49,7 @@ class Avada_Upgrade_591 extends Avada_Upgrade_Abstract {
 	 */
 	protected function migration_process() {
 		$available_languages       = Fusion_Multilingual::get_available_languages();
-		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : array( '' );
+		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : [ '' ];
 
 		$this->migrate_options();
 	}
@@ -63,7 +63,7 @@ class Avada_Upgrade_591 extends Avada_Upgrade_Abstract {
 	protected function migrate_options() {
 		$available_langs = self::$available_languages;
 
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 		$options = $this->migrate_search_options( $options );
 		$options = $this->migrate_old_color_options( $options );
 		$options = $this->migrate_megamenu_width( $options );
@@ -78,7 +78,7 @@ class Avada_Upgrade_591 extends Avada_Upgrade_Abstract {
 				continue;
 			}
 
-			$options = get_option( $this->option_name . '_' . $language, array() );
+			$options = get_option( $this->option_name . '_' . $language, [] );
 			$options = $this->migrate_search_options( $options );
 			$options = $this->migrate_old_color_options( $options );
 			$options = $this->migrate_megamenu_width( $options );
@@ -89,12 +89,12 @@ class Avada_Upgrade_591 extends Avada_Upgrade_Abstract {
 	}
 
 	/**
-	 * Migrate the search page Theme Options.
+	 * Migrate the search page Global Options.
 	 *
 	 * @access private
 	 * @since 5.9.1
-	 * @param array $options The Theme Options array.
-	 * @return array         The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array         The updated Global Options array.
 	 */
 	private function migrate_search_options( $options ) {
 
@@ -104,17 +104,17 @@ class Avada_Upgrade_591 extends Avada_Upgrade_Abstract {
 	}
 
 	/**
-	 * Migrate old color Theme Options where the default was set inside the options.
+	 * Migrate old color Global Options where the default was set inside the options.
 	 *
 	 * @access private
 	 * @since 5.9.1
-	 * @param array $options The Theme Options array.
-	 * @return array         The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array         The updated Global Options array.
 	 */
 	private function migrate_old_color_options( $options ) {
 
 		if ( ! isset( $options['menu_icon_hover_color'] ) ) {
-			$options['menu_icon_hover_color'] = ( isset( $options['primary_color'] ) && ! empty( $options['primary_color'] ) ) ? $options['primary_color'] : '#a0ce4e';
+			$options['menu_icon_hover_color'] = ( isset( $options['primary_color'] ) && ! empty( $options['primary_color'] ) ) ? $options['primary_color'] : '#65bc7b';
 		}
 
 		if ( ! isset( $options['footer_link_color_hover'] ) ) {
@@ -134,15 +134,15 @@ class Avada_Upgrade_591 extends Avada_Upgrade_Abstract {
 		}
 
 		if ( ! isset( $options['map_overlay_color'] ) ) {
-			$options['map_overlay_color'] = ( isset( $options['primary_color'] ) && ! empty( $options['primary_color'] ) ) ? $options['primary_color'] : '#a0ce4e';
+			$options['map_overlay_color'] = ( isset( $options['primary_color'] ) && ! empty( $options['primary_color'] ) ) ? $options['primary_color'] : '#65bc7b';
 		}
 
 		if ( ! isset( $options['faq_accordian_active_color'] ) ) {
-			$options['faq_accordian_active_color'] = ( isset( $options['primary_color'] ) && ! empty( $options['primary_color'] ) ) ? $options['primary_color'] : '#a0ce4e';
+			$options['faq_accordian_active_color'] = ( isset( $options['primary_color'] ) && ! empty( $options['primary_color'] ) ) ? $options['primary_color'] : '#65bc7b';
 		}
 
 		if ( ! isset( $options['accordian_active_color'] ) ) {
-			$options['accordian_active_color'] = ( isset( $options['primary_color'] ) && ! empty( $options['primary_color'] ) ) ? $options['primary_color'] : '#a0ce4e';
+			$options['accordian_active_color'] = ( isset( $options['primary_color'] ) && ! empty( $options['primary_color'] ) ) ? $options['primary_color'] : '#65bc7b';
 		}
 
 		return $options;
@@ -153,8 +153,8 @@ class Avada_Upgrade_591 extends Avada_Upgrade_Abstract {
 	 *
 	 * @access private
 	 * @since 5.9.1
-	 * @param array $options The Theme Options array.
-	 * @return array         The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array         The updated Global Options array.
 	 */
 	private function migrate_megamenu_width( $options ) {
 
@@ -173,12 +173,12 @@ class Avada_Upgrade_591 extends Avada_Upgrade_Abstract {
 	}
 
 	/**
-	 * Migrate the to top Theme Options.
+	 * Migrate the to top Global Options.
 	 *
 	 * @access private
 	 * @since 5.9.1
-	 * @param array $options The Theme Options array.
-	 * @return array         The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array         The updated Global Options array.
 	 */
 	private function migrate_totop_options( $options ) {
 		if ( '1' === $options['status_totop'] ) {

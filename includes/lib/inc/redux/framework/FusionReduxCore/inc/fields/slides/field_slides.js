@@ -42,8 +42,7 @@
                     return;
                 }
 
-                el.find( '.fusionredux-slides-remove' ).live(
-                    'click', function() {
+                el.on( 'click', '.fusionredux-slides-remove', function() {
                         fusionredux_change( $( this ) );
 
                         $( this ).parent().siblings().find( 'input[type="text"]' ).val( '' );

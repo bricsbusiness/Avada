@@ -16,8 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php while ( have_posts() ) : ?>
 		<?php the_post(); ?>
 		<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<?php echo fusion_render_rich_snippets_for_pages(); // WPCS: XSS ok. ?>
-			<?php avada_featured_images_for_pages(); ?>
+			<?php echo fusion_render_rich_snippets_for_pages(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+
+			<?php avada_singular_featured_image(); ?>
+
 			<div class="post-content">
 				<?php the_content(); ?>
 				<?php fusion_link_pages(); ?>
@@ -28,12 +30,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php $woo_thanks_page_id = get_option( 'woocommerce_thanks_page_id' ); ?>
 					<?php $is_woo_thanks_page = ( ! get_option( 'woocommerce_thanks_page_id' ) ) ? false : is_page( get_option( 'woocommerce_thanks_page_id' ) ); ?>
 					<?php if ( Avada()->settings->get( 'comments_pages' ) && ! is_cart() && ! is_checkout() && ! is_account_page() && ! $is_woo_thanks_page ) : ?>
-						<?php wp_reset_postdata(); ?>
 						<?php comments_template(); ?>
 					<?php endif; ?>
 				<?php else : ?>
 					<?php if ( Avada()->settings->get( 'comments_pages' ) ) : ?>
-						<?php wp_reset_postdata(); ?>
 						<?php comments_template(); ?>
 					<?php endif; ?>
 				<?php endif; ?>
@@ -41,10 +41,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endif; // Password check. ?>
 		</div>
 	<?php endwhile; ?>
-	<?php wp_reset_postdata(); ?>
 </section>
 <?php do_action( 'avada_after_content' ); ?>
-<?php
-get_footer();
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */
+<?php get_footer(); ?>

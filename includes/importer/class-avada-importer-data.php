@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -28,7 +28,7 @@ class Avada_Importer_Data {
 	 * @access protected
 	 * @var array
 	 */
-	protected $demo_data = array();
+	protected $demo_data = [];
 
 	/**
 	 * The root of the remote server where demos are off-loaded.
@@ -53,7 +53,7 @@ class Avada_Importer_Data {
 	 * @access protected
 	 * @var array
 	 */
-	protected $files = array();
+	protected $files = [];
 
 	/**
 	 * The class constructor
@@ -101,7 +101,7 @@ class Avada_Importer_Data {
 
 		$demos = get_transient( 'avada_demos' );
 		// Reset demos if reset_transient=1.
-		if ( isset( $_GET['reset_transient'] ) && '1' === $_GET['reset_transient'] ) {
+		if ( isset( $_GET['reset_transient'] ) && '1' === $_GET['reset_transient'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$demos = false;
 		}
 		// If the transient does not exist or we've reset it, continue to get the JSON.
@@ -111,15 +111,15 @@ class Avada_Importer_Data {
 			$demos = json_decode( $demos, true );
 
 			// Get the demo details from the remote server.
-			$args         = array(
+			$args         = [
 				'user-agent' => 'avada-user-agent',
-			);
+			];
 			$remote_demos = wp_remote_retrieve_body( wp_remote_get( self::$remote_server, $args ) );
 			$remote_demos = json_decode( $remote_demos, true );
 			if ( ! empty( $remote_demos ) && $remote_demos && function_exists( 'json_last_error' ) && json_last_error() === JSON_ERROR_NONE ) {
 				$demos = $remote_demos;
 			}
-			set_transient( 'avada_demos', $demos, WEEK_IN_SECONDS );
+			set_transient( 'avada_demos', $demos, DAY_IN_SECONDS );
 		}
 		return $demos;
 	}
@@ -129,7 +129,7 @@ class Avada_Importer_Data {
 	 *
 	 * @access protected
 	 */
-	protected function mkdir() {
+	protected function make_dir() {
 
 		if ( ! file_exists( $this->basedir ) ) {
 			wp_mkdir_p( $this->basedir );
@@ -163,7 +163,7 @@ class Avada_Importer_Data {
 	public function download_remote_files() {
 
 		// Attempt to create the necessary folders if they don't exist.
-		$this->mkdir();
+		$this->make_dir();
 
 		// Get remote files and save them locally.
 		$this->get_remote_files();
@@ -240,27 +240,24 @@ class Avada_Importer_Data {
 		// Replace placeholders.
 		$home_url = untrailingslashit( get_home_url() );
 
-		// In 'classic' demo case 'avada-xml' should be used for replacements.
 		$demo = $this->demo;
-		if ( 'classic' === $demo ) {
-			$demo = 'avada-xml';
-		}
+
 		$demo = str_replace( '_', '-', $demo );
 
 		// Replace URLs.
 		$xml_content  = str_replace(
-			array(
+			[
 				'http://avada.theme-fusion.com/' . $demo,
 				'https://avada.theme-fusion.com/' . $demo,
-			),
+			],
 			$home_url,
 			$xml_content
 		);
 		$json_content = str_replace(
-			array(
+			[
 				str_replace( '/', '\\/', 'http://avada.theme-fusion.com/' . $demo ),
 				str_replace( '/', '\\/', 'https://avada.theme-fusion.com/' . $demo ),
-			),
+			],
 			str_replace( '/', '\\/', $home_url ),
 			$json_content
 		);
@@ -295,10 +292,10 @@ class Avada_Importer_Data {
 			$site_id        = substr( $json_content, $start_position, $end_position - $start_position - 1 );
 
 			// Use site id to create upload url.
-			$uploads_url = array(
+			$uploads_url = [
 				str_replace( '/', '\\/', 'http://avada.theme-fusion.com/' . $demo . '/wp-content/uploads/sites/' . $site_id ),
 				str_replace( '/', '\\/', 'https://avada.theme-fusion.com/' . $demo . '/wp-content/uploads/sites/' . $site_id ),
-			);
+			];
 
 			// Find new uploads url.
 			$uploads_dir = wp_upload_dir();
@@ -353,7 +350,7 @@ class Avada_Importer_Data {
 
 		// Early exit if we don't have anything.
 		if ( ! isset( $this->demo_data['revSliders'] ) || empty( $this->demo_data['revSliders'] ) ) {
-			return array();
+			return [];
 		}
 		return $this->demo_data['revSliders'];
 
@@ -377,6 +374,22 @@ class Avada_Importer_Data {
 	}
 
 	/**
+	 * Get the Convert Plus property of this object.
+	 *
+	 * @access public
+	 * @return false|array
+	 */
+	public function get_cp_modules() {
+
+		// Early exit if we don't have anything.
+		if ( ! isset( $this->demo_data['convertPlus'] ) || empty( $this->demo_data['convertPlus'] ) ) {
+			return false;
+		}
+
+		return $this->demo_data['convertPlus'];
+	}
+
+	/**
 	 * Is this demo a shop demo or not?
 	 *
 	 * @access public
@@ -396,7 +409,7 @@ class Avada_Importer_Data {
 	 * @return false|array
 	 */
 	public function get_sidebars() {
-		if ( isset( $this->demo_data['sidebars'] ) && false != $this->demo_data['sidebars'] ) {
+		if ( isset( $this->demo_data['sidebars'] ) && false != $this->demo_data['sidebars'] ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 			return $this->demo_data['sidebars'];
 		}
 		return false;
@@ -422,7 +435,7 @@ class Avada_Importer_Data {
 	 * @return false|array
 	 */
 	public function get_woopages() {
-		if ( isset( $this->demo_data['woopages'] ) && false != $this->demo_data['woopages'] ) {
+		if ( isset( $this->demo_data['woopages'] ) && false != $this->demo_data['woopages'] ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 			return $this->demo_data['woopages'];
 		}
 		return false;

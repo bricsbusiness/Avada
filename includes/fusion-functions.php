@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      1.0
@@ -26,25 +26,29 @@ if ( ! function_exists( 'fusion_get_related_posts' ) ) {
 
 		$args = '';
 
-		if ( 0 == $number_posts ) {
+		$number_posts = (int) $number_posts;
+		if ( 0 === $number_posts ) {
 			$query = new WP_Query();
 			return $query;
 		}
 
 		$args = wp_parse_args(
 			$args,
-			array(
-				'category__in'        => wp_get_post_categories( $post_id ),
-				'ignore_sticky_posts' => 0,
-				'posts_per_page'      => $number_posts,
-				'post__not_in'        => array( $post_id ),
+			apply_filters(
+				'fusion_related_posts_query_args',
+				array(
+					'category__in'        => wp_get_post_categories( $post_id ),
+					'ignore_sticky_posts' => 0,
+					'posts_per_page'      => $number_posts,
+					'post__not_in'        => array( $post_id ),
+				)
 			)
 		);
 
 		// If placeholder images are disabled,
 		// add the _thumbnail_id meta key to the query to only retrieve posts with featured images.
 		if ( ! Avada()->settings->get( 'featured_image_placeholder' ) ) {
-			$args['meta_key'] = '_thumbnail_id';
+			$args['meta_key'] = '_thumbnail_id'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		}
 
 		return fusion_cached_query( $args );
@@ -67,7 +71,8 @@ if ( ! function_exists( 'fusion_get_custom_posttype_related_posts' ) ) {
 
 		$args = '';
 
-		if ( 0 == $number_posts ) {
+		$number_posts = (int) $number_posts;
+		if ( 0 === $number_posts || ! $number_posts ) {
 			return $query;
 		}
 
@@ -90,7 +95,7 @@ if ( ! function_exists( 'fusion_get_custom_posttype_related_posts' ) ) {
 					'posts_per_page'      => $number_posts,
 					'post__not_in'        => array( $post_id ),
 					'post_type'           => 'avada_' . $post_type,
-					'tax_query'           => array(
+					'tax_query'           => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 						array(
 							'field'    => 'id',
 							'taxonomy' => $post_type . '_category',
@@ -102,16 +107,16 @@ if ( ! function_exists( 'fusion_get_custom_posttype_related_posts' ) ) {
 
 			// If placeholder images are disabled, add the _thumbnail_id meta key to the query to only retrieve posts with featured images.
 			if ( ! Avada()->settings->get( 'featured_image_placeholder' ) ) {
-				$args['meta_key'] = '_thumbnail_id';
+				$args['meta_key'] = '_thumbnail_id'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			}
 
-			$query = fusion_cached_query( $args );
+			$query = fusion_cached_query( apply_filters( 'fusion_related_posts_args', $args ) );
 
 		}
 
 		return $query;
 	}
-} // End if().
+}
 
 if ( ! function_exists( 'fusion_attr' ) ) {
 	/**
@@ -150,7 +155,7 @@ if ( ! function_exists( 'fusion_breadcrumbs' ) ) {
 	 * @return void
 	 */
 	function fusion_breadcrumbs() {
-		$breadcrumbs = Avada_Breadcrumbs::get_instance();
+		$breadcrumbs = Fusion_Breadcrumbs::get_instance();
 		$breadcrumbs->get_breadcrumbs();
 	}
 }
@@ -167,9 +172,7 @@ if ( ! function_exists( 'fusion_strip_unit' ) ) {
 		$value_length = strlen( $value );
 		$unit_length  = strlen( $unit_to_strip );
 
-		if ( $value_length > $unit_length &&
-			 substr_compare( $value, $unit_to_strip, $unit_length * ( -1 ), $unit_length ) === 0
-		) {
+		if ( $value_length > $unit_length && 0 === substr_compare( $value, $unit_to_strip, $unit_length * ( -1 ), $unit_length ) ) {
 			return substr( $value, 0, $value_length - $unit_length );
 		} else {
 			return $value;
@@ -234,7 +237,7 @@ if ( ! function_exists( 'fusion_add_url_parameter' ) ) {
 	 * @return array               params added to url data.
 	 */
 	function fusion_add_url_parameter( $url, $param_name, $param_value ) {
-		 $url_data = wp_parse_url( $url );
+		$url_data = wp_parse_url( $url );
 		if ( ! isset( $url_data['query'] ) ) {
 			$url_data['query'] = '';
 		}
@@ -248,7 +251,7 @@ if ( ! function_exists( 'fusion_add_url_parameter' ) ) {
 
 		$params[ $param_name ] = $param_value;
 
-		if ( 'product_count' == $param_name && is_paged() ) {
+		if ( 'product_count' === $param_name && is_paged() ) {
 			$params['paged'] = '1';
 		}
 
@@ -295,7 +298,7 @@ if ( ! function_exists( 'fusion_build_url' ) ) {
 
 		return $url;
 	}
-} // End if().
+}
 
 if ( ! function_exists( 'fusion_color_luminance' ) ) {
 	/**
@@ -309,6 +312,10 @@ if ( ! function_exists( 'fusion_color_luminance' ) ) {
 		// Validate hex string.
 		$hex     = preg_replace( '/[^0-9a-f]/i', '', $hex );
 		$new_hex = '#';
+
+		if ( '' === $hex ) {
+			return $hex;
+		}
 
 		if ( strlen( $hex ) < 6 ) {
 			$hex = $hex[0] + $hex[0] + $hex[1] + $hex[1] + $hex[2] + $hex[2];
@@ -368,9 +375,9 @@ if ( ! function_exists( 'fusion_rgb2hsl' ) ) {
 			str_pad( $hex_color, 3 - strlen( $hex_color ), '0' );
 		}
 
-		$add    = strlen( $hex_color ) == 6 ? 2 : 1;
-		$aa     = 0;
-		$add_on = 1 == $add ? ( $aa = 16 - 1 ) + 1 : 1;
+		$add    = 6 === strlen( $hex_color ) ? 2 : 1;
+		$aa     = 1 === $add ? 15 : 0;
+		$add_on = 1 === $add ? 16 : 1;
 
 		$red   = round( ( hexdec( substr( $hex_color, 0, $add ) ) * $add_on + $aa ) / 255, 6 );
 		$green = round( ( hexdec( substr( $hex_color, $add, $add ) ) * $add_on + $aa ) / 255, 6 );
@@ -389,7 +396,7 @@ if ( ! function_exists( 'fusion_rgb2hsl' ) ) {
 
 		$hsl_color['lum'] = ( $minimum + $maximum ) / 2;
 
-		if ( 0 == $chroma ) {
+		if ( 0 == $chroma ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 			$hsl_color['lum'] = round( $hsl_color['lum'] * 100, 0 );
 
 			return $hsl_color;
@@ -406,9 +413,9 @@ if ( ! function_exists( 'fusion_rgb2hsl' ) ) {
 			$hsl_color['sat'] = 1;
 		}
 
-		if ( $maximum == $red ) {
+		if ( $maximum == $red ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 			$hsl_color['hue'] = round( ( $blue > $green ? 1 - ( abs( $green - $blue ) / $range ) : ( $green - $blue ) / $range ) * 255, 0 );
-		} elseif ( $maximum == $green ) {
+		} elseif ( $maximum == $green ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 			$hsl_color['hue'] = round( ( $red > $blue ? abs( 1 - ( 4 / 3 ) + ( abs( $blue - $red ) / $range ) ) : ( 1 / 3 ) + ( $blue - $red ) / $range ) * 255, 0 );
 		} else {
 			$hsl_color['hue'] = round( ( $green < $red ? 1 - 2 / 3 + abs( $red - $green ) / $range : 2 / 3 + ( $red - $green ) / $range ) * 255, 0 );
@@ -419,7 +426,7 @@ if ( ! function_exists( 'fusion_rgb2hsl' ) ) {
 
 		return $hsl_color;
 	}
-} // End if().
+}
 
 if ( ! function_exists( 'fusion_compress_css' ) ) {
 	/**
@@ -458,31 +465,6 @@ if ( ! function_exists( 'fusion_count_widgets' ) ) {
 		}
 
 		return 0;
-	}
-}
-
-if ( ! function_exists( 'fusion_get_attachment_data_by_url' ) ) {
-	/**
-	 * Get attachment data by URL.
-	 *
-	 * @param  string $image_url  The Image URL.
-	 * @param  string $logo_field The logo field.
-	 * @return array              Image Details.
-	 */
-	function fusion_get_attachment_data_by_url( $image_url, $logo_field = '' ) {
-		global $wpdb;
-
-		$attachment = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE guid=%s;", $image_url ) );
-
-		if ( $attachment ) {
-			return wp_get_attachment_metadata( $attachment[0] );
-		}
-		// Import the image to media library.
-		$import_image = fusion_import_to_media_library( $image_url, $logo_field );
-		if ( $import_image ) {
-			return wp_get_attachment_metadata( $import_image );
-		}
-		return false;
 	}
 }
 
@@ -558,8 +540,8 @@ if ( ! function_exists( 'fusion_import_to_media_library' ) ) {
 			}
 
 			return $attach_id;
-		} // End if().
+		}
 		return false;
 	}
-} // End if().
+}
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

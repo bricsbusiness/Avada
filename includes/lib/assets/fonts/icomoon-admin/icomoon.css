@@ -1,22 +1,253 @@
 @font-face {
-	font-family: 'icomoon';
-	src:	url('icomoon.svg#icomoon') format('svg');
-	font-weight: normal;
-	font-style: normal;
+  font-family: 'icomoon';
+  src:  url('icomoon.eot?ml2ll5');
+  src:  url('icomoon.eot?ml2ll5#iefix') format('embedded-opentype'),
+    url('icomoon.ttf?ml2ll5') format('truetype'),
+    url('icomoon.woff?ml2ll5') format('woff'),
+    url('icomoon.svg?ml2ll5#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }
 
 [class^="fusiona-"], [class*=" fusiona-"] {
-	font-family: 'icomoon';
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
 
-	/* Better Font Rendering =========== */
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fusiona-check_circle_outline:before {
+  content: "\e965";
+}
+.fusiona-check_circle:before {
+  content: "\e966";
+}
+.fusiona-af-recaptcha:before {
+  content: "\e964";
+}
+.fusiona-af-address:before {
+  content: "\e93b";
+}
+.fusiona-af-checkbox:before {
+  content: "\e93c";
+}
+.fusiona-af-date:before {
+  content: "\e93d";
+}
+.fusiona-af-dropdown:before {
+  content: "\e93e";
+}
+.fusiona-af-email:before {
+  content: "\e93f";
+}
+.fusiona-af-number:before {
+  content: "\e940";
+}
+.fusiona-af-page-break:before {
+  content: "\e944";
+}
+.fusiona-af-password:before {
+  content: "\e947";
+}
+.fusiona-af-phone-number:before {
+  content: "\e94f";
+}
+.fusiona-af-radio-image:before {
+  content: "\e950";
+}
+.fusiona-af-radio:before {
+  content: "\e951";
+}
+.fusiona-af-range:before {
+  content: "\e952";
+}
+.fusiona-af-rating:before {
+  content: "\e95d";
+}
+.fusiona-af-text-area:before {
+  content: "\e95e";
+}
+.fusiona-af-text:before {
+  content: "\e95f";
+}
+.fusiona-af-time:before {
+  content: "\e960";
+}
+.fusiona-af-upload:before {
+  content: "\e961";
+}
+.fusiona-avada-form-element:before {
+  content: "\e962";
+}
+.fusiona-submission:before {
+  content: "\e939";
+}
+.fusiona-confirmation:before {
+  content: "\e93a";
+}
+.fusiona-lottie:before {
+  content: "\e937";
+}
+.fusiona-key:before {
+  content: "\e934";
+}
+.fusiona-bars:before {
+  content: "\e938";
+}
+.fusiona-space-around:before {
+  content: "\e91c";
+}
+.fusiona-space-between:before {
+  content: "\e91d";
+}
+.fusiona-space-evenly:before {
+  content: "\e91e";
+}
+.fusiona-horizontal-space-evenly:before {
+  content: "\e919";
+}
+.fusiona-horizontal-space-between:before {
+  content: "\e91a";
+}
+.fusiona-horizontal-space-around:before {
+  content: "\e91b";
+}
+.fusiona-align-bottom-columns:before {
+  content: "\e94a";
+}
+.fusiona-horizontal-flex-end:before {
+  content: "\e953";
+}
+.fusiona-horizontal-flex-start:before {
+  content: "\e954";
+}
+.fusiona-align-bottom-vert:before {
+  content: "\e955";
+}
+.fusiona-align-center-columns:before {
+  content: "\e956";
+}
+.fusiona-align-center-horz:before {
+  content: "\e957";
+}
+.fusiona-horizontal-flex-center:before {
+  content: "\e958";
+}
+.fusiona-align-center-vert:before {
+  content: "\e959";
+}
+.fusiona-align-top-columns:before {
+  content: "\e95a";
+}
+.fusiona-align-top-vert:before {
+  content: "\e95b";
+}
+.fusiona-full-height:before {
+  content: "\e95c";
+}
+.fusiona-stretch:before {
+  content: "\e963";
+}
+.fusiona-meta-data:before {
+  content: "\e928";
+}
+.fusiona-arrange:before {
+  content: "\e925";
+}
+.fusiona-plus-square-solid:before {
+  content: "\e916";
+}
+.fusiona-list-alt-solid:before {
+  content: "\e917";
+}
+.fusiona-file-import-solid:before {
+  content: "\e918";
+}
+.fusiona-info-circle:before {
+  content: "\e915";
+}
+.fusiona-unlink-solid:before {
+  content: "\e914";
+}
+.fusiona-times-solid:before {
+  content: "\e912";
+}
+.fusiona-question-circle-solid:before {
+  content: "\e911";
+}
+.fusiona-back:before {
+  content: "\e913";
+}
+.fusiona-cog:before {
+  content: "\f013";
+}
+.fusiona-file-upload-solid:before {
+  content: "\e91f";
+}
+.fusiona-project-details:before {
+  content: "\e90a";
+}
+.fusiona-widget:before {
+  content: "\e920";
+}
+.fusiona-content:before {
+  content: "\e921";
+}
+.fusiona-slider:before {
+  content: "\e922";
+}
+.fusiona-author:before {
+  content: "\e948";
+}
+.fusiona-comments:before {
+  content: "\e949";
+}
+.fusiona-featured-images:before {
+  content: "\e94b";
+}
+.fusiona-pagination:before {
+  content: "\e94c";
+}
+.fusiona-related-posts:before {
+  content: "\e94d";
+}
+.fusiona-search-results:before {
+  content: "\e94e";
+}
+.fusiona-breadcrumb:before {
+  content: "\e923";
+}
+.fusiona-hover-state:before {
+  content: "\e945";
+}
+.fusiona-regular-state:before {
+  content: "\e946";
+}
+.fusiona-gradient-fill:before {
+  content: "\e942";
+}
+.fusiona-fill-drip-solid:before {
+  content: "\e943";
+}
+.fusiona-dynamic-data:before {
+  content: "\e941";
+}
+.fusiona-icon-move:before {
+  content: "\e924";
+}
+.fusiona-audio:before {
+  content: "\e926";
+}
+.fusiona-Gravityforms:before {
+  content: "\e646";
 }
 .fusiona-dashboard:before {
   content: "\e286";
@@ -231,22 +462,22 @@
 .fusiona-plus2:before {
   content: "\e645";
 }
-.fusiona-user-secret:before {
-  content: "\e900";
+.fusiona-privacy:before {
+  content: "\e927";
 }
 .fusiona-FB_logo_black-solid-1:before {
-  content: "\e901";
+  content: "\e929";
 }
 .fusiona-calendar-check-regular:before {
-  content: "\e902";
+  content: "\e92a";
 }
 .fusiona-calendar-alt-regular:before {
-  content: "\e903";
+  content: "\e92b";
 }
 .fusiona-search:before {
   content: "\f002";
 }
-.fusiona-envelope-o:before {
+.fusiona-envelope:before {
   content: "\f003";
 }
 .fusiona-trash-o:before {
@@ -305,4 +536,100 @@
 }
 .fusiona-arrows-v:before {
   content: "\f07d";
+}
+.fusiona-video:before {
+  content: "\e92c";
+}
+.fusiona-chevron-small-down:before {
+  content: "\e92d";
+}
+.fusiona-chevron-small-up:before {
+  content: "\e92e";
+}
+.fusiona-cross:before {
+  content: "\e92f";
+}
+.fusiona-checkmark:before {
+  content: "\e930";
+}
+.fusiona-tick:before {
+  content: "\e930";
+}
+.fusiona-correct:before {
+  content: "\e930";
+}
+.fusiona-accept:before {
+  content: "\e930";
+}
+.fusiona-ok:before {
+  content: "\e930";
+}
+.fusiona-mobile:before {
+  content: "\e931";
+}
+.fusiona-tablet:before {
+  content: "\e932";
+}
+.fusiona-desktop:before {
+  content: "\e933";
+}
+.fusiona-buy-now-cart:before {
+  content: "\e900";
+}
+.fusiona-arrow-forward:before {
+  content: "\e901";
+}
+.fusiona-carousel:before {
+  content: "\e902";
+}
+.fusiona-customize:before {
+  content: "\e903";
+}
+.fusiona-demos:before {
+  content: "\e904";
+}
+.fusiona-documentation:before {
+  content: "\e905";
+}
+.fusiona-forms:before {
+  content: "\e906";
+}
+.fusiona-help-outlined:before {
+  content: "\e907";
+}
+.fusiona-icons:before {
+  content: "\e908";
+}
+.fusiona-layouts:before {
+  content: "\e909";
+}
+.fusiona-patcher:before {
+  content: "\e935";
+}
+.fusiona-play:before {
+  content: "\e90b";
+}
+.fusiona-star:before {
+  content: "\e90c";
+}
+.fusiona-status:before {
+  content: "\e90d";
+}
+.fusiona-unlock:before {
+  content: "\e90e";
+}
+.fusiona-verified:before {
+  content: "\e90f";
+}
+.fusiona-wink:before {
+  content: "\e910";
+}
+.fusiona-avada-logo:before {
+  content: "\e936";
+}
+.fusiona-plugins:before {
+  content: "\f12e";
+}
+.fusiona-eye-slash:before {
+  content: "\e9d1";
 }

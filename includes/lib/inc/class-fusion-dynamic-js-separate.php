@@ -6,11 +6,6 @@
  * @since 1.0.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Handles enqueueing files dynamically.
  */
@@ -36,7 +31,7 @@ final class Fusion_Dynamic_JS_Separate {
 
 		$this->dynamic_js = $dynamic_js;
 
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_separate_scripts' ) );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_separate_scripts' ] );
 	}
 
 	/**
@@ -50,14 +45,15 @@ final class Fusion_Dynamic_JS_Separate {
 		$wp_content_dir = untrailingslashit( wp_normalize_path( WP_CONTENT_DIR ) );
 		$wp_content_url = content_url();
 
-		foreach ( $this->dynamic_js->get_scripts() as $script ) {
+		$scripts = $this->dynamic_js->get_scripts();
+		foreach ( $scripts as $script ) {
 			// Get URL in case we're using path.
 			if ( 0 !== strpos( $script['url'], 'http' ) ) {
 				$script['url'] = str_replace( $wp_content_dir, $wp_content_url, wp_normalize_path( $script['url'] ) );
 			}
 
 			// Strip protocols.
-			$script['url']  = set_url_scheme( $script['url'] );
+			$script['url'] = set_url_scheme( $script['url'] );
 
 			wp_enqueue_script(
 				$script['handle'],
@@ -67,7 +63,8 @@ final class Fusion_Dynamic_JS_Separate {
 				$script['in_footer']
 			);
 		}
-		foreach ( $this->dynamic_js->get_localizations() as $l10n ) {
+		$localizations = $this->dynamic_js->get_localizations();
+		foreach ( $localizations as $l10n ) {
 			wp_localize_script(
 				$l10n['handle'],
 				$l10n['name'],

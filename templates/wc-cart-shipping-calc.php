@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.1.0
@@ -95,7 +95,4 @@ if ( get_option( 'woocommerce_enable_shipping_calc' ) === 'no' || ! WC()->cart->
 	</div>
 </form>
 
-<?php
-do_action( 'woocommerce_after_shipping_calculator' );
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */
+<?php do_action( 'woocommerce_after_shipping_calculator' ); ?>

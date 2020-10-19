@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -38,7 +38,7 @@ class Avada_Upgrade_590 extends Avada_Upgrade_Abstract {
 	 * @since 5.9
 	 * @var array
 	 */
-	private static $available_languages = array();
+	private static $available_languages = [];
 
 	/**
 	 * The actual migration process.
@@ -49,7 +49,7 @@ class Avada_Upgrade_590 extends Avada_Upgrade_Abstract {
 	 */
 	protected function migration_process() {
 		$available_languages       = Fusion_Multilingual::get_available_languages();
-		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : array( '' );
+		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : [ '' ];
 
 		$this->migrate_options();
 	}
@@ -63,7 +63,7 @@ class Avada_Upgrade_590 extends Avada_Upgrade_Abstract {
 	protected function migrate_options() {
 		$available_langs = self::$available_languages;
 
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 		$options = $this->migrate_recaptcha_options( $options );
 		$options = $this->migrate_pagination_options( $options );
 		$options = $this->migrate_totop_options( $options );
@@ -78,7 +78,7 @@ class Avada_Upgrade_590 extends Avada_Upgrade_Abstract {
 				continue;
 			}
 
-			$options = get_option( $this->option_name . '_' . $language, array() );
+			$options = get_option( $this->option_name . '_' . $language, [] );
 			$options = $this->migrate_recaptcha_options( $options );
 			$options = $this->migrate_pagination_options( $options );
 			$options = $this->migrate_totop_options( $options );
@@ -89,12 +89,12 @@ class Avada_Upgrade_590 extends Avada_Upgrade_Abstract {
 	}
 
 	/**
-	 * Migrate the reCaptcha Theme Options.
+	 * Migrate the reCAPTCHA Global Options.
 	 *
 	 * @access private
 	 * @since 5.9
-	 * @param array $options The Theme Options array.
-	 * @return array         The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array         The updated Global Options array.
 	 */
 	private function migrate_recaptcha_options( $options ) {
 		if ( ! isset( $options['recaptcha_version'] ) ) {
@@ -105,12 +105,12 @@ class Avada_Upgrade_590 extends Avada_Upgrade_Abstract {
 	}
 
 	/**
-	 * Migrate the pagination Theme Options.
+	 * Migrate the pagination Global Options.
 	 *
 	 * @access private
 	 * @since 5.9
-	 * @param array $options The Theme Options array.
-	 * @return array         The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array         The updated Global Options array.
 	 */
 	private function migrate_pagination_options( $options ) {
 		$options['pagination_sizing'] = 'padding';
@@ -118,12 +118,12 @@ class Avada_Upgrade_590 extends Avada_Upgrade_Abstract {
 	}
 
 	/**
-	 * Migrate the ToTop Theme Options.
+	 * Migrate the ToTop Global Options.
 	 *
 	 * @access private
 	 * @since 5.9
-	 * @param array $options The Theme Options array.
-	 * @return array         The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array         The updated Global Options array.
 	 */
 	private function migrate_totop_options( $options ) {
 		if ( is_rtl() ) {
@@ -134,34 +134,34 @@ class Avada_Upgrade_590 extends Avada_Upgrade_Abstract {
 	}
 
 	/**
-	 * Migrate the search page Theme Options.
+	 * Migrate the search page Global Options.
 	 *
 	 * @access private
 	 * @since 5.9
-	 * @param array $options The Theme Options array.
-	 * @return array         The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array         The updated Global Options array.
 	 */
 	private function migrate_search_options( $options ) {
 
 		if ( isset( $options['search_content'] ) ) {
-			$search_content = array();
+			$search_content = [];
 
 			if ( 'Posts and Pages' === $options['search_content'] ) {
-				$search_content = array( 'post', 'page', 'avada_portfolio', 'avada_faq', 'product', 'tribe_events' );
+				$search_content = [ 'post', 'page', 'avada_portfolio', 'avada_faq', 'product', 'tribe_events' ];
 			} elseif ( 'all_post_types_no_pages' === $options['search_content'] ) {
-				$search_content = array( 'post', 'avada_portfolio', 'avada_faq', 'product', 'tribe_events' );
+				$search_content = [ 'post', 'avada_portfolio', 'avada_faq', 'product', 'tribe_events' ];
 			} elseif ( 'Only Pages' === $options['search_content'] ) {
-				$search_content = array( 'page' );
+				$search_content = [ 'page' ];
 			} elseif ( 'Only Posts' === $options['search_content'] ) {
-				$search_content = array( 'post' );
+				$search_content = [ 'post' ];
 			} elseif ( 'portfolio_items' === $options['search_content'] ) {
-				$search_content = array( 'avada_portfolio' );
+				$search_content = [ 'avada_portfolio' ];
 			} elseif ( 'woocommerce_products' === $options['search_content'] ) {
-				$search_content = array( 'product' );
+				$search_content = [ 'product' ];
 			} elseif ( 'tribe_events' === $options['search_content'] ) {
-				$search_content = array( 'tribe_events' );
+				$search_content = [ 'tribe_events' ];
 			} else {
-				$search_content = array( 'post', 'page', 'avada_portfolio', 'avada_faq', 'product', 'tribe_events' );
+				$search_content = [ 'post', 'page', 'avada_portfolio', 'avada_faq', 'product', 'tribe_events' ];
 			}
 
 			$options['search_content'] = $search_content;
@@ -207,7 +207,7 @@ class Avada_Upgrade_590 extends Avada_Upgrade_Abstract {
 			$options['search_strip_html_excerpt'] = $options['strip_html_excerpt'];
 		}
 
-		$search_meta = array();
+		$search_meta = [];
 		if ( isset( $options['post_meta'] ) && ! $options['post_meta'] ) {
 			$options['search_meta'] = $search_meta;
 		} elseif ( isset( $options['post_meta_author'] ) && isset( $options['post_meta_date'] ) && isset( $options['post_meta_cats'] ) && isset( $options['post_meta_comments'] ) && isset( $options['post_meta_read'] ) && isset( $options['post_meta_tags'] ) ) {

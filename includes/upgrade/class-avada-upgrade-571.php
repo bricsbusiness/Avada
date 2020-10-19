@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -38,7 +38,7 @@ class Avada_Upgrade_571 extends Avada_Upgrade_Abstract {
 	 * @since 5.7.1
 	 * @var array
 	 */
-	private static $available_languages = array();
+	private static $available_languages = [];
 
 	/**
 	 * The actual migration process.

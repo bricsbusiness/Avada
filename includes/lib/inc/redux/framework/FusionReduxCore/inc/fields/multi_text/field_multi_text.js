@@ -33,8 +33,7 @@
                 } else {
                     return;
                 }
-                el.find( '.fusionredux-multi-text-remove' ).live(
-                    'click', function() {
+                el.on( 'click', '.fusionredux-multi-text-remove', function() {
                         fusionredux_change( $( this ) );
                         $( this ).prev( 'input[type="text"]' ).val( '' );
                         $( this ).parent().slideUp(

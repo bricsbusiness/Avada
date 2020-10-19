@@ -29,7 +29,7 @@ final class Avada_Google_Fonts {
 	 * @access private
 	 * @var array
 	 */
-	private $fonts = array();
+	private $fonts = [];
 
 	/**
 	 * An array of all google fonts.
@@ -38,15 +38,7 @@ final class Avada_Google_Fonts {
 	 * @access private
 	 * @var array
 	 */
-	private $google_fonts = array();
-
-	/**
-	 * The array of subsets
-	 *
-	 * @access private
-	 * @var array
-	 */
-	private $subsets = array();
+	private $google_fonts = [];
 
 	/**
 	 * The google link
@@ -55,14 +47,6 @@ final class Avada_Google_Fonts {
 	 * @var string
 	 */
 	private $remote_link = '';
-
-	/**
-	 * The local link for google fonts.
-	 *
-	 * @access private
-	 * @var string
-	 */
-	private $local_link = '';
 
 	/**
 	 * The class constructor.
@@ -75,9 +59,9 @@ final class Avada_Google_Fonts {
 		$this->google_fonts = $this->get_google_fonts();
 
 		// Enqueue link.
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ), 105 );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue' ], 105 );
 
-		add_filter( 'fusion_dynamic_css_final', array( $this, 'add_inline_css' ) );
+		add_filter( 'fusion_dynamic_css_final', [ $this, 'add_inline_css' ] );
 	}
 
 	/**
@@ -91,12 +75,14 @@ final class Avada_Google_Fonts {
 		// Go through our fields and populate $this->fonts.
 		$this->loop_fields();
 
+		// Allow filter to add in fonts.
+		$this->fonts = apply_filters( 'fusion_google_fonts', $this->fonts );
+
 		// Goes through $this->fonts and adds or removes things as needed.
 		$this->process_fonts();
 
-		// Go through $this->fonts and populate $this->remote_link and $this->local_link.
+		// Go through $this->fonts and populate $this->remote_link.
 		$this->create_remote_link();
-		$this->create_local_link(); // Since 5.5.2.
 
 	}
 
@@ -106,7 +92,6 @@ final class Avada_Google_Fonts {
 	 * @access public
 	 */
 	public function enqueue() {
-
 		$this->init();
 
 		if ( 'local' === Avada()->settings->get( 'gfonts_load_method' ) ) {
@@ -114,7 +99,9 @@ final class Avada_Google_Fonts {
 		}
 		// If $this->remote_link is not empty then enqueue it.
 		if ( '' !== $this->remote_link && false === $this->get_fonts_inline_styles() ) {
-			wp_enqueue_style( 'avada_google_fonts', $this->remote_link, array(), null );
+			// The "null" version is there to get around a WP-Core bug.
+			// See https://core.trac.wordpress.org/ticket/49742.
+			wp_enqueue_style( 'avada_google_fonts', $this->remote_link, [], null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters
 		}
 	}
 
@@ -144,7 +131,7 @@ final class Avada_Google_Fonts {
 	 * @access private
 	 */
 	private function loop_fields() {
-		$fields = array(
+		$fields = [
 			'footer_headings_typography',
 			'nav_typography',
 			'mobile_menu_typography',
@@ -158,7 +145,7 @@ final class Avada_Google_Fonts {
 			'h6_typography',
 			'post_title_typography',
 			'post_titles_extras_typography',
-		);
+		];
 		foreach ( $fields as $field ) {
 			$this->generate_google_font( $field );
 		}
@@ -200,22 +187,9 @@ final class Avada_Google_Fonts {
 			}
 		}
 
-		if ( isset( $value['subsets'] ) ) {
-
-			// Add the subset directly to the array of subsets in the Kirki_GoogleFonts_Manager object.
-			// Subsets must be applied to ALL fonts if possible.
-			if ( ! is_array( $value['subsets'] ) ) {
-				$this->subsets[] = $value['subsets'];
-			} else {
-				foreach ( $value['subsets'] as $subset ) {
-					$this->subsets[] = $subset;
-				}
-			}
-		}
-
 		// Add the requested google-font.
 		if ( ! isset( $this->fonts[ $value['font-family'] ] ) ) {
-			$this->fonts[ $value['font-family'] ] = array();
+			$this->fonts[ $value['font-family'] ] = [];
 		}
 		if ( ! in_array( $value['variant'], $this->fonts[ $value['font-family'] ], true ) ) {
 			$this->fonts[ $value['font-family'] ][] = $value['variant'];
@@ -233,6 +207,11 @@ final class Avada_Google_Fonts {
 			$this->fonts[ $value['font-family'] ][] = '700';
 			$this->fonts[ $value['font-family'] ][] = '700italic';
 		}
+
+		if ( 400 !== $value['variant'] && '400' !== $value['variant'] && 'regular' !== $value['variant'] ) {
+			$this->fonts[ $value['font-family'] ][] = intval( $value['variant'] ) . 'italic';
+		}
+
 		// Make sure there are no duplicate entries.
 		$this->fonts[ $value['font-family'] ] = array_unique( $this->fonts[ $value['font-family'] ] );
 
@@ -252,7 +231,6 @@ final class Avada_Google_Fonts {
 			return;
 		}
 
-		$valid_subsets = array();
 		foreach ( $this->fonts as $font => $variants ) {
 
 			// Determine if this is indeed a google font or not.
@@ -263,25 +241,14 @@ final class Avada_Google_Fonts {
 			}
 
 			// Get all valid font variants for this font.
-			$font_variants = array();
+			$font_variants = [];
 			if ( isset( $this->google_fonts[ $font ]['variants'] ) ) {
 				$font_variants = $this->google_fonts[ $font ]['variants'];
 			}
 
 			// Only use valid variants.
 			$this->fonts[ $font ] = array_intersect( $variants, $font_variants );
-
-			// Check if the selected subsets exist, even in one of the selected fonts.
-			// If they don't, then they have to be removed otherwise the link will fail.
-			if ( isset( $this->google_fonts[ $font ]['subsets'] ) ) {
-				foreach ( $this->subsets as $subset ) {
-					if ( in_array( $subset, $this->google_fonts[ $font ]['subsets'], true ) ) {
-						$valid_subsets[] = $subset;
-					}
-				}
-			}
 		}
-		$this->subsets = $valid_subsets;
 	}
 
 	/**
@@ -296,98 +263,91 @@ final class Avada_Google_Fonts {
 			return;
 		}
 
-		// Get font-family + subsets.
-		$link_fonts = array();
+		// Get font-family.
+		$link_fonts = [];
 		foreach ( $this->fonts as $font => $variants ) {
 
-			$variants = implode( ',', $variants );
+			$weights = [
+				'regular' => [],
+				'italic'  => [],
+			];
 
-			$link_font = str_replace( ' ', '+', $font );
-			if ( ! empty( $variants ) ) {
-				$link_font .= ':' . $variants;
+			if ( ( ! $variants || empty( $variants ) || ( isset( $variants[0] ) && empty( $variants[0] ) && ! isset( $variants[1] ) ) ) && isset( $this->google_fonts[ $font ] ) && isset( $this->google_fonts[ $font ]['variants'] ) ) {
+				$variants = $this->google_fonts[ $font ]['variants'];
 			}
-			$link_fonts[] = $link_font;
-		}
 
-		if ( ! empty( $this->subsets ) ) {
-			$this->subsets = array_unique( $this->subsets );
-		}
-
-		$this->remote_link = add_query_arg(
-			array(
-				'family' => str_replace( '%2B', '+', rawurlencode( implode( '|', $link_fonts ) ) ),
-				'subset' => rawurlencode( implode( ',', $this->subsets ) ),
-			),
-			'https://fonts.googleapis.com/css'
-		);
-	}
-
-	/**
-	 * Creates the google-fonts link.
-	 *
-	 * @access private
-	 * @since 5.5.2
-	 * @return void
-	 */
-	private function create_local_link() {
-
-		// If we don't have any fonts then we can exit.
-		if ( empty( $this->fonts ) ) {
-			return;
-		}
-
-		// Get font-family + subsets.
-		$link_fonts = array();
-		foreach ( $this->fonts as $font => $variants ) {
-			$variants  = implode( ',', $variants );
-			$link_font = str_replace( ' ', '+', $font );
-			if ( ! empty( $variants ) ) {
-				$link_font .= ':' . $variants;
-			}
-			$link_fonts[] = $link_font;
-		}
-		$this->local_link = add_query_arg(
-			array(
-				'action' => 'get-gfonts',
-				'family' => str_replace( '%2B', '+', rawurlencode( implode( '|', $link_fonts ) ) ),
-			),
-			site_url()
-		);
-	}
-
-	/**
-	 * Echo the CSS for local fonts and then exit.
-	 *
-	 * @access public
-	 * @since 1.0
-	 * @return void
-	 */
-	public function the_local_fonts_css() {
-		$css = '';
-		if ( isset( $_GET['action'] ) && 'get-gfonts' === sanitize_text_field( wp_unslash( $_GET['action'] ) ) && isset( $_GET['family'] ) ) { // WPCS: CSRF ok.
-
-			header( 'Content-type: text/css; charset: UTF-8' );
-
-			// Split font-families.
-			$families = explode( '|', sanitize_text_field( wp_unslash( $_GET['family'] ) ) ); // WPCS: CSRF ok.
-
-			foreach ( $families as $family ) {
-
-				// Split font-family and variants.
-				$family = explode( ':', $family );
-
-				// Get the variants as an array.
-				$variants = array();
-				if ( isset( $family[1] ) ) {
-					$variants = explode( ',', $family[1] );
+			foreach ( $variants as $variant ) {
+				$weight = ( 'regular' === $variant || 'italic' === $variant ) ? 400 : intval( $variant );
+				if ( $weight ) {
+					if ( false === strpos( $variant, 'i' ) ) {
+						$weights['regular'][] = $weight;
+					} else {
+						$weights['italic'][] = $weight;
+					}
 				}
-
-				// Generate the CSS for the font-family.
-				$font = new Fusion_GFonts_Downloader( $family[0] );
-				$css .= $font->get_fontface_css( $variants );
 			}
-			echo $css; // WPCS: XSS ok.
-			exit();
+
+			// Same as array_unique, just faster.
+			$weights['regular'] = array_flip( array_flip( $weights['regular'] ) );
+			$weights['italic']  = array_flip( array_flip( $weights['italic'] ) );
+
+			// The new Google-Fonts API requires font-weights in a specific order.
+			sort( $weights['regular'] );
+			sort( $weights['italic'] );
+
+			if ( empty( $weights['regular'] ) ) {
+				unset( $weights['regular'] );
+			}
+
+			if ( empty( $weights['italic'] ) ) {
+				unset( $weights['italic'] );
+			}
+
+			// Build the font-family part.
+			$link_font = 'family=' . str_replace( ' ', '+', $font );
+
+			// Define if we want italics.
+			if ( isset( $weights['italic'] ) ) {
+				$link_font .= ':ital';
+			}
+
+			if ( empty( $weights ) ) {
+				$weights = [
+					'regular' => [ 400, 700 ],
+				];
+			}
+
+			// Build the font-weights part.
+			$font_weights_fragments = [];
+			if ( ! isset( $weights['italic'] ) ) {
+				$font_weights_fragments = $weights['regular'];
+			} else {
+				if ( isset( $weights['regular'] ) ) {
+					foreach ( $weights['regular'] as $weight ) {
+						$font_weights_fragments[] = '0,' . $weight;
+					}
+				}
+				if ( isset( $weights['italic'] ) ) {
+					foreach ( $weights['italic'] as $weight ) {
+						$font_weights_fragments[] = '1,' . $weight;
+					}
+				}
+			}
+
+			if ( ! isset( $weights['italic'] ) && isset( $weights['regilar'] ) && 1 === count( $weights['regular'] ) && 400 === $weights['regular'][0] ) {
+				$link_fonts[] = $link_font;
+				continue;
+			}
+			$link_font .= ( isset( $weights['italic'] ) ) ? ',wght@' : ':wght@';
+			$link_font .= implode( ';', $font_weights_fragments );
+
+			$link_fonts[] = $link_font;
+		}
+
+		$this->remote_link = 'https://fonts.googleapis.com/css2?' . implode( '&', $link_fonts );
+		$font_face_display = Avada()->settings->get( 'font_face_display' );
+		if ( 'block' !== $font_face_display ) {
+			$this->remote_link .= '&display=swap';
 		}
 	}
 
@@ -396,22 +356,18 @@ final class Avada_Google_Fonts {
 	 *
 	 * @access public
 	 * @since 1.0
+	 * @param string $styles The styles from the remote URL.
 	 * @return string
 	 */
-	public function get_local_fonts_css() {
-		$css = '';
+	public function get_local_fonts_css( $styles ) {
 
 		// If we don't have any fonts then we can exit.
 		if ( empty( $this->fonts ) ) {
 			return;
 		}
 
-		// Get font-family + subsets.
-		foreach ( $this->fonts as $font => $variants ) {
-			$family = new Fusion_GFonts_Downloader( $font );
-			$css   .= $family->get_fontface_css( $variants );
-		}
-		return $css;
+		$family = new Fusion_GFonts_Downloader( '', $styles );
+		return $family->get_fontface_css();
 	}
 
 	/**
@@ -424,17 +380,15 @@ final class Avada_Google_Fonts {
 
 		if ( null === $this->google_fonts || empty( $this->google_fonts ) ) {
 
-			$fonts = include_once wp_normalize_path( FUSION_LIBRARY_PATH . '/inc/redux/custom-fields/typography/googlefonts-array.php' );
+			$fonts = include_once wp_normalize_path( FUSION_LIBRARY_PATH . '/inc/googlefonts-array.php' );
 
-			$google_fonts = array();
+			$google_fonts = [];
 			if ( is_array( $fonts ) ) {
 				foreach ( $fonts['items'] as $font ) {
-					$google_fonts[ $font['family'] ] = array(
+					$google_fonts[ $font['family'] ] = [
 						'label'    => $font['family'],
 						'variants' => $font['variants'],
-						'subsets'  => $font['subsets'],
-						'category' => $font['category'],
-					);
+					];
 				}
 			}
 
@@ -454,18 +408,14 @@ final class Avada_Google_Fonts {
 	 */
 	protected function get_fonts_inline_styles() {
 
-		// If we're using local, early exit after getting the styles.
-		if ( 'local' === Avada()->settings->get( 'gfonts_load_method' ) ) {
-			return $this->get_local_fonts_css();
-		}
-
 		$transient_name = 'avada_googlefonts_contents';
 		if ( '' !== Fusion_Multilingual::get_active_language() && 'all' !== Fusion_Multilingual::get_active_language() ) {
 			$transient_name .= '_' . Fusion_Multilingual::get_active_language();
 		}
 
-		$contents = get_transient( $transient_name );
-		if ( false === $contents ) {
+		$skip_transient = apply_filters( 'fusion_google_fonts_extra', false ) || ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() );
+		$contents       = get_transient( 'avada_googlefonts_contents' );
+		if ( false === $contents || $skip_transient ) {
 
 			// Create the link.
 			if ( '' === $this->remote_link ) {
@@ -479,7 +429,12 @@ final class Avada_Google_Fonts {
 			}
 
 			// Get remote HTML file.
-			$response = wp_remote_get( $this->remote_link );
+			$response = wp_remote_get(
+				$this->remote_link,
+				[
+					'user-agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/603.3.8 (KHTML, like Gecko) Version/10.1.2 Safari/603.3.8',
+				]
+			);
 
 			// Check for errors.
 			if ( is_wp_error( $response ) ) {
@@ -495,16 +450,20 @@ final class Avada_Google_Fonts {
 				return false;
 			}
 
-			// Set font display.
-			$contents = str_replace( '@font-face {', '@font-face {font-display: ' . Avada()->settings->get( 'font_face_display' ) . ';', $contents );
-
-			// Store remote HTML file in transient, expire after 24 hours.
-			set_transient( $transient_name, $contents, DAY_IN_SECONDS );
+			// Store remote HTML file in transient, expire after 24 hours.  Only do so if no extra per page files added.
+			if ( ! $skip_transient ) {
+				set_transient( $transient_name, $contents, DAY_IN_SECONDS );
+			}
 		}
 
 		// Return false if we were unable to get the contents of the googlefonts from remote.
 		if ( 'failed' === $contents ) {
 			return false;
+		}
+
+		// If we're using local, early exit after getting the styles.
+		if ( 'local' === Avada()->settings->get( 'gfonts_load_method' ) ) {
+			return $this->get_local_fonts_css( $contents );
 		}
 
 		// If we got this far then we can safely return the contents.

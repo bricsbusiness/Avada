@@ -6,11 +6,6 @@
  * @since 1.0.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Registers scripts.
  */
@@ -40,12 +35,13 @@ class Fusion_Scripts {
 	 * Constructor.
 	 */
 	public function __construct() {
+		$path = ( true === FUSION_LIBRARY_DEV_MODE ) ? '' : '/min';
 
-		self::$js_folder_url  = FUSION_LIBRARY_URL . '/assets/min/js';
-		self::$js_folder_path = FUSION_LIBRARY_PATH . '/assets/min/js';
+		self::$js_folder_url  = FUSION_LIBRARY_URL . '/assets' . $path . '/js';
+		self::$js_folder_path = FUSION_LIBRARY_PATH . '/assets' . $path . '/js';
 
-		add_action( 'wp', array( $this, 'init' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
+		add_action( 'wp', [ $this, 'init' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'wp_enqueue_scripts' ] );
 	}
 
 	/**
@@ -71,382 +67,392 @@ class Fusion_Scripts {
 	 * @return void
 	 */
 	protected function register_scripts() {
+		global $fusion_library_latest_version;
 
-		$scripts = array(
-			array(
+		$is_builder = ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) || ( function_exists( 'fusion_is_builder_frame' ) && fusion_is_builder_frame() );
+
+		$scripts = [
+			[
 				'cssua',
 				self::$js_folder_url . '/library/cssua.js',
 				self::$js_folder_path . '/library/cssua.js',
-				array(),
+				[],
 				'2.1.28',
 				true,
-			),
-			array(
+			],
+			[
 				'modernizr',
 				self::$js_folder_url . '/library/modernizr.js',
 				self::$js_folder_path . '/library/modernizr.js',
-				array(),
+				[],
 				'3.3.1',
 				true,
-			),
-			array(
+			],
+			[
+				'fusion',
+				self::$js_folder_url . '/general/fusion.js',
+				self::$js_folder_path . '/general/fusion.js',
+				[],
+				$fusion_library_latest_version,
+				true,
+			],
+			[
 				'isotope',
 				self::$js_folder_url . '/library/isotope.js',
 				self::$js_folder_path . '/library/isotope.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'3.0.4',
 				true,
-			),
-			array(
+			],
+			[
 				'packery',
 				self::$js_folder_url . '/library/packery.js',
 				self::$js_folder_path . '/library/packery.js',
-				array( 'jquery', 'isotope' ),
+				[ 'jquery', 'isotope' ],
 				'2.0.0',
 				true,
-			),
+			],
 
 			// Lazy Loading.
-			array(
+			[
 				'lazysizes',
 				self::$js_folder_url . '/library/lazysizes.js',
 				self::$js_folder_path . '/library/lazysizes.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'4.1.5',
 				true,
-			),
+			],
 
 			// Bootstrap.
-			array(
+			[
 				'bootstrap-collapse',
 				self::$js_folder_url . '/library/bootstrap.collapse.js',
 				self::$js_folder_path . '/library/bootstrap.collapse.js',
-				array(),
+				[],
 				'3.1.1',
 				true,
-			),
-			array(
+			],
+			[
 				'bootstrap-modal',
 				self::$js_folder_url . '/library/bootstrap.modal.js',
 				self::$js_folder_path . '/library/bootstrap.modal.js',
-				array(),
+				[],
 				'3.1.1',
 				true,
-			),
-			array(
+			],
+			[
 				'bootstrap-tooltip',
 				self::$js_folder_url . '/library/bootstrap.tooltip.js',
 				self::$js_folder_path . '/library/bootstrap.tooltip.js',
-				array(),
+				[],
 				'3.3.5',
 				true,
-			),
-			array(
+			],
+			[
 				'bootstrap-popover',
 				self::$js_folder_url . '/library/bootstrap.popover.js',
 				self::$js_folder_path . '/library/bootstrap.popover.js',
-				array( 'bootstrap-tooltip', 'cssua' ),
+				[ 'bootstrap-tooltip', 'cssua' ],
 				'3.3.5',
 				true,
-			),
-			array(
+			],
+			[
 				'bootstrap-transition',
 				self::$js_folder_url . '/library/bootstrap.transition.js',
 				self::$js_folder_path . '/library/bootstrap.transition.js',
-				array(),
+				[],
 				'3.3.6',
 				true,
-			),
-			array(
+			],
+			[
 				'bootstrap-tab',
 				self::$js_folder_url . '/library/bootstrap.tab.js',
 				self::$js_folder_path . '/library/bootstrap.tab.js',
-				array( 'bootstrap-transition' ),
+				[ 'bootstrap-transition' ],
 				'3.1.1',
 				true,
-			),
+			],
 
 			// jQuery.
-			array(
+			[
 				'jquery-waypoints',
 				self::$js_folder_url . '/library/jquery.waypoints.js',
 				self::$js_folder_path . '/library/jquery.waypoints.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'2.0.3',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-request-animation-frame',
 				self::$js_folder_url . '/library/jquery.requestAnimationFrame.js',
 				self::$js_folder_path . '/library/jquery.requestAnimationFrame.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-appear',
 				self::$js_folder_url . '/library/jquery.appear.js',
 				self::$js_folder_path . '/library/jquery.appear.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-caroufredsel',
 				self::$js_folder_url . '/library/jquery.carouFredSel.js',
 				self::$js_folder_path . '/library/jquery.carouFredSel.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'6.2.1',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-cycle',
 				self::$js_folder_url . '/library/jquery.cycle.js',
 				self::$js_folder_path . '/library/jquery.cycle.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'3.0.3',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-easing',
 				self::$js_folder_url . '/library/jquery.easing.js',
 				self::$js_folder_path . '/library/jquery.easing.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1.3',
 				true,
-			),
-			array(
-				'jquery-easy-pie-chart',
-				self::$js_folder_url . '/library/jquery.easyPieChart.js',
-				self::$js_folder_path . '/library/jquery.easyPieChart.js',
-				array( 'jquery' ),
-				'2.1.7',
-				true,
-			),
-			array(
+			],
+			[
 				'jquery-fitvids',
 				self::$js_folder_url . '/library/jquery.fitvids.js',
 				self::$js_folder_path . '/library/jquery.fitvids.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1.1',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-flexslider',
 				self::$js_folder_url . '/library/jquery.flexslider.js',
 				self::$js_folder_path . '/library/jquery.flexslider.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'2.2.2',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-fusion-maps',
 				self::$js_folder_url . '/library/jquery.fusion_maps.js',
 				self::$js_folder_path . '/library/jquery.fusion_maps.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'2.2.2',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-hover-flow',
 				self::$js_folder_url . '/library/jquery.hoverflow.js',
 				self::$js_folder_path . '/library/jquery.hoverflow.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-hover-intent',
 				self::$js_folder_url . '/library/jquery.hoverintent.js',
 				self::$js_folder_path . '/library/jquery.hoverintent.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-lightbox',
 				self::$js_folder_url . '/library/jquery.ilightbox.js',
 				self::$js_folder_path . '/library/jquery.ilightbox.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'2.2.3',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-infinite-scroll',
 				self::$js_folder_url . '/library/jquery.infinitescroll.js',
 				self::$js_folder_path . '/library/jquery.infinitescroll.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'2.1',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-mousewheel',
 				self::$js_folder_url . '/library/jquery.mousewheel.js',
 				self::$js_folder_path . '/library/jquery.mousewheel.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'3.0.6',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-placeholder',
 				self::$js_folder_url . '/library/jquery.placeholder.js',
 				self::$js_folder_path . '/library/jquery.placeholder.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'2.0.7',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-touch-swipe',
 				self::$js_folder_url . '/library/jquery.touchSwipe.js',
 				self::$js_folder_path . '/library/jquery.touchSwipe.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1.6.6',
 				true,
-			),
-			array(
+			],
+			[
 				'jquery-fade',
 				self::$js_folder_url . '/library/jquery.fade.js',
 				self::$js_folder_path . '/library/jquery.fade.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'images-loaded',
 				self::$js_folder_url . '/library/imagesLoaded.js',
 				self::$js_folder_path . '/library/imagesLoaded.js',
-				array(),
+				[],
 				'3.1.8',
 				true,
-			),
+			],
 
 			// General.
-			array(
+			[
 				'fusion-alert',
 				self::$js_folder_url . '/general/fusion-alert.js',
 				self::$js_folder_path . '/general/fusion-alert.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-equal-heights',
 				self::$js_folder_url . '/general/fusion-equal-heights.js',
 				self::$js_folder_path . '/general/fusion-equal-heights.js',
-				array( 'jquery', 'modernizr' ),
+				[ 'jquery', 'modernizr' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-parallax',
 				self::$js_folder_url . '/library/fusion-parallax.js',
 				self::$js_folder_path . '/library/fusion-parallax.js',
-				array( 'jquery', 'cssua', 'jquery-request-animation-frame' ),
+				[ 'jquery', 'cssua', 'jquery-request-animation-frame' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-video-bg',
 				self::$js_folder_url . '/library/fusion-video-bg.js',
 				self::$js_folder_path . '/library/fusion-video-bg.js',
-				array( 'fusion-video-general', 'jquery-fitvids' ),
+				[ 'fusion-video-general', 'jquery-fitvids' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-video-general',
 				self::$js_folder_url . '/library/fusion-video-general.js',
 				self::$js_folder_path . '/library/fusion-video-general.js',
-				array( 'jquery-fitvids' ),
+				[ 'jquery-fitvids' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-waypoints',
 				self::$js_folder_url . '/general/fusion-waypoints.js',
 				self::$js_folder_path . '/general/fusion-waypoints.js',
-				array( 'jquery-waypoints', 'modernizr' ),
+				[ 'jquery-waypoints', 'modernizr' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-lightbox',
 				self::$js_folder_url . '/general/fusion-lightbox.js',
 				self::$js_folder_path . '/general/fusion-lightbox.js',
-				array( 'jquery-lightbox', 'jquery-mousewheel' ),
+				[ 'jquery-lightbox', 'jquery-mousewheel' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-carousel',
 				self::$js_folder_url . '/general/fusion-carousel.js',
 				self::$js_folder_path . '/general/fusion-carousel.js',
-				array( 'jquery-caroufredsel', 'jquery-touch-swipe' ),
+				[ 'jquery-caroufredsel', 'jquery-touch-swipe' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-flexslider',
 				self::$js_folder_url . '/general/fusion-flexslider.js',
 				self::$js_folder_path . '/general/fusion-flexslider.js',
-				array( 'jquery-flexslider' ),
+				[ 'jquery-flexslider' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-popover',
 				self::$js_folder_url . '/general/fusion-popover.js',
 				self::$js_folder_path . '/general/fusion-popover.js',
-				array( 'cssua', 'bootstrap-popover' ),
+				[ 'cssua', 'bootstrap-popover' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-tooltip',
 				self::$js_folder_url . '/general/fusion-tooltip.js',
 				self::$js_folder_path . '/general/fusion-tooltip.js',
-				array( 'bootstrap-tooltip', 'jquery-hover-flow' ),
+				[ 'bootstrap-tooltip', 'jquery-hover-flow' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-sharing-box',
 				self::$js_folder_url . '/general/fusion-sharing-box.js',
 				self::$js_folder_path . '/general/fusion-sharing-box.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-blog',
 				self::$js_folder_url . '/general/fusion-blog.js',
 				self::$js_folder_path . '/general/fusion-blog.js',
-				array( 'jquery', 'packery', 'isotope', 'fusion-lightbox', 'fusion-flexslider', 'jquery-infinite-scroll', 'images-loaded' ),
+				[ 'jquery', 'packery', 'isotope', 'fusion-lightbox', 'fusion-flexslider', 'jquery-infinite-scroll', 'images-loaded' ],
 				'1',
 				true,
-			),
-			array(
+			],
+			[
 				'fusion-button',
 				self::$js_folder_url . '/general/fusion-button.js',
 				self::$js_folder_path . '/general/fusion-button.js',
-				array( 'jquery', 'cssua' ),
+				[ 'jquery', 'cssua' ],
 				'1',
 				true,
-			),
-		);
+			],
+			[
+				'jquery-sticky-kit',
+				self::$js_folder_url . '/library/jquery.sticky-kit.js',
+				self::$js_folder_path . '/library/jquery.sticky-kit.js',
+				[ 'jquery' ],
+				'1.1.2',
+				true,
+			],
+		];
 
 		// Conditional scripts.
-		if ( fusion_library()->get_option( 'status_vimeo' ) ) {
-			$scripts[] = array(
+		if ( fusion_library()->get_option( 'status_vimeo' ) || $is_builder ) {
+			$scripts[] = [
 				'vimeo-player',
 				self::$js_folder_url . '/library/vimeoPlayer.js',
 				self::$js_folder_path . '/library/vimeoPlayer.js',
-				array(),
+				[],
 				'2.2.1',
 				true,
-			);
+			];
 		}
-
 		foreach ( $scripts as $script ) {
 			Fusion_Dynamic_JS::register_script(
 				$script[0],
@@ -469,14 +475,16 @@ class Fusion_Scripts {
 	 */
 	public function wp_enqueue_scripts() {
 
-		if ( fusion_library()->get_option( 'status_gmap' ) ) {
+		$is_builder = ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) || ( function_exists( 'fusion_is_builder_frame' ) && fusion_is_builder_frame() );
+
+		if ( fusion_library()->get_option( 'status_gmap' ) || $is_builder ) {
 			$map_protocol = ( is_ssl() ) ? 'https' : 'http';
 			$map_key      = apply_filters( 'fusion_google_maps_api_key', fusion_library()->get_option( 'gmap_api' ) );
 			$map_key      = ( $map_key ) ? 'key=' . $map_key . '&' : '';
 			$lang_code    = fusion_get_google_maps_language_code();
 			$map_api      = $map_protocol . '://maps.googleapis.com/maps/api/js?' . $map_key . 'language=' . $lang_code;
-			wp_register_script( 'google-maps-api', $map_api, array(), '1', true );
-			wp_register_script( 'google-maps-infobox', self::$js_folder_url . '/library/infobox_packed.js', array(), '1', true );
+			wp_register_script( 'google-maps-api', $map_api, [], '1', true );
+			wp_register_script( 'google-maps-infobox', self::$js_folder_url . '/library/infobox_packed.js', [], '1', true );
 		}
 	}
 
@@ -488,26 +496,33 @@ class Fusion_Scripts {
 	 * @return void
 	 */
 	protected function enqueue_scripts() {
-		global $post;
+		global $post, $fusion_library_latest_version;
+
+		$is_builder = ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) || ( function_exists( 'fusion_is_builder_frame' ) && fusion_is_builder_frame() );
+
+		$header_override = false;
+		if ( class_exists( 'Fusion_Template_Builder' ) ) {
+			$header_override = Fusion_Template_Builder::get_instance()->get_override( 'header' );
+		}
 
 		// Some general enqueue for now.
 		Fusion_Dynamic_JS::enqueue_script(
 			'fusion-general-global',
 			self::$js_folder_url . '/general/fusion-general-global.js',
 			self::$js_folder_path . '/general/fusion-general-global.js',
-			array( 'jquery', 'jquery-placeholder' ),
+			[ 'jquery', 'jquery-placeholder' ],
 			'1',
 			true
 		);
 
 		// Scroll to anchor, required in FB?
-		$scroll_to_anchor_dependencies = array(
+		$scroll_to_anchor_dependencies = [
 			'jquery',
 			'jquery-easing',
 			'modernizr',
-		);
+		];
 
-		if ( ! isset( $post->ID ) || 'no' !== fusion_get_page_option( 'display_header', $post->ID ) ) {
+		if ( ! $header_override && ( ! isset( $post->ID ) || 'no' !== fusion_get_page_option( 'display_header', $post->ID ) ) ) {
 			$scroll_to_anchor_dependencies[] = 'avada-menu';
 		}
 
@@ -520,25 +535,23 @@ class Fusion_Scripts {
 			true
 		);
 
-		// If responsive typography is enabled.
-		if ( fusion_library()->get_option( 'typography_responsive' ) || fusion_library()->get_option( 'status_fusion_slider' ) ) {
-			Fusion_Dynamic_JS::enqueue_script(
-				'fusion-responsive-typography',
-				self::$js_folder_url . '/general/fusion-responsive-typography.js',
-				self::$js_folder_path . '/general/fusion-responsive-typography.js',
-				array( 'jquery' ),
-				'1',
-				true
-			);
-		}
+		// Responsive typography.
+		Fusion_Dynamic_JS::enqueue_script(
+			'fusion-responsive-typography',
+			self::$js_folder_url . '/general/fusion-responsive-typography.js',
+			self::$js_folder_path . '/general/fusion-responsive-typography.js',
+			[ 'jquery', 'fusion' ],
+			'1',
+			true
+		);
 
 		// If responsive is disabled.
-		if ( ! fusion_library()->get_option( 'responsive' ) ) {
+		if ( ! fusion_library()->get_option( 'responsive' ) || $is_builder ) {
 			Fusion_Dynamic_JS::enqueue_script(
 				'fusion-non-responsive',
 				self::$js_folder_url . '/general/fusion-non-responsive.js',
 				self::$js_folder_path . '/general/fusion-non-responsive.js',
-				array( 'jquery' ),
+				[ 'jquery' ],
 				'1',
 				true
 			);
@@ -556,125 +569,131 @@ class Fusion_Scripts {
 
 		// Localize scripts.
 		Fusion_Dynamic_JS::localize_script(
+			'fusion',
+			'fusionJSVars',
+			[
+				'visibility_small'  => fusion_library()->get_option( 'visibility_small' ),
+				'visibility_medium' => fusion_library()->get_option( 'visibility_medium' ),
+			]
+		);
+		Fusion_Dynamic_JS::localize_script(
 			'fusion-video-bg',
 			'fusionVideoBgVars',
-			array(
+			[
 				'status_vimeo' => fusion_library()->get_option( 'status_vimeo' ) ? fusion_library()->get_option( 'status_vimeo' ) : '0',
 				'status_yt'    => fusion_library()->get_option( 'status_yt' ) ? fusion_library()->get_option( 'status_yt' ) : '0',
-			)
+			]
 		);
 		Fusion_Dynamic_JS::localize_script(
 			'fusion-equal-heights',
 			'fusionEqualHeightVars',
-			array(
+			[
 				'content_break_point' => intval( fusion_library()->get_option( 'content_break_point' ) ),
-			)
+			]
 		);
 		Fusion_Dynamic_JS::localize_script(
 			'fusion-video-general',
 			'fusionVideoGeneralVars',
-			array(
+			[
 				'status_vimeo' => fusion_library()->get_option( 'status_vimeo' ) ? fusion_library()->get_option( 'status_vimeo' ) : '0',
 				'status_yt'    => fusion_library()->get_option( 'status_yt' ) ? fusion_library()->get_option( 'status_yt' ) : '0',
-			)
+			]
 		);
 		Fusion_Dynamic_JS::localize_script(
 			'jquery-fusion-maps',
 			'fusionMapsVars',
-			array(
+			[
 				'admin_ajax' => admin_url( 'admin-ajax.php' ),
-			)
+			]
 		);
 		Fusion_Dynamic_JS::localize_script(
 			'jquery-lightbox',
 			'fusionLightboxVideoVars',
-			array(
+			[
 				'lightbox_video_width'  => fusion_library()->get_option( 'lightbox_video_dimensions' ) ? Fusion_Sanitize::number( fusion_library()->get_option( 'lightbox_video_dimensions', 'width' ) ) : '1280',
 				'lightbox_video_height' => fusion_library()->get_option( 'lightbox_video_dimensions' ) ? Fusion_Sanitize::number( fusion_library()->get_option( 'lightbox_video_dimensions', 'height' ) ) : '720',
-			)
+			]
 		);
 		Fusion_Dynamic_JS::localize_script(
 			'fusion-lightbox',
 			'fusionLightboxVars',
-			array(
+			[
 				'status_lightbox'          => fusion_library()->get_option( 'status_lightbox' ) ? fusion_library()->get_option( 'status_lightbox' ) : false,
-				'lightbox_gallery'         => fusion_library()->get_option( 'lightbox_gallery' ) ? fusion_library()->get_option( 'lightbox_gallery' ) : false,
-				'lightbox_skin'            => fusion_library()->get_option( 'lightbox_skin' ) ? fusion_library()->get_option( 'lightbox_skin' ) : false,
-				'lightbox_title'           => fusion_library()->get_option( 'lightbox_title' ) ? fusion_library()->get_option( 'lightbox_title' ) : false,
-				'lightbox_arrows'          => fusion_library()->get_option( 'lightbox_arrows' ) ? fusion_library()->get_option( 'lightbox_arrows' ) : false,
-				'lightbox_slideshow_speed' => fusion_library()->get_option( 'lightbox_slideshow_speed' ) ? (int) fusion_library()->get_option( 'lightbox_slideshow_speed' ) : false,
-				'lightbox_autoplay'        => fusion_library()->get_option( 'lightbox_autoplay' ) ? fusion_library()->get_option( 'lightbox_autoplay' ) : false,
-				'lightbox_opacity'         => fusion_library()->get_option( 'lightbox_opacity' ) ? fusion_library()->get_option( 'lightbox_opacity' ) : false,
-				'lightbox_desc'            => fusion_library()->get_option( 'lightbox_desc' ) ? fusion_library()->get_option( 'lightbox_desc' ) : false,
-				'lightbox_social'          => fusion_library()->get_option( 'lightbox_social' ) ? fusion_library()->get_option( 'lightbox_social' ) : false,
+				'lightbox_gallery'         => fusion_get_option( 'lightbox_gallery' ),
+				'lightbox_skin'            => fusion_get_option( 'lightbox_skin' ),
+				'lightbox_title'           => fusion_get_option( 'lightbox_title' ),
+				'lightbox_arrows'          => fusion_get_option( 'lightbox_arrows' ),
+				'lightbox_slideshow_speed' => fusion_get_option( 'lightbox_slideshow_speed' ),
+				'lightbox_autoplay'        => fusion_get_option( 'lightbox_autoplay' ),
+				'lightbox_opacity'         => fusion_get_option( 'lightbox_opacity' ),
+				'lightbox_desc'            => fusion_get_option( 'lightbox_desc' ),
+				'lightbox_social'          => fusion_get_option( 'lightbox_social' ),
 				'lightbox_deeplinking'     => fusion_library()->get_option( 'lightbox_deeplinking' ) ? fusion_library()->get_option( 'lightbox_deeplinking' ) : false,
-				'lightbox_path'            => fusion_library()->get_option( 'lightbox_path' ) ? fusion_library()->get_option( 'lightbox_path' ) : 'vertical',
-				'lightbox_post_images'     => fusion_library()->get_option( 'lightbox_post_images' ) ? fusion_library()->get_option( 'lightbox_post_images' ) : false,
-				'lightbox_animation_speed' => fusion_library()->get_option( 'lightbox_animation_speed' ) ? fusion_library()->get_option( 'lightbox_animation_speed' ) : false,
-			)
+				'lightbox_path'            => fusion_get_option( 'lightbox_path' ),
+				'lightbox_post_images'     => fusion_get_option( 'lightbox_post_images' ),
+				'lightbox_animation_speed' => fusion_get_option( 'lightbox_animation_speed' ),
+				'l10n'                     => [
+					'close'           => esc_html__( 'Press Esc to close', 'Avada' ),
+					'enterFullscreen' => esc_html__( 'Enter Fullscreen (Shift+Enter)', 'Avada' ),
+					'exitFullscreen'  => esc_html__( 'Exit Fullscreen (Shift+Enter)', 'Avada' ),
+					'slideShow'       => esc_html__( 'Slideshow', 'Avada' ),
+					'next'            => esc_html__( 'Next', 'Avada' ),
+					'previous'        => esc_html__( 'Previous', 'Avada' ),
+				],
+			]
 		);
 		Fusion_Dynamic_JS::localize_script(
 			'fusion-carousel',
 			'fusionCarouselVars',
-			array(
+			[
 				'related_posts_speed' => fusion_library()->get_option( 'related_posts_speed' ) ? (int) fusion_library()->get_option( 'related_posts_speed' ) : 5000,
 				'carousel_speed'      => fusion_library()->get_option( 'carousel_speed' ) ? (int) fusion_library()->get_option( 'carousel_speed' ) : 5000,
-			)
+			]
 		);
 		Fusion_Dynamic_JS::localize_script(
 			'fusion-scroll-to-anchor',
 			'fusionScrollToAnchorVars',
-			array(
+			[
 				'content_break_point'                     => intval( fusion_library()->get_option( 'content_break_point' ) ),
 				'container_hundred_percent_height_mobile' => intval( fusion_library()->get_option( 'container_hundred_percent_height_mobile' ) ),
-			)
+				'hundred_percent_scroll_sensitivity'      => intval( fusion_library()->get_option( 'container_hundred_percent_scroll_sensitivity' ) ),
+			]
 		);
 
-		$smooth_height = ( 'auto' === get_post_meta( fusion_library()->get_page_id(), 'pyre_fimg_width', true ) && 'half' === get_post_meta( fusion_library()->get_page_id(), 'pyre_width', true ) ) ? 'true' : 'false';
-		if ( 'true' === $smooth_height ) {
-			$flex_smooth_height = 'true';
-		} else {
-			$flex_smooth_height = ( fusion_library()->get_option( 'slideshow_smooth_height' ) ) ? 'true' : 'false';
-		}
+		$flex_smooth_height = ( fusion_library()->get_option( 'slideshow_smooth_height' ) ) ? 'true' : 'false';
 
 		Fusion_Dynamic_JS::localize_script(
 			'fusion-flexslider',
 			'fusionFlexSliderVars',
-			array(
+			[
 				'status_vimeo'           => fusion_library()->get_option( 'status_vimeo' ) ? fusion_library()->get_option( 'status_vimeo' ) : false,
-				'page_smoothHeight'      => $smooth_height,
 				'slideshow_autoplay'     => fusion_library()->get_option( 'slideshow_autoplay' ) ? fusion_library()->get_option( 'slideshow_autoplay' ) : false,
 				'slideshow_speed'        => fusion_library()->get_option( 'slideshow_speed' ) ? (int) fusion_library()->get_option( 'slideshow_speed' ) : 5000,
 				'pagination_video_slide' => fusion_library()->get_option( 'pagination_video_slide' ) ? fusion_library()->get_option( 'pagination_video_slide' ) : false,
 				'status_yt'              => fusion_library()->get_option( 'status_yt' ) ? fusion_library()->get_option( 'status_yt' ) : false,
 				'flex_smoothHeight'      => $flex_smooth_height,
-			)
+			]
 		);
 		Fusion_Dynamic_JS::localize_script(
 			'fusion-responsive-typography',
 			'fusionTypographyVars',
-			array(
-				'site_width'             => fusion_library()->get_option( 'site_width' ) ? fusion_library()->get_option( 'site_width' ) : '1100px',
-				'typography_responsive'  => fusion_library()->get_option( 'typography_responsive' ) ? true : false,
+			[
+				'site_width'             => fusion_library()->get_option( 'site_width' ) ? fusion_library()->get_option( 'site_width' ) : '1200px',
 				'typography_sensitivity' => fusion_library()->get_option( 'typography_sensitivity' ) ? fusion_library()->get_option( 'typography_sensitivity' ) : 1,
 				'typography_factor'      => fusion_library()->get_option( 'typography_factor' ) ? fusion_library()->get_option( 'typography_factor' ) : 1,
 				'elements'               => apply_filters( 'fusion_responsive_type_elements', 'h1, h2, h3, h4, h5, h6' ),
-			)
+			]
 		);
 		Fusion_Dynamic_JS::localize_script(
 			'fusion-blog',
 			'fusionBlogVars',
-			array(
-				'infinite_blog_text'     => '<em>' . __( 'Loading the next set of posts...', 'Avada' ) . '</em>',
-				'infinite_finished_msg'  => '<em>' . __( 'All items displayed.', 'Avada' ) . '</em>',
-				'slideshow_autoplay'     => fusion_library()->get_option( 'slideshow_autoplay' ) ? fusion_library()->get_option( 'slideshow_autoplay' ) : false,
-				'slideshow_speed'        => fusion_library()->get_option( 'slideshow_speed' ) ? (int) fusion_library()->get_option( 'slideshow_speed' ) : 5000,
-				'pagination_video_slide' => fusion_library()->get_option( 'pagination_video_slide' ) ? fusion_library()->get_option( 'pagination_video_slide' ) : false,
-				'status_yt'              => fusion_library()->get_option( 'status_yt' ) ? fusion_library()->get_option( 'status_yt' ) : false,
-				'lightbox_behavior'      => fusion_library()->get_option( 'lightbox_behavior' ) ? fusion_library()->get_option( 'lightbox_behavior' ) : false,
-				'blog_pagination_type'   => fusion_library()->get_option( 'blog_pagination_type' ) ? fusion_library()->get_option( 'blog_pagination_type' ) : false,
-				'flex_smoothHeight'      => $flex_smooth_height,
-			)
+			[
+				'infinite_blog_text'    => '<em>' . __( 'Loading the next set of posts...', 'Avada' ) . '</em>',
+				'infinite_finished_msg' => '<em>' . __( 'All items displayed.', 'Avada' ) . '</em>',
+				'slideshow_autoplay'    => fusion_library()->get_option( 'slideshow_autoplay' ) ? fusion_library()->get_option( 'slideshow_autoplay' ) : false,
+				'lightbox_behavior'     => fusion_library()->get_option( 'lightbox_behavior' ) ? fusion_library()->get_option( 'lightbox_behavior' ) : false,
+				'blog_pagination_type'  => fusion_library()->get_option( 'blog_pagination_type' ) ? fusion_library()->get_option( 'blog_pagination_type' ) : false,
+			]
 		);
 	}
 }

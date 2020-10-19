@@ -407,7 +407,7 @@
 			 * @return      array The modified array of links
 			 */
 			public function plugin_metalinks( $links, $file ) {
-				if ( strpos( $file, 'fusionredux-framework.php' ) !== false && is_plugin_active( $file ) ) {
+				if ( strpos( $file, 'fusionredux-framework.php' ) !== false && fusion_is_plugin_activated( $file ) ) {
 
 					$new_links = array(
 						'<a href="' . 'http://' . 'docs.fusionreduxframework.com/" target="_blank">' . __( 'Docs', 'Avada' ) . '</a>',

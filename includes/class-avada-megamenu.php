@@ -4,16 +4,11 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      3.4.0
  */
-
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
 
 // Don't duplicate me!
 if ( ! class_exists( 'Avada_Megamenu' ) ) {
@@ -30,10 +25,11 @@ if ( ! class_exists( 'Avada_Megamenu' ) ) {
 		 */
 		public function __construct() {
 			if ( ! is_customize_preview() ) {
-				add_action( 'wp_update_nav_menu_item', array( $this, 'save_custom_menu_style_fields' ), 10, 3 );
+				add_action( 'wp_update_nav_menu_item', [ $this, 'save_custom_menu_style_fields' ], 10, 3 );
 			}
-			add_filter( 'wp_setup_nav_menu_item', array( $this, 'add_menu_style_data_to_menu' ) );
-			add_filter( 'wp_edit_nav_menu_walker', array( $this, 'add_custom_fields' ) );
+			add_filter( 'wp_setup_nav_menu_item', [ $this, 'add_menu_style_data_to_menu' ] );
+			add_filter( 'wp_edit_nav_menu_walker', [ $this, 'add_custom_fields' ] );
+			add_action( 'wp_update_nav_menu', [ $this, 'update_nav_menu' ] );
 		}
 
 		/**
@@ -56,33 +52,74 @@ if ( ! class_exists( 'Avada_Megamenu' ) ) {
 		 */
 		public function save_custom_menu_style_fields( $menu_id, $menu_item_db_id, $args ) {
 
-			$meta_data  = get_post_meta( $menu_item_db_id );
-			$avada_meta = ! empty( $meta_data['_menu_item_fusion_megamenu'][0] ) ? maybe_unserialize( $meta_data['_menu_item_fusion_megamenu'][0] ) : array();
+			// If this is a front-end save, exit early.
+			if ( isset( $_POST ) && isset( $_POST['custom'] ) ) { // phpcs:ignore WordPress.Security
+				return;
+			}
 
-			$field_name_suffix = array( 'icon', 'icononly', 'modal', 'highlight-label', 'highlight-label-background', 'highlight-label-color', 'highlight-label-border-color' );
+			$meta_data  = get_post_meta( $menu_item_db_id );
+			$avada_meta = ! empty( $meta_data['_menu_item_fusion_megamenu'][0] ) ? maybe_unserialize( $meta_data['_menu_item_fusion_megamenu'][0] ) : [];
+
+			$field_name_suffix = [
+				'icon',
+				'icononly',
+				'modal',
+				'highlight-label',
+				'highlight-label-background',
+				'highlight-label-color',
+				'highlight-label-border-color',
+				'special-link',
+				'show-woo-cart-counter',
+				'show-woo-cart-contents',
+				'searchform-mode',
+			];
 			if ( ! $args['menu-item-parent-id'] ) {
-				$field_name_suffix = array( 'style', 'icon', 'icononly', 'modal', 'highlight-label', 'highlight-label-background', 'highlight-label-color', 'highlight-label-border-color' );
+				$field_name_suffix = [
+					'style',
+					'icon',
+					'icononly',
+					'modal',
+					'highlight-label',
+					'highlight-label-background',
+					'highlight-label-color',
+					'highlight-label-border-color',
+					'special-link',
+					'show-woo-cart-counter',
+					'show-woo-cart-contents',
+					'searchform-mode',
+				];
 			}
 
 			if ( Avada()->settings->get( 'disable_megamenu' ) ) {
 
-				$megamenu_field_name_suffix = array( 'title', 'widgetarea', 'columnwidth', 'thumbnail', 'thumbnail-id', 'background-image' );
+				$megamenu_field_name_suffix = [ 'title', 'widgetarea', 'columnwidth', 'thumbnail', 'thumbnail-id', 'background-image' ];
 
 				if ( ! $args['menu-item-parent-id'] ) {
-					$megamenu_field_name_suffix = array( 'status', 'width', 'columns', 'columnwidth', 'thumbnail', 'thumbnail-id', 'background-image' );
+					$megamenu_field_name_suffix = [ 'status', 'width', 'columns', 'columnwidth', 'thumbnail', 'thumbnail-id', 'background-image' ];
 				}
 
 				$field_name_suffix = array_merge( $field_name_suffix, $megamenu_field_name_suffix );
 			}
 
 			foreach ( $field_name_suffix as $key ) {
-				if ( ! isset( $_REQUEST[ 'menu-item-fusion-megamenu-' . $key ][ $menu_item_db_id ] ) ) {
+				if ( ! isset( $_REQUEST[ 'menu-item-fusion-megamenu-' . $key ][ $menu_item_db_id ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 					$_REQUEST[ 'menu-item-fusion-megamenu-' . $key ][ $menu_item_db_id ] = '';
 				}
-				$avada_meta[ str_replace( '-', '_', $key ) ] = sanitize_text_field( wp_unslash( $_REQUEST[ 'menu-item-fusion-megamenu-' . $key ][ $menu_item_db_id ] ) );
+				$avada_meta[ str_replace( '-', '_', $key ) ] = sanitize_text_field( wp_unslash( $_REQUEST[ 'menu-item-fusion-megamenu-' . $key ][ $menu_item_db_id ] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			}
 
 			update_post_meta( $menu_item_db_id, '_menu_item_fusion_megamenu', $avada_meta );
+		}
+
+		/**
+		 * Additional actions to run when the menu is saved.
+		 *
+		 * @access public
+		 * @since 7.0.0
+		 * @return void
+		 */
+		public function update_nav_menu() {
+			wp_cache_delete( 'avada_woo_nav_items', 'avada' );
 		}
 
 		/**
@@ -95,7 +132,7 @@ if ( ! class_exists( 'Avada_Megamenu' ) ) {
 		public function add_menu_style_data_to_menu( $menu_item ) {
 
 			$meta_data  = get_post_meta( $menu_item->ID );
-			$avada_meta = ! empty( $meta_data['_menu_item_fusion_megamenu'][0] ) ? maybe_unserialize( $meta_data['_menu_item_fusion_megamenu'][0] ) : array();
+			$avada_meta = ! empty( $meta_data['_menu_item_fusion_megamenu'][0] ) ? maybe_unserialize( $meta_data['_menu_item_fusion_megamenu'][0] ) : [];
 
 			if ( ! $menu_item->menu_item_parent ) {
 				$menu_item->fusion_menu_style = isset( $avada_meta['style'] ) ? $avada_meta['style'] : '';
@@ -104,6 +141,11 @@ if ( ! class_exists( 'Avada_Megamenu' ) ) {
 			$menu_item->fusion_menu_icononly  = isset( $avada_meta['icononly'] ) ? $avada_meta['icononly'] : '';
 			$menu_item->fusion_megamenu_icon  = isset( $avada_meta['icon'] ) ? $avada_meta['icon'] : '';
 			$menu_item->fusion_megamenu_modal = isset( $avada_meta['modal'] ) ? $avada_meta['modal'] : '';
+
+			$menu_item->fusion_special_link           = isset( $avada_meta['special_link'] ) ? $avada_meta['special_link'] : '';
+			$menu_item->fusion_show_woo_cart_counter  = isset( $avada_meta['show_woo_cart_counter'] ) ? $avada_meta['show_woo_cart_counter'] : 'no';
+			$menu_item->fusion_show_woo_cart_contents = isset( $avada_meta['show_woo_cart_contents'] ) ? $avada_meta['show_woo_cart_contents'] : 'no';
+			$menu_item->fusion_searchform_mode        = isset( $avada_meta['searchform_mode'] ) ? $avada_meta['searchform_mode'] : 'inline';
 
 			$menu_item->fusion_highlight_label              = isset( $avada_meta['highlight_label'] ) ? $avada_meta['highlight_label'] : '';
 			$menu_item->fusion_highlight_label_background   = isset( $avada_meta['highlight_label_background'] ) ? $avada_meta['highlight_label_background'] : '';

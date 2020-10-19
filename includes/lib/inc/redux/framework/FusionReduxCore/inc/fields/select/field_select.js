@@ -50,10 +50,7 @@
                             default_params = $.extend(
                                 {}, {
                                     formatResult: fusionredux.field_objects.select.addIcon,
-                                    formatSelection: fusionredux.field_objects.select.addIcon,
-                                    escapeMarkup: function( m ) {
-                                        return m;
-                                    }
+                                    formatSelection: fusionredux.field_objects.select.addIcon
                                 }, default_params
                             );
                         }

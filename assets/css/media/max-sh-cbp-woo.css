@@ -1,3 +1,5 @@
+/* stylelint-disable no-descending-specificity */
+/* stylelint-disable no-duplicate-selectors */
 .woo-tabs-horizontal #wrapper .woocommerce-tabs .panel,
 .woo-tabs-horizontal #wrapper .woocommerce-tabs .tabs {
   float: none;
@@ -21,10 +23,12 @@
 }
 .woo-tabs-horizontal .woocommerce-tabs > .tabs li {
   float: none;
-  border-bottom: 1px solid;
 }
 .woo-tabs-horizontal .woocommerce-tabs > .tabs li a {
   padding: 10px 0;
+}
+.woo-tabs-horizontal .woocommerce-tabs .entry-content {
+  border-top: 1px solid;
 }
 .woocommerce-MyAccount-navigation,
 .woocommerce-side-nav,
@@ -36,10 +40,8 @@
   padding: 4% !important;
 }
 .woocommerce .checkout_coupon {
-  -ms-flex-pack: center;
-      justify-content: center;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 .woocommerce .checkout_coupon .promo-code-heading {
   margin-bottom: 5px;
@@ -47,17 +49,24 @@
 .woocommerce .checkout_coupon .coupon-contents {
   margin: 0;
 }
-.woocommerce #customer_login .login .form-row,
-.woocommerce #customer_login .login .lost_password {
+.woocommerce .login .form-row {
   float: none;
 }
-.woocommerce #customer_login .login .inline,
-.woocommerce #customer_login .login .lost_password {
+.woocommerce .login #customer_login #customer_login .login .woocommerce-form-login__submit {
+  margin-bottom: 10px;
+}
+.woocommerce .login #customer_login #customer_login .login .woocommerce-form-login__rememberme {
+  margin-bottom: 10px;
+  padding: 0;
+  width: 100%;
+}
+.woocommerce .login #customer_login .inline,
+.woocommerce .login #customer_login .lost_password {
   display: block;
   margin-left: 0;
   margin-right: 0;
 }
-.woocommerce #customer_login .login .button {
+.woocommerce .login #customer_login .button {
   margin-bottom: 10px;
 }
 .woocommerce-MyAccount-content .my_account_orders .woocommerce-orders-table__cell-order-number {
@@ -121,12 +130,9 @@
   margin: 0;
 }
 #wrapper .orderby-order-container {
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-align: center;
-      align-items: center;
-  -ms-flex-pack: justify;
-      justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
   margin: 0 auto 10px;
   width: 225px;
   float: none;
@@ -161,11 +167,23 @@
 .avada-myaccount-data .my_account_orders .woocommerce-orders-table__cell-order-actions {
   padding-left: 8px;
 }
+.shop_table {
+  table-layout: fixed;
+}
 .shop_table .product-name {
-  width: 35%;
+  width: 70%;
+}
+.shop_table .product-thumbnail {
+  width: 65px;
 }
 .fusion-body .shop_table .product-thumbnail {
   float: none;
+}
+.shop_table .product-info {
+  min-width: 80px;
+}
+form.checkout .shop_table tbody .product-thumbnail {
+  width: 65px;
 }
 form.checkout .shop_table tfoot th {
   padding-right: 20px;
@@ -233,24 +251,20 @@ form.checkout .shop_table tfoot td {
   position: absolute;
   top: 50%;
   left: 50%;
-  -ms-transform: translate(-50%, -50%);
-      transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
   float: none;
   line-height: 25px;
 }
 .cart-collaterals {
-  -ms-flex-direction: column;
-      flex-direction: column;
+  flex-direction: column;
 }
 .cart-collaterals .shipping-coupon .coupon #avada_coupon_code {
   margin: 0 0 20px;
   width: 100%;
 }
 .avada-coupon-fields {
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
-  -ms-flex-pack: end;
-      justify-content: flex-end;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 #wrapper #customer_login .col-1,
 #wrapper #customer_login .col-2,
@@ -351,4 +365,19 @@ html .woocommerce .woocommerce-container .social-share {
 .fusion-woo-slider .fusion-carousel-title-on-rollover .fusion-rollover-categories,
 .fusion-woo-slider .fusion-carousel-title-on-rollover .price {
   display: none;
+}
+.shop_table_responsive .product-remove {
+  background-color: var(--qty_bg_color);
+}
+.avada-has-woo-gallery-disabled.product .entry-summary .summary-container,
+.avada-has-woo-gallery-disabled .product .entry-summary .summary-container {
+  margin-top: 20px;
+}
+.fusion-woocommerce-quick-view-overlay,
+.fusion-woocommerce-quick-view-container,
+.fusion-body a.fusion-quick-view {
+  display: none !important;
+}
+.show_details_button.fusion-has-quick-view {
+  display: block !important;
 }

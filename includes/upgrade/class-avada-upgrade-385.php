@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -38,7 +38,7 @@ class Avada_Upgrade_385 extends Avada_Upgrade_Abstract {
 	 */
 	protected function migration_process() {
 
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		// We no longer have a less compiler.
 		// Migrate the less_compiler option to the new dynamic_css_compiler option.

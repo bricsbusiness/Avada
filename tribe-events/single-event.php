@@ -16,9 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $events_label_singular = tribe_get_event_label_singular();
 $events_label_plural = tribe_get_event_label_plural();
-
-$event_id = get_the_ID();
-
 ?>
 
 <div id="tribe-events-content" class="tribe-events-single">
@@ -36,9 +33,9 @@ $event_id = get_the_ID();
 		<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 			<?php if ( has_post_thumbnail() ) :  ?>
 				<div class="fusion-events-featured-image">
-					<div class="hover-type-<?php echo Avada()->settings->get( 'ec_hover_type' ); ?>">
-						<!-- Event featured image, but exclude link -->
-						<?php echo tribe_event_featured_image( $event_id, 'full', false ); ?>
+					<div class="fusion-ec-hover-type hover-type-<?php echo Avada()->settings->get( 'ec_hover_type' ); ?>">
+
+						<?php avada_singular_featured_image(); ?>
 
 						<?php Avada_EventsCalendar::render_single_event_title(); ?>
 					</div>

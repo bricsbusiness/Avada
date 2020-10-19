@@ -12,18 +12,18 @@
 	<div id="info_bar">
 
 		<a href="javascript:void(0);" class="expand_options<?php echo esc_attr(( $this->parent->args['open_expanded'] ) ? ' expanded' : ''); ?>"<?php echo $this->parent->args['hide_expand'] ? ' style="display: none;"' : '' ?>>
-			<?php esc_attr_e( 'Expand', 'Avada' ); ?>
+			<?php esc_html_e( 'Expand', 'Avada' ); ?>
 		</a>
 
 		<div class="fusionredux-action_bar">
 			<span class="spinner"></span>
 			<?php if ( false === $this->parent->args['hide_save'] ) { ?>
-				<?php submit_button( esc_attr__( 'Save Changes', 'Avada' ), 'primary', 'fusionredux_save', false ); ?>
+				<?php submit_button( esc_html__( 'Save Changes', 'Avada' ), 'primary', 'fusionredux_save', false ); ?>
 			<?php } ?>
 
 			<?php if ( false === $this->parent->args['hide_reset'] ) { ?>
-				<?php submit_button( esc_attr__( 'Reset Section', 'Avada' ), 'secondary', $this->parent->args['opt_name'] . '[defaults-section]', false, array( 'id' => 'fusionredux-defaults-section' ) ); ?>
-				<?php submit_button( esc_attr__( 'Reset All', 'Avada' ), 'secondary', $this->parent->args['opt_name'] . '[defaults]', false, array( 'id' => 'fusionredux-defaults' ) ); ?>
+				<?php submit_button( esc_html__( 'Reset Section', 'Avada' ), 'secondary', $this->parent->args['opt_name'] . '[defaults-section]', false, array( 'id' => 'fusionredux-defaults-section' ) ); ?>
+				<?php submit_button( esc_html__( 'Reset All', 'Avada' ), 'secondary', $this->parent->args['opt_name'] . '[defaults]', false, array( 'id' => 'fusionredux-defaults' ) ); ?>
 			<?php } ?>
 		</div>
 		<div class="fusionredux-ajax-loading" alt="<?php esc_attr_e( 'Working...', 'Avada' ) ?>">&nbsp;</div>

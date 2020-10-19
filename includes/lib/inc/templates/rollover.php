@@ -15,8 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 global $product, $woocommerce;
 
-// Set defaults for Fusion Builder ( Fusion Page Options ).
-$image_rollover_icons = apply_filters( 'fusion_builder_image_rollover_icons', 'linkzoom', $post_id );
+// Set defaults for Avada Builder ( Avada Page Options ).
+$image_rollover_icons = apply_filters( 'fusion_builder_image_rollover_icons', fusion_get_option( 'image_rollover_icons', false, $post_id ) );
 
 // Portfolio defaults.
 $link_icon_target = apply_filters( 'fusion_builder_link_icon_target', '', $post_id );
@@ -26,11 +26,12 @@ $video_url        = apply_filters( 'fusion_builder_video_url', '', $post_id );
 $link_icon_url     = apply_filters( 'fusion_builder_link_icon_url', '', $post_id );
 $post_links_target = apply_filters( 'fusion_builder_post_links_target', '', $post_id );
 
-// Set defaults for Fusion Builder ( Theme Options ).
+// Set defaults for Avada Builder ( Global Options ).
 $cats_image_rollover  = apply_filters( 'fusion_builder_cats_image_rollover', false );
 $title_image_rollover = apply_filters( 'fusion_builder_title_image_rollover', false );
+
 // Portfolio defaults.
-$portfolio_link_icon_target = apply_filters( 'fusion_builder_portfolio_link_icon_target', false );
+$portfolio_link_icon_target = apply_filters( 'fusion_builder_portfolio_link_icon_target', false, $post_id );
 
 // Retrieve the permalink if it is not set.
 $post_permalink = ( ! $post_permalink ) ? get_permalink( $post_id ) : $post_permalink;
@@ -58,30 +59,16 @@ if ( 'default' === $display_post_title ) {
 }
 
 // Set the link and the link text on the link icon to a custom url if set in page options.
-if ( null != $link_icon_url ) {
-	$icon_permalink = $link_icon_url;
+if ( null != $link_icon_url ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
+	$icon_permalink       = $link_icon_url;
 	$icon_permalink_title = esc_url_raw( $link_icon_url );
 } else {
-	$icon_permalink = $post_permalink;
+	$icon_permalink       = $post_permalink;
 	$icon_permalink_title = the_title_attribute( 'echo=0&post=' . $post_id );
 }
 
-if ( '' === $image_rollover_icons || 'default' === $image_rollover_icons ) {
-	if ( fusion_library()->get_option( 'link_image_rollover' ) && fusion_library()->get_option( 'zoom_image_rollover' ) ) { // Link + Zoom.
-		$image_rollover_icons = 'linkzoom';
-	} elseif ( fusion_library()->get_option( 'link_image_rollover' ) && ! fusion_library()->get_option( 'zoom_image_rollover' ) ) { // Link.
-		$image_rollover_icons = 'link';
-	} elseif ( ! fusion_library()->get_option( 'link_image_rollover' ) && fusion_library()->get_option( 'zoom_image_rollover' ) ) { // Zoom.
-		$image_rollover_icons = 'zoom';
-	} elseif ( ! fusion_library()->get_option( 'link_image_rollover' ) && ! fusion_library()->get_option( 'zoom_image_rollover' ) ) { // Link.
-		$image_rollover_icons = 'no';
-	} else {
-		$image_rollover_icons = 'linkzoom';
-	}
-}
-
 // Set the link target to blank if the option is set.
-$link_target = ( 'yes' === $link_icon_target || 'yes' === $post_links_target || ( 'avada_portfolio' === get_post_type() && $portfolio_link_icon_target && 'default' === $link_icon_target ) ) ? ' target="_blank"' : '';
+$link_target = ( 'yes' === $link_icon_target || 'yes' === $post_links_target || ( 'avada_portfolio' === get_post_type() && $portfolio_link_icon_target ) ) ? ' target="_blank"' : '';
 ?>
 <div class="fusion-rollover">
 	<div class="fusion-rollover-content">
@@ -98,7 +85,7 @@ $link_target = ( 'yes' === $link_icon_target || 'yes' === $post_links_target || 
 			 */
 			?>
 			<?php if ( 'zoom' !== $image_rollover_icons ) : ?>
-				<a class="fusion-rollover-link" href="<?php echo esc_url_raw( $icon_permalink ); ?>"<?php echo $link_target; // WPCS: XSS ok. ?>><?php echo $icon_permalink_title; // WPCS: XSS ok. ?></a>
+				<a class="fusion-rollover-link" href="<?php echo esc_url_raw( $icon_permalink ); ?>"<?php echo $link_target; ?>><?php echo $icon_permalink_title; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
 			<?php endif; ?>
 
 			<?php
@@ -109,9 +96,9 @@ $link_target = ( 'yes' === $link_icon_target || 'yes' === $post_links_target || 
 			<?php if ( 'link' !== $image_rollover_icons ) : ?>
 				<?php $full_image = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ), 'full' ); // Get the image data. ?>
 				<?php
-				$full_image = ( ! is_array( $full_image ) ) ? array(
+				$full_image = ( ! is_array( $full_image ) ) ? [
 					0 => '',
-				) : $full_image;
+				] : $full_image;
 				?>
 
 				<?php
@@ -149,23 +136,27 @@ $link_target = ( 'yes' === $link_icon_target || 'yes' === $post_links_target || 
 					<a class="fusion-rollover-gallery" href="<?php echo esc_url_raw( $full_image[0] ); ?>" data-id="<?php echo esc_attr( $post_id ); ?>" data-rel="<?php echo esc_attr( $data_rel ); ?>" data-title="<?php echo esc_attr( get_post_field( 'post_title', get_post_thumbnail_id( $post_id ) ) ); ?>" data-caption="<?php echo esc_attr( get_post_field( 'post_excerpt', get_post_thumbnail_id( $post_id ) ) ); ?>">
 						<?php esc_html_e( 'Gallery', 'Avada' ); ?>
 					</a>
-					<?php echo $lightbox_content; // WPCS: XSS ok. ?>
+					<?php echo $lightbox_content; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				<?php endif; ?>
 			<?php endif; ?>
 		<?php endif; ?>
 
 		<?php $in_cart = false; ?>
-		<?php if ( class_exists( 'WooCommerce' ) && $woocommerce->cart ) : ?>
-			<?php $items_in_cart = array(); ?>
-			<?php if ( $woocommerce->cart->get_cart() && is_array( $woocommerce->cart->get_cart() ) ) : ?>
-				<?php foreach ( $woocommerce->cart->get_cart() as $cart ) : ?>
-					<?php $items_in_cart[] = $cart['product_id']; ?>
-				<?php endforeach; ?>
-			<?php endif; ?>
+		<?php 
+		if ( class_exists( 'WooCommerce' ) ) {
+			$items_in_cart = [];
+			$wc_cart_items = method_exists( WC()->cart, 'get_cart' ) ? WC()->cart->get_cart() : [];
 
-			<?php $id = get_the_ID(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited ?>
-			<?php $in_cart = in_array( $id, $items_in_cart ); ?>
-		<?php endif; ?>
+			if ( ! empty( $wc_cart_items ) ) {
+				foreach ( $wc_cart_items as $cart ) {
+					$items_in_cart[] = $cart['product_id'];
+				}
+			}
+
+			$id      = get_the_ID(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+			$in_cart = in_array( $id, $items_in_cart ); // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+		} 
+		?>
 
 		<?php if ( ! $in_cart ) : ?>
 			<?php
@@ -175,8 +166,8 @@ $link_target = ( 'yes' === $link_icon_target || 'yes' === $post_links_target || 
 			?>
 			<?php if ( $display_post_title ) : ?>
 				<h4 class="fusion-rollover-title">
-					<a href="<?php echo esc_url_raw( $icon_permalink ); ?>"<?php echo $link_target; // WPCS: XSS ok. ?>>
-						<?php echo get_the_title( $post_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<a class="fusion-rollover-title-link" href="<?php echo esc_url_raw( $icon_permalink ); ?>"<?php echo $link_target; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
+						<?php echo wp_kses_post( get_the_title( $post_id ) ); ?>
 					</a>
 				</h4>
 			<?php endif; ?>
@@ -206,7 +197,7 @@ $link_target = ( 'yes' === $link_icon_target || 'yes' === $post_links_target || 
 			<?php $icon_class = ( $in_cart ) ? 'fusion-icon-check-square-o' : 'fusion-icon-spinner'; ?>
 			<div class="cart-loading">
 				<a href="<?php echo esc_url_raw( wc_get_cart_url() ); ?>">
-					<i class="<?php echo esc_attr( $icon_class ); ?>"></i>
+					<i class="<?php echo esc_attr( $icon_class ); ?>" aria-hidden="true"></i>
 					<div class="view-cart"><?php esc_html_e( 'View Cart', 'Avada' ); ?></div>
 				</a>
 			</div>
@@ -251,6 +242,6 @@ $link_target = ( 'yes' === $link_icon_target || 'yes' === $post_links_target || 
 				</div>
 			<?php endif; ?>
 		<?php endif; ?>
-		<a class="fusion-link-wrapper" href="<?php echo esc_url_raw( $icon_permalink ); ?>"<?php echo $link_target; // WPCS: XSS ok. ?> aria-label="<?php the_title_attribute(); ?>"></a>
+		<a class="fusion-link-wrapper" href="<?php echo esc_url_raw( $icon_permalink ); ?>"<?php echo $link_target; // phpcs:ignore WordPress.Security.EscapeOutput ?> aria-label="<?php the_title_attribute(); ?>"></a>
 	</div>
 </div>

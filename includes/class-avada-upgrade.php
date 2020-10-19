@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -82,7 +82,7 @@ class Avada_Upgrade {
 	 * @access private
 	 * @var array
 	 */
-	private static $upgraded_options = array();
+	private static $upgraded_options = [];
 
 	/**
 	 * Constructor.
@@ -91,7 +91,7 @@ class Avada_Upgrade {
 	 */
 	protected function __construct() {
 
-		$this->previous_theme_versions = get_option( 'avada_previous_version', array() );
+		$this->previous_theme_versions = get_option( 'avada_previous_version', [] );
 		// Previous version only really needed, because through the upgrade loop, the database_theme_version will be altered.
 		$this->previous_theme_version = $this->get_previous_theme_version();
 		$this->database_theme_version = get_option( 'avada_version', false );
@@ -99,7 +99,7 @@ class Avada_Upgrade {
 		$this->current_theme_version  = Avada::get_theme_version();
 		$this->current_theme_version  = Avada_Helper::normalize_version( $this->current_theme_version );
 
-		// Check through all options names that were available for Theme Options in databse.
+		// Check through all options names that were available for Global Options in databse.
 		$theme_options = get_option( Avada::get_option_name(), get_option( 'avada_theme_options', get_option( 'Avada_options', false ) ) );
 
 		// If no old version is in database or there are no saved options,
@@ -114,39 +114,56 @@ class Avada_Upgrade {
 		}
 
 		// Each version is defined as an array( 'Version', 'Force-Instantiation' ).
-		$versions = array(
-			'385' => array( '3.8.5', false ),
-			'387' => array( '3.8.7', false ),
-			'390' => array( '3.9.0', false ),
-			'392' => array( '3.9.2', false ),
-			'400' => array( '4.0.0', true ),
-			'402' => array( '4.0.2', false ),
-			'403' => array( '4.0.3', false ),
-			'500' => array( '5.0.0', true ),
-			'503' => array( '5.0.3', false ),
-			'510' => array( '5.1.0', false ),
-			'516' => array( '5.1.6', false ),
-			'520' => array( '5.2.0', false ),
-			'521' => array( '5.2.1', false ),
-			'530' => array( '5.3.0', false ),
-			'540' => array( '5.4.0', false ),
-			'541' => array( '5.4.1', false ),
-			'542' => array( '5.4.2', false ),
-			'550' => array( '5.5.0', false ),
-			'551' => array( '5.5.1', false ),
-			'552' => array( '5.5.2', false ),
-			'560' => array( '5.6.0', false ),
-			'561' => array( '5.6.1', false ),
-			'562' => array( '5.6.2', false ),
-			'570' => array( '5.7.0', false ),
-			'571' => array( '5.7.1', false ),
-			'572' => array( '5.7.2', false ),
-			'580' => array( '5.8.0', false ),
-			'581' => array( '5.8.1', false ),
-			'582' => array( '5.8.2', false ),
-			'590' => array( '5.9.0', false ),
-			'591' => array( '5.9.1', false ),
-		);
+		$versions = [
+			'385' => [ '3.8.5', false ],
+			'387' => [ '3.8.7', false ],
+			'390' => [ '3.9.0', false ],
+			'392' => [ '3.9.2', false ],
+			'400' => [ '4.0.0', true ],
+			'402' => [ '4.0.2', false ],
+			'403' => [ '4.0.3', false ],
+			'500' => [ '5.0.0', true ],
+			'503' => [ '5.0.3', false ],
+			'510' => [ '5.1.0', false ],
+			'516' => [ '5.1.6', false ],
+			'520' => [ '5.2.0', false ],
+			'521' => [ '5.2.1', false ],
+			'530' => [ '5.3.0', false ],
+			'540' => [ '5.4.0', false ],
+			'541' => [ '5.4.1', false ],
+			'542' => [ '5.4.2', false ],
+			'550' => [ '5.5.0', false ],
+			'551' => [ '5.5.1', false ],
+			'552' => [ '5.5.2', false ],
+			'560' => [ '5.6.0', false ],
+			'561' => [ '5.6.1', false ],
+			'562' => [ '5.6.2', false ],
+			'570' => [ '5.7.0', false ],
+			'571' => [ '5.7.1', false ],
+			'572' => [ '5.7.2', false ],
+			'580' => [ '5.8.0', false ],
+			'581' => [ '5.8.1', false ],
+			'582' => [ '5.8.2', false ],
+			'590' => [ '5.9.0', false ],
+			'591' => [ '5.9.1', false ],
+			'592' => [ '5.9.2', false ],
+			'600' => [ '6.0.0', false ],
+			'601' => [ '6.0.1', false ],
+			'602' => [ '6.0.2', false ],
+			'603' => [ '6.0.3', false ],
+			'610' => [ '6.1.0', false ],
+			'611' => [ '6.1.1', false ],
+			'612' => [ '6.1.2', false ],
+			'620' => [ '6.2.0', false ],
+			'621' => [ '6.2.1', false ],
+			'622' => [ '6.2.2', false ],
+			'623' => [ '6.2.3', false ],
+			'700' => [ '7.0.0', false ],
+			'701' => [ '7.0.1', false ],
+			'702' => [ '7.0.2', false ],
+			'710' => [ '7.1.0', false ],
+			'711' => [ '7.1.1', false ],
+		];
 
 		$upgraded = false;
 		foreach ( $versions as $key => $version ) {
@@ -164,6 +181,15 @@ class Avada_Upgrade {
 				if ( class_exists( $classname ) ) {
 					new $classname( true );
 				}
+			}
+		}
+
+		// Manual migration rerun.
+		if ( is_admin() && current_user_can( 'switch_themes' ) && isset( $_GET['migrate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$classname = 'Avada_Upgrade_' . str_replace( '.', '', Avada_Helper::normalize_version( sanitize_text_field( wp_unslash( $_GET['migrate'] ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+
+			if ( class_exists( $classname ) ) {
+				new $classname( true );
 			}
 		}
 
@@ -185,7 +211,7 @@ class Avada_Upgrade {
 			return;
 		}
 
-		add_action( 'init', array( $this, 'update_installation' ) );
+		add_action( 'init', [ $this, 'update_installation' ] );
 
 	}
 
@@ -264,12 +290,12 @@ class Avada_Upgrade {
 
 		// Hook the dismiss notice functionality.
 		if ( ! $skip400 ) {
-			add_action( 'admin_init', array( $this, 'notices_action' ) );
+			add_action( 'admin_init', [ $this, 'notices_action' ] );
 		}
 
 		// Show upgrade notices.
 		if ( version_compare( $this->current_theme_version, '5.1.0', '<=' ) ) {
-			add_action( 'admin_notices', array( $this, 'upgrade_notice' ) );
+			add_action( 'admin_notices', [ $this, 'upgrade_notice' ] );
 		}
 	}
 
@@ -287,14 +313,14 @@ class Avada_Upgrade {
 					$versions_array   = $this->previous_theme_versions;
 					$versions_array[] = $this->database_theme_version;
 				} else {
-					$versions_array = array(
+					$versions_array = [
 						$this->previous_theme_versions,
-					);
+					];
 				}
 			} else {
-				$versions_array = array(
+				$versions_array = [
 					$this->database_theme_version,
-				);
+				];
 			}
 
 			update_option( 'avada_previous_version', $versions_array );
@@ -307,7 +333,7 @@ class Avada_Upgrade {
 	public function upgrade_notice() {
 		/* Check that the user hasn't already clicked to ignore the message */
 		if ( $this->previous_theme_version && current_user_can( 'switch_themes' ) && ! get_user_meta( $this->current_user->ID, 'avada_update_notice', true ) ) {
-			echo '<div class="updated error fusion-upgrade-notices">';
+			echo '<div class="avada-db-card avada-db-notice updated error fusion-upgrade-notices">';
 			if ( version_compare( $this->previous_theme_version, '3.8.5', '<' ) ) {
 				?>
 				<p><strong>The following important changes were made to Avada 3.8.5:</strong></p>
@@ -332,9 +358,9 @@ class Avada_Upgrade {
 				<ol>
 					<li><strong>REMOVED:</strong> Fixed Mode for iPad is removed as a theme option. Fixed Mode is moved into a free plugin. <a href="https://theme-fusion.com/documentation/avada/fixed-mode-for-ipad-portrait/" target="_blank" rel="noopener noreferrer">Download</a>.</li>
 					<li><strong>CHANGED:</strong> The left/right padding for the 100% Width Page Template &amp; 100% Full Width Container Now Applies To Mobile.</li>
-					<li><strong>CHANGED:</strong> <strong><em>Theme Options -> Header Content Options -> Side Header Responsive Breakpoint</em></strong> was replaced by <strong>Mobile Header Responsive Breakpoint</strong>. It can now be used to control the side header breakpoint as well as the mobile header break point for top headers.</li>
-					<li><strong>CHANGED:</strong> <strong><em>Theme Options -> Menu Options -> Menu Text Align</em></strong> will be followed by header 5. If your menu is no longer in center, please use that option to change the position of the menu.</li>
-					<li><strong>CHANGED:</strong> <strong><em>Theme Options -> Search Page -> Search Field Height</em></strong> was removed and combined with the new <strong>Form Input and Select Height</strong> option in the Extra tab. All form inputs and selects can be controlled with the new option.</li>
+					<li><strong>CHANGED:</strong> <strong><em>Global Options > Header Content Options > Side Header Responsive Breakpoint</em></strong> was replaced by <strong>Mobile Header Responsive Breakpoint</strong>. It can now be used to control the side header breakpoint as well as the mobile header break point for top headers.</li>
+					<li><strong>CHANGED:</strong> <strong><em>Global Options > Menu Options > Menu Text Align</em></strong> will be followed by header 5. If your menu is no longer in center, please use that option to change the position of the menu.</li>
+					<li><strong>CHANGED:</strong> <strong><em>Global Options > Search Page > Search Field Height</em></strong> was removed and combined with the new <strong>Form Input and Select Height</strong> option in the Extra tab. All form inputs and selects can be controlled with the new option.</li>
 				</ol>
 				<?php
 			}
@@ -371,7 +397,7 @@ class Avada_Upgrade {
 	 */
 	public function notices_action() {
 		// Set update notice dismissal, so that the notice is no longer shown.
-		if ( isset( $_GET['avada_update_notice'] ) && sanitize_key( wp_unslash( $_GET['avada_update_notice'] ) ) ) { // WPCS: CSRF ok.
+		if ( isset( $_GET['avada_update_notice'] ) && sanitize_key( wp_unslash( $_GET['avada_update_notice'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			add_user_meta( $this->current_user->ID, 'avada_update_notice', '1', true );
 		}
 	}
@@ -384,11 +410,11 @@ class Avada_Upgrade {
 	 * @param  string $new_value The new value.
 	 */
 	private static function upgraded_options_row( $setting = '', $old_value = '', $new_value = '' ) {
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && $old_value !== $new_value && '' != $setting ) { // WPCS: loose comparison ok.
-			self::$upgraded_options[ $setting ] = array(
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && $old_value !== $new_value && '' != $setting ) { // phpcs:ignore WordPress.PHP.StrictComparisons
+			self::$upgraded_options[ $setting ] = [
 				'old' => $old_value,
 				'new' => $new_value,
-			);
+			];
 		}
 	}
 
@@ -401,7 +427,7 @@ class Avada_Upgrade {
 	 */
 	protected static function clear_twitter_widget_transients() {
 		global $wpdb;
-		$tweet_transients = $wpdb->get_results( "SELECT option_name AS name, option_value AS value FROM $wpdb->options WHERE option_name LIKE '_transient_list_tweets_%'" ); // WPCS: db call ok, cache ok.
+		$tweet_transients = $wpdb->get_results( "SELECT option_name AS name, option_value AS value FROM $wpdb->options WHERE option_name LIKE '_transient_list_tweets_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 
 		foreach ( $tweet_transients as $tweet_transient ) {
 			delete_transient( str_replace( '_transient_', '', $tweet_transient->name ) );
@@ -425,7 +451,7 @@ class Avada_Upgrade {
 
 			var_dump( 'Current Version: ' . Avada::$version ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
 			var_dump( 'DB Version: ' . get_option( 'avada_version', false ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
-			var_dump( 'Previous Version: ' . get_option( 'avada_previous_version', array() ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
+			var_dump( 'Previous Version: ' . get_option( 'avada_previous_version', [] ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
 			var_dump( 'Update Notice: ' . get_user_meta( $current_user->ID, 'avada_update_notice', true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
 		}
 	}

@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -54,7 +54,7 @@ class Avada_Upgrade_520 extends Avada_Upgrade_Abstract {
 	 */
 	private function update_menu_items() {
 		// Update menu item's meta fields to new format and remove old fields.
-		$meta_keys = array(
+		$meta_keys = [
 			'status'      => '_menu_item_fusion_megamenu_status',
 			'width'       => '_menu_item_fusion_megamenu_width',
 			'columns'     => '_menu_item_fusion_megamenu_columns',
@@ -66,20 +66,20 @@ class Avada_Upgrade_520 extends Avada_Upgrade_Abstract {
 			'thumbnail'   => '_menu_item_fusion_megamenu_thumbnail',
 			'style'       => '_menu_item_fusion_menu_style',
 			'icononly'    => '_menu_item_fusion_menu_icononly',
-		);
+		];
 
-		$args = array(
+		$args = [
 			'posts_per_page' => 100,
 			'post_type'      => 'nav_menu_item',
 			'post_status'    => 'publish',
 			'paged'          => 1,
-		);
+		];
 
 		while ( $posts = get_posts( $args ) ) {
 
 			foreach ( $posts as $post ) {
 				$old_meta = get_post_meta( $post->ID );
-				$new_meta = array();
+				$new_meta = [];
 
 				foreach ( $meta_keys as $new_key => $old_key ) {
 					$default = '';
@@ -110,7 +110,7 @@ class Avada_Upgrade_520 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function update_portfolio_settings() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		$portfolio_archive_layout            = $options['portfolio_archive_layout'];
 		$options['portfolio_archive_layout'] = 'grid';
@@ -141,7 +141,7 @@ class Avada_Upgrade_520 extends Avada_Upgrade_Abstract {
 			$options['portfolio_archive_one_column_text_position'] = 'below';
 		}
 
-		$options_to_migrate = array(
+		$options_to_migrate = [
 			'portfolio_archive_featured_image_size' => 'portfolio_featured_image_size',
 			'portfolio_archive_column_spacing'      => 'portfolio_column_spacing',
 			'portfolio_archive_items'               => 'portfolio_items',
@@ -152,7 +152,7 @@ class Avada_Upgrade_520 extends Avada_Upgrade_Abstract {
 			'portfolio_archive_text_alignment'      => 'portfolio_text_alignment',
 			'portfolio_archive_layout_padding'      => 'portfolio_layout_padding',
 			'portfolio_archive_load_more_posts_button_bg_color' => 'portfolio_load_more_posts_button_bg_color',
-		);
+		];
 
 		foreach ( $options_to_migrate as $new => $old ) {
 			if ( isset( $options[ $old ] ) ) {
@@ -188,7 +188,7 @@ class Avada_Upgrade_520 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function update_header_bg_color() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 		if ( 'transparent' === $options['header_bg_color'] ) {
 			$options['header_bg_color'] = '#ffffff';
 			update_option( $this->option_name, $options );

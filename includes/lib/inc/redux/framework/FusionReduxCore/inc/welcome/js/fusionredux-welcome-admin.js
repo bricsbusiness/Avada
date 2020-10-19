@@ -53,22 +53,21 @@
                         data: {
                             action: "fusionredux_support_hash",
                             nonce: $nonce
-                        },
-                        error: function( response ) {
-                            console.log( response );
-                            $button.removeClass( 'disabled' );
-                            $button.parent().find( '.spinner' ).remove();
-                            alert( 'There was an error. Please try again later.' );
-                        },
-                        success: function( response ) {
-                            if ( response.status == "success" ) {
-                                $button.parents( 'fieldset:first' ).find( '.next' ).removeAttr( 'disabled' ).click();
-                            } else {
-                                alert( 'There was an error. Please try again later.' );
-                            }
                         }
+                )
+                .fail( function( response ) {
+                    console.log( response );
+                    $button.removeClass( 'disabled' );
+                    $button.parent().find( '.spinner' ).remove();
+                    alert( 'There was an error. Please try again later.' );
+                } )
+                .done( function( response ) {
+                    if ( response.status == "success" ) {
+                        $button.parents( 'fieldset:first' ).find( '.next' ).removeAttr( 'disabled' ).click();
+                    } else {
+                        alert( 'There was an error. Please try again later.' );
                     }
-                );
+                } );
                 e.preventDefault();
             }
         );

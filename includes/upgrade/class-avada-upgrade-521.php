@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -51,7 +51,7 @@ class Avada_Upgrade_521 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function update_portfolio_settings() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		$posts_per_page = get_option( 'posts_per_page' );
 

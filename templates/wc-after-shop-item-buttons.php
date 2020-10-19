@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.1.0
@@ -28,6 +28,3 @@ if ( isset( $_SERVER['QUERY_STRING'] ) ) {
 <?php if ( 'classic' === Avada()->settings->get( 'woocommerce_product_box_design' ) ) : ?>
 	</div> <?php // fusion-product-content container. ?>
 <?php endif; ?>
-<?php
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */

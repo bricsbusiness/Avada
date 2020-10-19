@@ -1,15 +1,11 @@
 var $avadaVersion;
-window.$versionSuffix = ' rc1';
+window.$versionSuffix = ' beta';
 
 if ( window.jQuery ) {
 	jQuery( document ).ready( function() {
 
-		// Main logos
-		jQuery( '.avada-logo .avada-version' ).text( jQuery( '.avada-logo .avada-version' ).text() + window.$versionSuffix );
-		jQuery( '.avada-logo .fusion-builder-version' ).text( jQuery( '.avada-logo .fusion-builder-version' ).text() + window.$versionSuffix );
-
-		// TO.
-		jQuery( '.fusionredux-sidebar h2 span' ).text( jQuery( '.fusionredux-sidebar h2 span' ).text() + window.$versionSuffix );
+		// Main Dashboard Version Area.
+		jQuery( '.avada-dashboard .avada-db-version span' ).text( jQuery( '.avada-dashboard .avada-db-version span' ).text() + window.$versionSuffix );
 
 		// Avada Plugins page
 		jQuery( '.avada-install-plugins' ).find( '.fusion-admin-box:nth-child(1), .fusion-admin-box:nth-child(2)' ).each( function() {
@@ -20,7 +16,7 @@ if ( window.jQuery ) {
 		} );
 
 		// WP Plugins page
-		jQuery( 'table.plugins #the-list' ).find( '[data-slug="fusion-core"], [data-slug="fusion-builder"]' ).each( function() {
+		jQuery( 'table.plugins #the-list' ).find( '[data-slug="avada-core"], [data-slug="avada-builder"]' ).each( function() {
 			var $versionContainer = jQuery( this ).find( '.plugin-version-author-uri' ),
 				$html = $versionContainer.html().replace( '| By', window.$versionSuffix + ' | By' );
 
@@ -32,5 +28,5 @@ if ( window.jQuery ) {
 
 	// Splash Screens
 	$avadaVersion = document.getElementsByClassName( 'avada-version-inner' );
-	$avadaVersion['0'].textContent = $avadaVersion['0'].textContent + window.$versionSuffix;
+	$avadaVersion[ '0' ].textContent = $avadaVersion[ '0' ].textContent + window.$versionSuffix;
 }

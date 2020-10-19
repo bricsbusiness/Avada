@@ -6,11 +6,6 @@
  * @since 1.0.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Handles the scripts compiling.
  */
@@ -34,7 +29,7 @@ class Fusion_Dynamic_JS_Compiler {
 	 * @since 1.0.0
 	 * @var array
 	 */
-	protected static $scripts = array();
+	protected static $scripts = [];
 
 	/**
 	 * Have the scripts been reordered already?
@@ -54,7 +49,7 @@ class Fusion_Dynamic_JS_Compiler {
 	 * @since 1.0.0
 	 * @var array
 	 */
-	protected static $external_dependencies = array();
+	protected static $external_dependencies = [];
 
 	/**
 	 * Constructor.
@@ -101,7 +96,7 @@ class Fusion_Dynamic_JS_Compiler {
 					$file_content = $wp_filesystem->get_contents( $path );
 					// If it failed, try file_get_contents().
 					if ( ! $file_content ) {
-						$file_content = @file_get_contents( $path );
+						$file_content = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 					}
 					$file_content = trim( $file_content );
 					if ( ! empty( $file_content ) ) {
@@ -137,7 +132,7 @@ class Fusion_Dynamic_JS_Compiler {
 					}
 					$l10n_script['data'][ $key ] = html_entity_decode( (string) $value, ENT_QUOTES, 'UTF-8' );
 				}
-				$value = wp_json_encode( $l10n_script['data'] );
+				$value    = wp_json_encode( $l10n_script['data'] );
 				$content .= "var {$l10n_script['name']}={$value};";
 			}
 
@@ -149,7 +144,7 @@ class Fusion_Dynamic_JS_Compiler {
 			// Add the contents of the JS file.
 			$file_content = $wp_filesystem->get_contents( $path );
 			if ( ! $file_content ) {
-				$file_content = @file_get_contents( $path );
+				$file_content = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 			}
 			$file_content = trim( $file_content );
 			if ( ! empty( $file_content ) ) {
@@ -162,7 +157,7 @@ class Fusion_Dynamic_JS_Compiler {
 				// Add a blank line after each script.
 				$content .= PHP_EOL;
 			}
-		} // End foreach().
+		}
 		return apply_filters( 'fusion_dynamic_js_final', $content );
 	}
 
@@ -175,7 +170,7 @@ class Fusion_Dynamic_JS_Compiler {
 	public function reorder_scripts() {
 
 		// Build an ordered array of our dependent scripts.
-		$dependent_scripts = array();
+		$dependent_scripts = [];
 		foreach ( self::$scripts as $key => $script ) {
 
 			// Check if the script has dependencies.
@@ -212,8 +207,8 @@ class Fusion_Dynamic_JS_Compiler {
 		// so that the final array is ordered for dependencies handling.
 		$dependent_scripts = array_reverse( $dependent_scripts );
 		foreach ( $dependent_scripts as $dependent ) {
-			$key    = $this->get_key_from_handle( $dependent );
-			$script = self::$scripts[ $key ];
+			$key             = $this->get_key_from_handle( $dependent );
+			$script          = self::$scripts[ $key ];
 			self::$scripts[] = $script;
 			unset( self::$scripts[ $key ] );
 		}
@@ -250,7 +245,7 @@ class Fusion_Dynamic_JS_Compiler {
 	 */
 	protected function add_element( $array, $new_key, $new_value ) {
 		$length    = count( $array );
-		$new_array = array();
+		$new_array = [];
 		// If we're adding as the last element it's easy.
 		if ( $new_key >= $length ) {
 			$array[] = $new_value;

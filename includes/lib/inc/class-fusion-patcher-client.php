@@ -6,11 +6,6 @@
  * @subpackage Fusion-Patcher
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Handles getting patches remotely and preparing them for Avada.
  *
@@ -41,7 +36,7 @@ class Fusion_Patcher_Client {
 	 * @param array $args An array of arguments inherited from Fusion_Patcher.
 	 * @return array
 	 */
-	public static function get_patches( $args = array() ) {
+	public static function get_patches( $args = [] ) {
 		// Get a new instance of this object.
 		$client = new self();
 		// Set the $args property.
@@ -65,12 +60,23 @@ class Fusion_Patcher_Client {
 	 */
 	private function query_patch_server() {
 		global $is_apache, $is_IIS, $wp_version;
-		$args = array();
-		if ( ! empty( $this->args ) ) {
-			$id = str_replace( '-', '_', $this->args['context'] );
-			$args[ $id . '_version' ] = $this->args['version'];
-			$args['limit'] = true;
+		$args = [
+			'limit' => true,
+		];
+
+		if ( defined( 'AVADA_VERSION' ) ) {
+			$args['avada_version'] = AVADA_VERSION;
 		}
+		if ( defined( 'FUSION_CORE_VERSION' ) ) {
+			$args['fusion_core_version'] = FUSION_CORE_VERSION;
+		}
+		if ( defined( 'FUSION_BUILDER_VERSION' ) ) {
+			$args['fusion_builder_version'] = FUSION_BUILDER_VERSION;
+		}
+
+		/**
+		 * WIP.
+		 * These lines were commented-out in Avada v7.0.
 		$site_url = site_url();
 		// EVERYTHING is anonymous.
 		$args['site_url'] = md5( $site_url );
@@ -80,35 +86,35 @@ class Fusion_Patcher_Client {
 			} elseif ( $is_IIS ) {
 				$args['server_software'] = 'iis';
 			} elseif ( isset( $_SERVER['SERVER_SOFTWARE'] ) ) {
-				$server_software = sanitize_key( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) );
-				$args['server_software'] = ( false !== strpos( $server_software, 'nginx' ) ) ? 'nginx' : urlencode( $server_software );
+				$server_software         = sanitize_key( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) );
+				$args['server_software'] = ( false !== strpos( $server_software, 'nginx' ) ) ? 'nginx' : urlencode( $server_software ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
 			}
 		}
 		if ( defined( 'PHP_VERSION_ID' ) ) {
 			$args['php_version_id'] = PHP_VERSION_ID;
 		}
 		$args['wp_version'] = $wp_version;
-
+		*/
 		// Build the remote server URL using the provided version.
 		$url = add_query_arg( $args, self::$remote_patches_uri );
 
 		// Get the server response.
 		$response = wp_remote_get(
 			$url,
-			array(
+			[
 				'user-agent' => 'fusion-patcher-client',
-			)
+			]
 		);
 
 		// Return false if we couldn't get to the server.
 		if ( is_wp_error( $response ) ) {
 			// Add a message so that the user knows what happened.
-			new Fusion_Patcher_Admin_Notices( 'server-unreachable', esc_attr__( 'The ThemeFusion patches server could not be reached. Please contact your host to unblock the "https://updates.theme-fusion.com/" domain.', 'Avada' ) );
+			new Fusion_Patcher_Admin_Notices( 'server-unreachable', esc_html__( 'The ThemeFusion patches server could not be reached. Please contact your host to unblock the "https://updates.theme-fusion.com/" domain.', 'Avada' ) );
 			return false;
 		}
 
 		// Return false if the response does not have a body.
-		if ( ! isset( $response['body'] ) ) {
+		if ( ! isset( $response['body'] ) || 200 !== $response['response']['code'] ) {
 			return false;
 		}
 		$json = $response['body'];
@@ -128,7 +134,7 @@ class Fusion_Patcher_Client {
 	 */
 	private function prepare_patches() {
 		self::$patches = (array) self::$patches;
-		$patches = array();
+		$patches       = [];
 
 		if ( ! empty( self::$patches ) ) {
 			foreach ( self::$patches as $patch_id => $patch_args ) {
@@ -139,8 +145,8 @@ class Fusion_Patcher_Client {
 				foreach ( $patch_args as $key => $patch ) {
 					$patches[ $patch_id ][ $key ] = (array) $patch;
 					foreach ( $patches[ $patch_id ]['patch'] as $patch_key => $args ) {
-						$args = (array) $args;
-						$args['reference'] = base64_decode( $args['reference'] );
+						$args                                        = (array) $args;
+						$args['reference']                           = fusion_decode_input( $args['reference'] );
 						$patches[ $patch_id ]['patch'][ $patch_key ] = $args;
 					}
 				}
@@ -155,7 +161,7 @@ class Fusion_Patcher_Client {
 	private function get_cached() {
 		$cache = new Fusion_Patcher_Cache();
 		// Force getting new options from the server if needed.
-		if ( $_GET && isset( $_GET['fusion-reset-cached-patches'] ) ) {
+		if ( $_GET && isset( $_GET['fusion-reset-cached-patches'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$cache->reset_caches();
 			return false;
 		}
@@ -175,6 +181,5 @@ class Fusion_Patcher_Client {
 			$cache = new Fusion_Patcher_Cache();
 			$cache->set_cache( $this->args, self::$patches );
 		}
-
 	}
 }

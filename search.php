@@ -13,28 +13,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <?php get_header(); ?>
 <section id="content" <?php Avada()->layout->add_class( 'content_class' ); ?> <?php Avada()->layout->add_style( 'content_style' ); ?>>
-	<?php if ( have_posts() && 0 != strlen( trim( get_search_query() ) ) ) : ?>
+	<?php if ( have_posts() && 0 !== strlen( trim( get_search_query() ) ) ) : ?>
 
-		<?php if ( 'bottom' == Avada()->settings->get( 'search_new_search_position' ) ) : ?>
+		<?php if ( 'bottom' === Avada()->settings->get( 'search_new_search_position' ) ) : ?>
 			<?php get_template_part( 'templates/blog', 'layout' ); ?>
 			<div class="fusion-clearfix"></div>
 		<?php endif; ?>
 
-		<?php if ( 'hidden' != Avada()->settings->get( 'search_new_search_position' ) ) : ?>
+		<?php if ( 'hidden' !== Avada()->settings->get( 'search_new_search_position' ) ) : ?>
 			<div class="search-page-search-form search-page-search-form-<?php echo esc_attr( Avada()->settings->get( 'search_new_search_position' ) ); ?>">
 				<?php
 				/**
 				 * Render the post title
 				 */
 				$title_size = ( false === avada_is_page_title_bar_enabled( 0 ) ? '1' : '2' );
-				echo avada_render_post_title( 0, false, esc_html__( 'Need a new search?', 'Avada' ), $title_size ); // WPCS: XSS ok.
+				echo avada_render_post_title( 0, false, esc_html__( 'Need a new search?', 'Avada' ), $title_size ); // phpcs:ignore WordPress.Security.EscapeOutput
 				?>
 				<p><?php esc_html_e( 'If you didn\'t find what you were looking for, try a new search!', 'Avada' ); ?></p>
 				<?php get_search_form(); ?>
 			</div>
 		<?php endif; ?>
 
-		<?php if ( 'top' == Avada()->settings->get( 'search_new_search_position' ) || 'hidden' == Avada()->settings->get( 'search_new_search_position' ) ) : ?>
+		<?php if ( 'top' === Avada()->settings->get( 'search_new_search_position' ) || 'hidden' === Avada()->settings->get( 'search_new_search_position' ) ) : ?>
 			<?php get_template_part( 'templates/blog', 'layout' ); ?>
 		<?php endif; ?>
 
@@ -52,12 +52,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<h3><?php esc_html_e( 'Helpful Links:', 'Avada' ); ?></h3>
 						<?php
 						// Get needed checklist default settings.
-						$checklist_icons_color   = Avada()->settings->get( 'checklist_icons_color' );
-						$checklist_circle_color  = Avada()->settings->get( 'checklist_circle_color' );
-						$circle_class            = ( Avada()->settings->get( 'checklist_circle' ) ) ? 'circle-yes' : 'circle-no';
-						$font_size               = Fusion_Sanitize::convert_font_size_to_px( Avada()->settings->get( 'checklist_item_size' ), Avada()->settings->get( 'body_typography', 'font-size' ) );
-						$checklist_divider       = ( 'yes' === Avada()->settings->get( 'checklist_divider' ) ) ? ' fusion-checklist-divider' : '';
-						$checklist_divider_color = Avada()->settings->get( 'checklist_divider_color' );
+						$circle_class      = ( Avada()->settings->get( 'checklist_circle' ) ) ? 'circle-yes' : 'circle-no';
+						$font_size         = Fusion_Sanitize::convert_font_size_to_px( Avada()->settings->get( 'checklist_item_size' ), Avada()->settings->get( 'body_typography', 'font-size' ) );
+						$checklist_divider = ( 'yes' === Avada()->settings->get( 'checklist_divider' ) ) ? ' fusion-checklist-divider' : '';
 
 						// Calculated derived values.
 						$circle_yes_font_size    = $font_size * 0.88;
@@ -69,12 +66,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						// Set markup depending on icon circle being used or not.
 						if ( Avada()->settings->get( 'checklist_circle' ) ) {
-							$before = '<span class="icon-wrapper circle-yes" style="background-color:' . $checklist_circle_color . ';font-size:' . $font_size . 'px;height:' . $line_height . 'px;width:' . $line_height . 'px;margin-' . $icon_margin_position . ':' . $icon_margin . 'px;" ><i class="fusion-li-icon fa fa-angle-right" style="color:' . $checklist_icons_color . ';"></i></span><div class="fusion-li-item-content" style="margin-' . $content_margin_position . ':' . $content_margin . 'px;">';
+							$before = '<span class="icon-wrapper circle-yes" style="background-color:var(--checklist_circle_color);font-size:' . $font_size . 'px;height:' . $line_height . 'px;width:' . $line_height . 'px;margin-' . $icon_margin_position . ':' . $icon_margin . 'px;" ><i class="fusion-li-icon fa fa-angle-right" style="color:var(--checklist_icons_color);" aria-hidden="true"></i></span><div class="fusion-li-item-content" style="margin-' . $content_margin_position . ':' . $content_margin . 'px;">';
 						} else {
-							$before = '<span class="icon-wrapper circle-no" style="font-size:' . $font_size . 'px;height:' . $line_height . 'px;width:' . $line_height . 'px;margin-' . $icon_margin_position . ':' . $icon_margin . 'px;" ><i class="fusion-li-icon fa fa-angle-right" style="color:' . $checklist_icons_color . ';"></i></span><div class="fusion-li-item-content" style="margin-' . $content_margin_position . ':' . $content_margin . 'px;">';
+							$before = '<span class="icon-wrapper circle-no" style="font-size:' . $font_size . 'px;height:' . $line_height . 'px;width:' . $line_height . 'px;margin-' . $icon_margin_position . ':' . $icon_margin . 'px;" ><i class="fusion-li-icon fa fa-angle-right" style="color:var(--checklist_icons_color);" aria-hidden="true"></i></span><div class="fusion-li-item-content" style="margin-' . $content_margin_position . ':' . $content_margin . 'px;">';
 						}
 
-						$error_page_menu_args = array(
+						$error_page_menu_args = [
 							'theme_location' => '404_pages',
 							'depth'          => 1,
 							'container'      => false,
@@ -86,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'echo'           => 0,
 							'item_spacing'   => 'discard',
 							'fallback_cb'    => 'fusion_error_page_menu_fallback',
-						);
+						];
 
 						// Get the menu markup with correct containers.
 						$error_page_menu = wp_nav_menu( $error_page_menu_args );
@@ -110,10 +107,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 						// Make sure divider lines have correct color.
 						if ( $checklist_divider ) {
-							$error_page_menu = str_replace( 'class="menu-item ', 'style="border-bottom-color:' . $checklist_divider_color . ';" class="menu-item ', $error_page_menu );
+							$error_page_menu = str_replace( 'class="menu-item ', 'style="border-bottom-color:var(--checklist_divider_color);" class="menu-item ', $error_page_menu );
 						}
 
-						echo $error_page_menu; // WPCS: XSS ok.
+						echo $error_page_menu; // phpcs:ignore WordPress.Security.EscapeOutput
 						?>
 					</div>
 					<div class="fusion-column col-lg-4 col-md-4 col-sm-4 fusion-error-page-search">
@@ -127,7 +124,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php endif; ?>
 </section>
 <?php do_action( 'avada_after_content' ); ?>
-<?php
-get_footer();
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */
+<?php get_footer(); ?>

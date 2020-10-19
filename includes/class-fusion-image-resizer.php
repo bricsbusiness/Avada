@@ -5,7 +5,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      3.8.0
@@ -28,7 +28,7 @@ class Fusion_Image_Resizer {
 	 * @param array $data The image data.
 	 */
 	public static function image_resize( $data ) {
-		$defaults = array(
+		$defaults = [
 			'id'     => 0,
 			'url'    => '',
 			'width'  => '',
@@ -36,7 +36,7 @@ class Fusion_Image_Resizer {
 			'crop'   => true,
 			'retina' => true,
 			'resize' => true,
-		);
+		];
 		$settings = wp_parse_args( $data, $defaults );
 
 		if ( empty( $settings['url'] ) ) {
@@ -96,11 +96,11 @@ class Fusion_Image_Resizer {
 		}
 
 		if ( ! isset( $file_path ) ) {
-			return array(
+			return [
 				'url'    => $url,
 				'width'  => $width,
 				'height' => $height,
-			);
+			];
 		}
 
 		// Destination width and height variables.
@@ -118,33 +118,34 @@ class Fusion_Image_Resizer {
 		// Suffix applied to filename.
 		$suffix_width  = ( $dest_width / $retina );
 		$suffix_height = ( $dest_height / $retina );
-		$suffix_retina = ( 1 != $retina ) ? '@' . $retina . 'x' : null; // WPCS: loose comparison ok.
+		$suffix_retina = ( 1 != $retina ) ? '@' . $retina . 'x' : null; // phpcs:ignore WordPress.PHP.StrictComparisons
 
 		$suffix = "{$suffix_width}x{$suffix_height}{$suffix_retina}";
 
 		// Get the destination file name.
 		$dest_file_name = "{$dir}/{$name}-{$suffix}.{$ext}";
 
-		if ( ! file_exists( $dest_file_name ) ) {
+		if ( ! file_exists( $dest_file_name ) || ( isset( $_GET['force-regenerate'] ) && $_GET['force-regenerate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
+
 			/*
 			 *  Bail if this image isn't in the Media Library.
 			 *  We only want to resize Media Library images, so we can be sure they get deleted correctly when appropriate.
 			 */
 			if ( ! isset( $attachment_id ) || ! $attachment_id ) {
-				return array(
+				return [
 					'url'    => $url,
 					'width'  => $width,
 					'height' => $height,
-				);
+				];
 			}
 			// Load WordPress Image Editor.
 			$editor = wp_get_image_editor( $file_path );
 			if ( is_wp_error( $editor ) ) {
-				return array(
+				return [
 					'url'    => $url,
 					'width'  => $width,
 					'height' => $height,
-				);
+				];
 			}
 
 			// Get the original image size.
@@ -172,11 +173,11 @@ class Fusion_Image_Resizer {
 			Avada_Helper::init_filesystem();
 
 			if ( ! $wp_filesystem->put_contents( $dest_file_name, '', FS_CHMOD_FILE ) ) {
-				return array(
+				return [
 					'url'    => $url,
 					'width'  => $orig_width,
 					'height' => $orig_height,
-				);
+				];
 			}
 			// Time to crop the image!
 			$editor->crop( $src_x, $src_y, $src_w, $src_h, $dest_width, $dest_height );
@@ -184,11 +185,11 @@ class Fusion_Image_Resizer {
 			$saved = $editor->save( $dest_file_name );
 			// If saving fails, return the original image.
 			if ( is_wp_error( $saved ) ) {
-				return array(
+				return [
 					'url'    => $url,
 					'width'  => $width,
 					'height' => $height,
-				);
+				];
 			}
 			// Get resized image information.
 			$resized_url    = str_replace( basename( $url ), basename( $saved['path'] ), $url );
@@ -202,24 +203,24 @@ class Fusion_Image_Resizer {
 				wp_update_attachment_metadata( $attachment_id, $metadata );
 			}
 			// Create the image array.
-			$image_array = array(
+			$image_array = [
 				'url'    => $resized_url,
 				'width'  => $resized_width,
 				'height' => $resized_height,
 				'type'   => $resized_type,
 				'path'   => $dest_file_name,
-			);
+			];
 
 			$image_array['retina_url'] = ( file_exists( "{$dir}/{$name}-{$suffix}{$suffix_retina}.{$ext}" ) ) ? rtrim( $image_array['url'], ".{$ext}" ) . "@2x.{$ext}" : false;
 
 		} else {
-			$image_array = array(
+			$image_array = [
 				'url'    => str_replace( basename( $url ), basename( $dest_file_name ), $url ),
 				'width'  => $dest_width,
 				'height' => $dest_height,
 				'type'   => $ext,
 				'path'   => $dest_file_name,
-			);
+			];
 
 			$image_array['retina_url'] = ( file_exists( "{$dir}/{$name}-{$suffix}{$suffix_retina}.{$ext}" ) ) ? rtrim( $image_array['url'], ".{$ext}" ) . "@2x.{$ext}" : false;
 

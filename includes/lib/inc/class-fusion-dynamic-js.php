@@ -6,11 +6,6 @@
  * @since 1.0.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Handles enqueueing files dynamically.
  */
@@ -25,7 +20,7 @@ final class Fusion_Dynamic_JS {
 	 * @since 1.0.0
 	 * @var array
 	 */
-	protected static $scripts = array();
+	protected static $scripts = [];
 
 	/**
 	 * An array of our wp_localize_script calls.
@@ -35,7 +30,7 @@ final class Fusion_Dynamic_JS {
 	 * @since 1.0.0
 	 * @var array
 	 */
-	protected static $localize_scripts = array();
+	protected static $localize_scripts = [];
 
 	/**
 	 * An instance of the Fusion_Dynamic_JS_File class.
@@ -55,9 +50,9 @@ final class Fusion_Dynamic_JS {
 	 */
 	public function __construct() {
 
-		add_action( 'get_header', array( $this, 'init' ) );
-		add_action( 'save_post', array( 'Fusion_Dynamic_JS_File', 'reset_cached_filenames' ) );
-		add_action( 'fusionredux/options/fusion_options/saved', array( 'Fusion_Dynamic_JS_File', 'delete_dynamic_js_transient' ) );
+		add_action( 'get_header', [ $this, 'init' ] );
+		add_action( 'save_post', [ 'Fusion_Dynamic_JS_File', 'reset_cached_filenames' ] );
+		add_action( 'fusionredux/options/fusion_options/saved', [ 'Fusion_Dynamic_JS_File', 'delete_dynamic_js_transient' ] );
 
 	}
 
@@ -70,9 +65,13 @@ final class Fusion_Dynamic_JS {
 	 */
 	public function init() {
 
-		// If JS compiler is disabled, or if WP_SCRIPT_DEBUG is set to true load separate files.
-		$settings = Fusion_Settings::get_instance();
-		if ( ( defined( 'FUSION_DISABLE_COMPILERS' ) && FUSION_DISABLE_COMPILERS ) || '0' === $settings->get( 'js_compiler' ) || ( defined( 'WP_SCRIPT_DEBUG' ) && WP_SCRIPT_DEBUG ) ) {
+		// If JS compiler is disabled, or if WP_SCRIPT_DEBUG is set to true or if on builder frame after change load separate files.
+		$option = Fusion_Settings::get_option_name();
+
+		if ( ( defined( 'FUSION_DISABLE_COMPILERS' ) && FUSION_DISABLE_COMPILERS ) ||
+			'0' === fusion_library()->get_option( 'js_compiler' ) ||
+			( defined( 'WP_SCRIPT_DEBUG' ) && WP_SCRIPT_DEBUG ) ||
+			( isset( $_GET['builder_id'] ) && get_transient( 'fusion_app_emulated-' . sanitize_text_field( wp_unslash( $_GET['builder_id'] ) ) . '-' . $option ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			new Fusion_Dynamic_JS_Separate( $this );
 			return;
 		}
@@ -93,7 +92,7 @@ final class Fusion_Dynamic_JS {
 	 * @param bool|string $ver       The script version.
 	 * @param bool        $in_footer Whether the script should be in the footer or not.
 	 */
-	public static function register_script( $handle = '', $url = '', $path = '', $deps = array(), $ver = false, $in_footer = false ) {
+	public static function register_script( $handle = '', $url = '', $path = '', $deps = [], $ver = false, $in_footer = false ) {
 		self::add_script( 'register', $handle, $url, $path, $deps, $ver, $in_footer );
 	}
 
@@ -110,7 +109,7 @@ final class Fusion_Dynamic_JS {
 	 * @param bool|string $ver       The script version.
 	 * @param bool        $in_footer Whether the script should be in the footer or not.
 	 */
-	public static function enqueue_script( $handle = '', $url = '', $path = '', $deps = array(), $ver = false, $in_footer = false ) {
+	public static function enqueue_script( $handle = '', $url = '', $path = '', $deps = [], $ver = false, $in_footer = false ) {
 		self::add_script( 'enqueue', $handle, $url, $path, $deps, $ver, $in_footer );
 	}
 
@@ -160,7 +159,8 @@ final class Fusion_Dynamic_JS {
 	 * @param bool|string $ver       The script version.
 	 * @param bool        $in_footer Whether the script should be in the footer or not.
 	 */
-	private static function add_script( $action = 'enqueue', $handle = '', $url = '', $path = '', $deps = array(), $ver = false, $in_footer = false ) {
+	private static function add_script( $action = 'enqueue', $handle = '', $url = '', $path = '', $deps = [], $ver = false, $in_footer = false ) {
+		$is_builder = ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) || ( function_exists( 'fusion_is_builder_frame' ) && fusion_is_builder_frame() );
 
 		// Early exit if $handle is not defined.
 		if ( ! $handle ) {
@@ -193,14 +193,14 @@ final class Fusion_Dynamic_JS {
 		}
 
 		// If animations are disabled in TO, we have to delete the dependency from the $deps array.
-		if ( ! fusion_library()->get_option( 'use_animate_css' ) ) {
-			$key = array_search( 'fusion-animations', $deps );
+		if ( 'off' === fusion_library()->get_option( 'status_css_animations' ) && ! $is_builder ) {
+			$key = array_search( 'fusion-animations', $deps, true );
 			if ( false !== $key ) {
 				unset( $deps[ $key ] );
 			}
 		}
 
-		self::$scripts[] = array(
+		self::$scripts[] = [
 			'action'    => (string) $action,
 			'handle'    => (string) $handle,
 			'url'       => (string) $url,
@@ -208,7 +208,7 @@ final class Fusion_Dynamic_JS {
 			'deps'      => (array) $deps,
 			'ver'       => (string) $ver,
 			'in_footer' => true,
-		);
+		];
 
 	}
 
@@ -222,7 +222,7 @@ final class Fusion_Dynamic_JS {
 	 * @param string $name   The variable name.
 	 * @param array  $data   An array of data.
 	 */
-	public static function localize_script( $handle = '', $name = '', $data = array() ) {
+	public static function localize_script( $handle = '', $name = '', $data = [] ) {
 
 		// Early exit if $handle or $name are not defined.
 		if ( ! $handle || ! $name ) {
@@ -236,11 +236,11 @@ final class Fusion_Dynamic_JS {
 			}
 		}
 
-		self::$localize_scripts[] = array(
-			'handle'    => (string) $handle,
-			'name'      => (string) $name,
-			'data'      => (array) $data,
-		);
+		self::$localize_scripts[] = [
+			'handle' => (string) $handle,
+			'name'   => (string) $name,
+			'data'   => (array) $data,
+		];
 
 	}
 

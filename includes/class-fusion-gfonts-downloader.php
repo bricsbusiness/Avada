@@ -29,6 +29,15 @@ class Fusion_GFonts_Downloader {
 	private $family;
 
 	/**
+	 * The styles from the normal Google-Fonts request.
+	 *
+	 * @access private
+	 * @since 5.5.2
+	 * @var string
+	 */
+	private $styles = '';
+
+	/**
 	 * The path where files for this font are stored.
 	 *
 	 * @access private
@@ -61,23 +70,48 @@ class Fusion_GFonts_Downloader {
 	 * @access public
 	 * @since 5.5.2
 	 * @param string $family The font-family we're dealing with.
+	 * @param string $styles The styles from the google-fonts normal request.
 	 */
-	public function __construct( $family ) {
+	public function __construct( $family = '', $styles = '' ) {
 		$this->family      = $family;
+		$this->styles      = $styles;
 		$this->folder_path = Fusion_Downloader::get_root_path( 'fusion-gfonts' ) . '/' . sanitize_key( $this->family );
 		$this->folder_url  = Fusion_Downloader::get_root_url( 'fusion-gfonts' ) . '/' . sanitize_key( $this->family );
 		$this->font        = $this->get_font_family();
 	}
 
 	/**
-	 * Gets the @font-face CSS for all variants this font-family contains.
+	 * Gets the @font-face CSS.
 	 *
 	 * @access public
 	 * @since 5.5.2
 	 * @param array $variants The variants we want to get.
 	 * @return string
 	 */
-	public function get_fontface_css( $variants = array() ) {
+	public function get_fontface_css( $variants = [] ) {
+
+		if ( ! empty( $this->styles ) ) {
+			$css         = $this->styles;
+			$folder_name = 'fusion-gfonts';
+
+			preg_match_all( '/https\:.*?\.woff/', $css, $matches );
+
+			$matches = array_shift( $matches );
+
+			foreach ( $matches as $match ) {
+				if ( 0 === strpos( $match, 'https://fonts.gstatic.com' ) ) {
+					$file = new Fusion_Downloader( $match, $folder_name );
+					$file->download_file();
+
+					$new_url = $file->get_new_url();
+					if ( $new_url ) {
+						$css = str_replace( $match, $new_url, $css );
+					}
+				}
+			}
+			return $css;
+		}
+
 		if ( ! $this->font ) {
 			return;
 		}
@@ -114,7 +148,10 @@ class Fusion_GFonts_Downloader {
 		$font_face .= "font-style:{$font_style};";
 
 		// Set font display.
-		$font_face .= 'font-display: ' . Avada()->settings->get( 'font_face_display' ) . ';';
+		$font_face_display = Avada()->settings->get( 'font_face_display' );
+		$font_face_display = ( 'block' === $font_face_display ) ? 'block' : 'swap';
+
+		$font_face .= 'font-display: ' . $font_face_display . ';';
 
 		// Get the font-weight.
 		$font_weight = '400';
@@ -182,7 +219,7 @@ class Fusion_GFonts_Downloader {
 	 * @return string
 	 */
 	public function get_local_font_name( $variant, $compact = false ) {
-		$variant_names = array(
+		$variant_names = [
 			'100'       => 'Thin',
 			'100i'      => 'Thin Italic',
 			'100italic' => 'Thin Italic',
@@ -212,14 +249,14 @@ class Fusion_GFonts_Downloader {
 			'900'       => 'Black',
 			'900i'      => 'Black Italic',
 			'900italic' => 'Black Italic',
-		);
+		];
 
 		$variant = (string) $variant;
 		if ( $compact ) {
 			if ( isset( $variant_names[ $variant ] ) ) {
-				return str_replace( array( ' ', '-' ), '', $this->family ) . '-' . str_replace( array( ' ', '-' ), '', $variant_names[ $variant ] );
+				return str_replace( [ ' ', '-' ], '', $this->family ) . '-' . str_replace( [ ' ', '-' ], '', $variant_names[ $variant ] );
 			}
-			return str_replace( array( ' ', '-' ), '', $this->family );
+			return str_replace( [ ' ', '-' ], '', $this->family );
 		}
 
 		if ( isset( $variant_names[ $variant ] ) ) {
@@ -237,7 +274,7 @@ class Fusion_GFonts_Downloader {
 	 * @return array
 	 */
 	public function get_font_files() {
-		$files       = array();
+		$files       = [];
 		$remote_urls = $this->get_font_files_urls_remote();
 		foreach ( $remote_urls as $key => $url ) {
 			$files[ $key ] = Fusion_Downloader::get_filename_from_url( $url );
@@ -256,7 +293,7 @@ class Fusion_GFonts_Downloader {
 		if ( isset( $this->font['files'] ) ) {
 			return $this->font['files'];
 		}
-		return array();
+		return [];
 	}
 
 	/**
@@ -267,7 +304,7 @@ class Fusion_GFonts_Downloader {
 	 * @return array
 	 */
 	public function get_font_files_urls_local() {
-		$urls  = array();
+		$urls  = [];
 		$files = $this->get_font_files();
 		foreach ( $files as $key => $file ) {
 			$urls[ $key ] = $this->folder_url . '/' . $file;
@@ -283,7 +320,7 @@ class Fusion_GFonts_Downloader {
 	 * @return array
 	 */
 	public function get_font_files_paths() {
-		$paths = array();
+		$paths = [];
 		$files = $this->get_font_files();
 		foreach ( $files as $key => $file ) {
 			$paths[ $key ] = $this->folder_path . '/' . $file;
@@ -326,8 +363,7 @@ class Fusion_GFonts_Downloader {
 	 * @return array
 	 */
 	private function get_fonts() {
-		$path = wp_normalize_path( FUSION_LIBRARY_PATH . '/inc/redux/custom-fields/typography/googlefonts-array.php' );
-		return include $path;
+		return include FUSION_LIBRARY_PATH . '/inc/googlefonts-array.php';
 	}
 
 	/**
@@ -338,13 +374,13 @@ class Fusion_GFonts_Downloader {
 	 * @param array $variants An array of variants to download. Leave empty to download all.
 	 * @return void
 	 */
-	public function download_font_family( $variants = array() ) {
+	public function download_font_family( $variants = [] ) {
 		if ( isset( $this->font['files'] ) ) {
 			if ( empty( $variants ) ) {
 				$variants = $this->font['variants'];
 			}
 			foreach ( $this->font['files'] as $variant => $file ) {
-				if ( in_array( $variant, $variants ) ) {
+				if ( in_array( $variant, $variants ) ) { // phpcs:ignore WordPress.PHP.StrictInArray
 					$file = new Fusion_Downloader( $file, 'fusion-gfonts/' . sanitize_key( $this->family ) );
 					$file->download_file();
 				}

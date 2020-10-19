@@ -1,3 +1,5 @@
+/* stylelint-disable no-descending-specificity */
+/* stylelint-disable no-duplicate-selectors */
 @media only screen and (orientation: portrait) {
   .products .product-list-view {
     width: 100% !important;
@@ -52,12 +54,11 @@
     float: none;
     text-align: center;
   }
-  .woocommerce #customer_login .login .form-row,
-  .woocommerce #customer_login .login .lost_password {
+  .woocommerce #customer_login .login .form-row {
     float: none;
   }
   .woocommerce #customer_login .login .inline,
-  .woocommerce #customer_login .login .lost_password {
+  .woocommerce #customer_login .login .woocommerce-LostPassword {
     display: block;
     margin-left: 0;
   }
@@ -82,12 +83,9 @@
     margin-bottom: 50px;
   }
   #wrapper .orderby-order-container {
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-align: center;
-        align-items: center;
-    -ms-flex-pack: justify;
-        justify-content: space-between;
+    align-items: center;
+    justify-content: space-between;
     margin: 0 auto 10px;
     width: 225px;
     float: none;
@@ -262,5 +260,9 @@
   }
   .fusion-body .avada-myaccount-user .username .not-user {
     padding: 0 5px;
+  }
+  .avada-has-woo-gallery-disabled.product .entry-summary .summary-container,
+  .avada-has-woo-gallery-disabled .product .entry-summary .summary-container {
+    margin-top: 20px;
   }
 }

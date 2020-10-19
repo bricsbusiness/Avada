@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -41,7 +41,7 @@ class Avada_Upgrade_540 extends Avada_Upgrade_Abstract {
 
 		$this->migrate_slidingbar_link_color_hover();
 
-		add_action( 'init', array( $this, 'migrate_fusion_slider_options' ), 20 );
+		add_action( 'init', [ $this, 'migrate_fusion_slider_options' ], 20 );
 	}
 
 	/**
@@ -52,7 +52,7 @@ class Avada_Upgrade_540 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function migrate_slidingbar_link_color_hover() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		$options['slidingbar_link_color_hover'] = $options['primary_color'];
 
@@ -60,7 +60,7 @@ class Avada_Upgrade_540 extends Avada_Upgrade_Abstract {
 	}
 
 	/**
-	 * Migrate Fusion Slider options.
+	 * Migrate Avada Slider options.
 	 *
 	 * @access public
 	 * @since 5.4.0
@@ -68,11 +68,11 @@ class Avada_Upgrade_540 extends Avada_Upgrade_Abstract {
 	 */
 	public function migrate_fusion_slider_options() {
 
-		$args = array(
+		$args = [
 			'taxonomy'   => 'slide-page',
 			'number'     => 0,
 			'hide_empty' => false,
-		);
+		];
 
 		$sliders = get_terms( $args );
 

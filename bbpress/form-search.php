@@ -16,7 +16,7 @@
 			<input tabindex="<?php bbp_tab_index(); ?>" type="text" value="<?php echo esc_attr( bbp_get_search_terms() ); ?>" placeholder="<?php _e( 'Search the Forum...', 'Avada' ); ?>" name="bbp_search" id="bbp_search" />
 		</div>
 		<div class="fusion-search-button search-button">
-			<input tabindex="<?php bbp_tab_index(); ?>" class="fusion-search-submit fusion-button button submit" type="submit" id="bbp_search_submit" value="&#xf002;" />
+			<input tabindex="<?php bbp_tab_index(); ?>" class="fusion-search-submit fusion-button button submit" type="submit" id="bbp_search_submit" aria-label="<?php esc_html_e( 'Search', 'Avada' ); ?>" value="&#xf002;" />
 		</div>
 	</div>
 </form>

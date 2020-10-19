@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.3
@@ -26,8 +26,8 @@ class Avada_Admin_Notices {
 	 * @since 5.3
 	 */
 	public function __construct() {
-		add_action( 'admin_enqueue_scripts', array( $this, 'load_script' ) );
-		add_action( 'wp_ajax_avada_dismiss_admin_notice', array( $this, 'dismiss_admin_notice' ) );
+		add_action( 'admin_enqueue_scripts', [ $this, 'load_script' ] );
+		add_action( 'wp_ajax_avada_dismiss_admin_notice', [ $this, 'dismiss_admin_notice' ] );
 	}
 
 	/**
@@ -37,18 +37,19 @@ class Avada_Admin_Notices {
 	 * @since 5.3
 	 */
 	public function load_script() {
+		$version = Avada::get_theme_version();
 
-		$vars = array(
+		$vars = [
 			'nonce' => wp_create_nonce( 'avada_admin_notice' ),
-		);
+		];
 
 		$vars = array_merge( $vars, $this->admin_notices_textdomain_strings() );
 
 		wp_enqueue_script(
 			'avada-admin-notices',
 			trailingslashit( Avada::$template_dir_url ) . 'assets/admin/js/avada-admin-notices.js',
-			array( 'jquery', 'common' ),
-			false,
+			[ 'jquery', 'common' ],
+			$version,
 			true
 		);
 
@@ -63,10 +64,10 @@ class Avada_Admin_Notices {
 	 */
 	public function admin_notices_textdomain_strings() {
 
-		$text_strings = array(
+		$text_strings = [
 			/* translators: The "Fusion Documentation" link. */
 			'deprecated_side_nav_teamplate' => sprintf( __( 'The \'Side Navigation\' page template will be deprecated in a future version of Avada. We have replaced it with a better solution, the <a href="%s" target="_blank" rel="noopener noreferrer">Avada Vertical Menu widget</a>. This new widget offers the same features but with greater flexibility. It works with the WP menu system. Please utilize this new method instead of the page template which will eventually be removed.', 'Avada' ), 'https://theme-fusion.com/documentation/avada/widgets/avada-vertical-and-horizontal-menu-widgets/' ),
-		);
+		];
 
 		return $text_strings;
 
@@ -84,10 +85,10 @@ class Avada_Admin_Notices {
 
 		if ( ! empty( $_POST ) ) {
 			$avada_admin_notices = get_transient( 'avada_admin_notices' );
-			$avada_admin_notices = ( false === $avada_admin_notices ? array() : $avada_admin_notices );
+			$avada_admin_notices = ( false === $avada_admin_notices ? [] : $avada_admin_notices );
 			$option_name         = '';
 			if ( isset( $_POST['option_name'] ) ) {
-				wp_unslash( sanitize_text_field( $_POST['option_name'] ) ); // WPCS: CSRF ok sanitization ok.
+				$option_name = sanitize_text_field( wp_unslash( $_POST['option_name'] ) );
 				if ( ! array_key_exists( $option_name, $avada_admin_notices ) ) {
 					$avada_admin_notices[ $option_name ] = 'dismissed';
 				}

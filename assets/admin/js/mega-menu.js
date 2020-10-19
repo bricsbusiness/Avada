@@ -3,7 +3,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      2.0.0
@@ -23,8 +23,10 @@
 		fusionMegamenu.updateMegamenuFields();
 		fusionMegamenu.megamenuFullwidthUpdate();
 
+		fusionMegamenu.specialLinksStatusUpdate();
+
 		// Setup automatic thumbnail handling.
-		jQuery( '#post-body' ).on( 'click', '.avada-remove-button', function( event ) {
+		jQuery( '#post-body' ).on( 'click', '.avada-remove-button', function() {
 			jQuery( this ).parents( '.fusion-upload-image' ).removeClass( 'fusion-image-set' );
 			jQuery( this ).parents( '.fusion-upload-image' ).find( 'img' ).attr( 'src', '' );
 			jQuery( this ).parents( '.fusion-upload-image' ).find( '.fusion-builder-upload-field' ).val( '' );
@@ -41,7 +43,7 @@
 	fusionMegamenu = {
 
 		menuItemMouseup: function() {
-			jQuery( document ).on( 'mouseup', '.menu-item-bar', function( event, ui ) {
+			jQuery( document ).on( 'mouseup', '.menu-item-bar', function( event ) {
 				if ( ! jQuery( event.target ).is( 'a' ) ) {
 					setTimeout( fusionMegamenu.updateMegamenuFields, 300 );
 				}
@@ -60,6 +62,55 @@
 				}
 
 				fusionMegamenu.updateMegamenuFields();
+			} );
+		},
+
+		specialLinksStatusUpdate: function() {
+
+			jQuery( document ).on( 'change', '.fusion-megamenu-special-link', function() {
+				var parentLiItem = jQuery( this ).parents( '.menu-item:eq( 0 )' ),
+					value = jQuery( this ).val();
+
+				parentLiItem
+					.removeClass( 'fusion-special-link-none' )
+					.removeClass( 'fusion-special-link-woo-cart' )
+					.removeClass( 'fusion-special-link-woo-account' )
+					.removeClass( 'fusion-special-link-sliding-bar-toggle' )
+					.removeClass( 'fusion-special-link-search' );
+
+				switch ( value ) {
+					case 'fusion-woo-cart':
+						parentLiItem.addClass( 'fusion-special-link-woo-cart' );
+						break;
+
+					case 'fusion-woo-my-account':
+						parentLiItem.addClass( 'fusion-special-link-woo-account' );
+						break;
+
+					case 'fusion-search':
+						parentLiItem.addClass( 'fusion-special-link-search' );
+						parentLiItem.addClass( 'fusion-special-link-search-' + parentLiItem.find( '.edit-menu-item-megamenu-searchform-mode input' ).val() );
+						break;
+
+					case 'fusion-sliding-bar-toggle':
+						parentLiItem.addClass( 'fusion-special-link-sliding-bar-toggle' );
+						break;
+
+					default:
+						parentLiItem.addClass( 'fusion-special-link-none' );
+						break;
+
+				}
+			} );
+
+			jQuery( document ).on( 'click', '.edit-menu-item-megamenu-searchform-mode a', function() {
+				var parentLiItem = jQuery( this ).parents( '.menu-item:eq( 0 )' );
+
+				parentLiItem
+					.removeClass( 'fusion-special-link-search-inline' )
+					.removeClass( 'fusion-special-link-search-dropdown' )
+					.removeClass( 'fusion-special-link-search-overlay' )
+					.addClass( 'fusion-special-link-search-' + jQuery( this ).parent().find( 'input' ).val() );
 			} );
 		},
 
@@ -133,8 +184,7 @@
 				return;
 			}
 
-			fusionMediaFrame = wp.media.frames.fusionMediaFrame = wp.media( {
-
+			fusionMediaFrame = wp.media( {
 				className: 'media-frame fusion-media-frame',
 				frame: 'select',
 				multiple: false,
@@ -142,6 +192,8 @@
 					type: 'image'
 				}
 			} );
+
+			wp.media.frames.fusionMediaFrame = fusionMediaFrame;
 
 			fusionMediaFrame.on( 'select', function() {
 
@@ -157,4 +209,4 @@
 			fusionMediaFrame.open();
 		} );
 	}
-} ( jQuery ) );
+}( jQuery ) );

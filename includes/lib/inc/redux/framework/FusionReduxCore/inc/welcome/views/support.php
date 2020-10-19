@@ -62,7 +62,7 @@
 							<i class="el el-user"></i><br/>
 							<?php esc_html_e( 'User', 'Avada' ); ?><br/>
 							<small>
-								<?php esc_html_e( 'I am a user, using a pre-built product.', 'Avada' ); ?>
+								<?php esc_html_e( 'I am a user, using a prebuilt product.', 'Avada' ); ?>
 							</small>
 						</td>
 						<td id="is_developer">

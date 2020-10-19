@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.1
@@ -34,13 +34,13 @@ global $woocommerce, $current_user;
 
 	<?php if ( Avada()->settings->get( 'woo_acc_msg_1' ) ) : ?>
 		<div class="avada-myaccount-user-column message">
-			<span class="msg"><?php echo Avada()->settings->get( 'woo_acc_msg_1' ); // WPCS: XSS ok. ?></span>
+			<span class="msg"><?php echo Avada()->settings->get( 'woo_acc_msg_1' ); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
 		</div>
 	<?php endif; ?>
 
 	<?php if ( Avada()->settings->get( 'woo_acc_msg_2' ) ) : ?>
 		<div class="avada-myaccount-user-column message">
-			<span class="msg"><?php echo Avada()->settings->get( 'woo_acc_msg_2' ); // WPCS: XSS ok. ?></span>
+			<span class="msg"><?php echo Avada()->settings->get( 'woo_acc_msg_2' ); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
 		</div>
 	<?php endif; ?>
 	<div class="avada-myaccount-user-column">

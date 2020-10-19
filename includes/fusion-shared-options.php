@@ -1,9 +1,9 @@
 <?php
 /**
- * This file contains filters to override Fusion Builder global options.
+ * This file contains filters to override Avada Builder global options.
  *
  * @author     ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -22,85 +22,94 @@ if ( ! defined( 'ABSPATH' ) ) {
 function avada_set_builder_classes( $default_elements, $class ) {
 
 	// Button class selector.
-	$elements = array(
-		'.fusion-portfolio-one .fusion-button',
-		'#main .comment-submit',
-		'#main #comment-submit',
-		'#reviews input#submit',
-		'.comment-form input[type="submit"]',
-		'.button-default',
-		'.fusion-button-default',
-		'.button.default',
-		'input.button-default',
-		'.post-password-form input[type="submit"]',
-		'.ticket-selector-submit-btn[type=submit]',
-		'.tml-submit-wrap input[type="submit"]',
-		'.slidingbar-area .button-default',
-	);
+	$elements = [
+		' .fusion-portfolio-one .fusion-button',
+		' #main .comment-submit',
+		' #main #comment-submit',
+		' #reviews input#submit',
+		' .comment-form input[type="submit"]',
+		' .button-default',
+		' .fusion-button-default',
+		' .button.default',
+		' input.button-default',
+		' .post-password-form input[type="submit"]',
+		' .ticket-selector-submit-btn[type=submit]',
+		' .tml-submit-wrap input[type="submit"]',
+		' .slidingbar-area .button-default',
+		' .fusion-footer-widget-area .fusion-privacy-placeholder .button-default',
+	];
 	if ( class_exists( 'GFForms' ) ) {
-		$elements[] = '.gform_wrapper .gform_button';
-		$elements[] = '.gform_wrapper .button';
-		$elements[] = '.gform_page_footer input[type="button"]';
+		$elements[] = ' .gform_wrapper .gform_button';
+		$elements[] = ' .gform_wrapper .button';
+		$elements[] = ' .gform_page_footer input[type="button"]';
 	}
 	if ( defined( 'WPCF7_PLUGIN' ) ) {
-		$elements[] = '.wpcf7-form input[type="submit"]';
-		$elements[] = '.wpcf7-submit';
+		$elements[] = ' .wpcf7-form input[type="submit"]';
+		$elements[] = ' .wpcf7-submit';
 	}
 	if ( class_exists( 'bbPress' ) ) {
-		$elements[] = '.bbp-submit-wrapper .button';
-		$elements[] = '#bbp_user_edit_submit';
+		$elements[] = ' .bbp-submit-wrapper .button';
+		$elements[] = ' #bbp_user_edit_submit';
 	}
 	if ( class_exists( 'WooCommerce' ) ) {
-		$elements[] = '.price_slider_amount button';
-		$elements[] = '.woocommerce .single_add_to_cart_button';
+		$elements[] = ' .price_slider_amount button';
+		$elements[] = ' .woocommerce .single_add_to_cart_button';
 		$elements[] = '.woocommerce button.button';
-		$elements[] = '.woocommerce .avada-shipping-calculator-form .button';
-		$elements[] = '.woocommerce .cart-collaterals .checkout-button';
-		$elements[] = '.woocommerce .checkout #place_order';
-		$elements[] = '.woocommerce .checkout_coupon .button';
-		$elements[] = '.woocommerce .login .button';
-		$elements[] = '.woocommerce .register .button';
-		$elements[] = '.woocommerce .avada-order-details .order-again .button';
-		$elements[] = '.woocommerce .avada-order-details .order-again .button';
-		$elements[] = '.woocommerce .lost_reset_password input[type="submit"]';
-		$elements[] = '.woocommerce-MyAccount-content form .button';
-		$elements[] = '.woocommerce.add_to_cart_inline .button';
+		$elements[] = ' .woocommerce .avada-shipping-calculator-form .button';
+		$elements[] = ' .woocommerce .login .button';
+		$elements[] = ' .woocommerce .register .button';
+		$elements[] = ' .woocommerce .avada-order-details .order-again .button';
+		$elements[] = ' .woocommerce .avada-order-details .order-again .button';
+		$elements[] = ' .woocommerce .lost_reset_password input[type="submit"]';
+		$elements[] = ' .woocommerce-MyAccount-content form .button'; // Needs space prepended (doesn't start with a body class).
+		$elements[] = ' .woocommerce.add_to_cart_inline .button'; // Needs space prepended (doesn't start with a body class).
+		$elements[] = ' .woocommerce .cart-collaterals .checkout-button';
+		$elements[] = ' .woocommerce .checkout #place_order';
+		$elements[] = ' .woocommerce .checkout_coupon .button';
 	}
 	if ( class_exists( 'Tribe__Events__Main' ) ) {
-		$elements[] = '#tribe-events-bar .tribe-bar-filters .tribe-bar-filters-inner .tribe-bar-submit input[type=submit]';
-		$elements[] = '#tribe-events .tribe-events-button';
-		$elements[] = '#tribe-events-footer ~ a.tribe-events-ical.tribe-events-button';
-		$elements[] = '#tribe_events_filter_control #tribe_events_filters_toggle';
-		$elements[] = '#tribe_events_filter_control #tribe_events_filters_reset';
-		$elements[] = '#tribe-events .tribe-events-tickets .add-to-cart .tribe-button';
-		$elements[] = '.page-tribe-attendee-registration button';
-		$elements[] = '#tribe-events .tribe-events-list .tribe-events-event-cost form .tribe-button';
-		$elements[] = '#tribe_events_filters_wrapper .tribe-events-filters-mobile-controls button';
+		$elements[] = ' #tribe-events-bar .tribe-bar-filters .tribe-bar-filters-inner .tribe-bar-submit input[type=submit]';
+		$elements[] = ' #tribe-events .tribe-events-button';
+		$elements[] = ' #tribe-events-footer ~ a.tribe-events-ical.tribe-events-button';
+		$elements[] = ' #tribe_events_filter_control #tribe_events_filters_toggle';
+		$elements[] = ' #tribe_events_filter_control #tribe_events_filters_reset';
+		$elements[] = ' #tribe-events .tribe-events-tickets .add-to-cart .tribe-button';
+		$elements[] = ' #tribe-events .tribe-events-tickets .tickets_submit .tribe-button';
+		$elements[] = ' .page-tribe-attendee-registration button';
+		$elements[] = ' #tribe-events .tribe-events-list .tribe-events-event-cost form .tribe-button';
+		$elements[] = ' .avada-ec-views-v1 #tribe_events_filters_wrapper .tribe-events-filters-mobile-controls button';
+		$elements[] = '.fusion-body .tribe-common .tribe-events-c-search__button';
+		$elements[] = ' .tribe-events .tribe-events-c-ical > a';
+		$elements[] = ' .tribe-block__events-link .tribe-block__btn--link > a';
+		$elements[] = ' .tribe-block__event-website a';
+		$elements[] = '.fusion-body .tribe_events .tribe-tickets .tribe-tickets__buy';
+		$elements[] = '.fusion-body .tribe-block.tribe-tickets .tribe-tickets .tribe-tickets__buy';
 	}
+
 	$element_map['.fusion-button-default'] = $elements;
 
 	// Default styling, not default size.
-	$non_default_size_elements                  = array(
-		'.button-default',
-		'.fusion-button-default',
-		'.button.default',
-		'input.button-default',
-	);
+	$non_default_size_elements                  = [
+		' .button-default',
+		' .fusion-button-default',
+		' .button.default',
+		' input.button-default',
+	];
 	$default_size_elements                      = array_diff( $elements, $non_default_size_elements );
 	$element_map['.fusion-button-default-size'] = $default_size_elements;
 
 	// Special styling for quantity buttons.
-	$elements                               = array(
-		'.quantity .minus',
-		'.quantity .plus',
-		'.quantity .qty',
-		'.quantity .tribe-ticket-quantity',
-		'.fusion-body .tribe-events-tickets-rsvp .tribe-ticket.quantity input',
+	$elements                               = [
+		'.fusion-body #main .quantity .minus',
+		'.fusion-body #main .quantity .plus',
+		'.fusion-body #main .quantity .qty',
+		'.fusion-body #main .quantity .tribe-ticket-quantity',
 		'.tribe-events-tickets .woocommerce .quantity input',
+		'.tribe-block__tickets__item__quantity button',
 		'.single-product .product .summary .cart .quantity .minus',
 		'.single-product .product .summary .cart .quantity .plus',
 		'.single-product .product .summary .cart .quantity .qty',
-	);
+	];
 	$element_map['.fusion-button-quantity'] = $elements;
 
 	if ( isset( $element_map[ $class ] ) ) {
@@ -122,13 +131,15 @@ add_filter( 'fusion_builder_element_classes', 'avada_set_builder_classes', 10, 2
 function avada_change_builder_default_args( $defaults, $element, $args ) {
 
 	// If its a custom color scheme selected, then set options based on that.
-	if ( 'fusion_button' == $element && false !== strpos( $defaults['color'], 'scheme-' ) && class_exists( 'Avada' ) ) {
+	if ( 'fusion_button' === $element && false !== strpos( $defaults['color'], 'scheme-' ) && class_exists( 'Avada' ) ) {
 		$scheme_id    = str_replace( 'scheme-', '', $defaults['color'] );
 		$custom_color = ( class_exists( 'Avada' ) && method_exists( 'Avada_Settings', 'get_custom_color' ) ) ? Avada()->settings->get_custom_color( $scheme_id ) : '';
 		// If the scheme exists and has options, use them.  Otherwise set the color scheme to default as fallback.
 		if ( ! empty( $custom_color ) ) {
 			$defaults['accent_color']          = ( isset( $custom_color['button_accent_color'] ) ) ? strtolower( $custom_color['button_accent_color'] ) : '#ffffff';
 			$defaults['accent_hover_color']    = ( isset( $custom_color['button_accent_hover_color'] ) ) ? strtolower( $custom_color['button_accent_hover_color'] ) : '#ffffff';
+			$defaults['border_color']          = ( isset( $custom_color['button_border_color'] ) ) ? strtolower( $custom_color['button_border_color'] ) : '#ffffff';
+			$defaults['border_hover_color']    = ( isset( $custom_color['button_border_hover_color'] ) ) ? strtolower( $custom_color['button_border_hover_color'] ) : '#ffffff';
 			$defaults['bevel_color']           = ( isset( $custom_color['button_bevel_color'] ) ) ? strtolower( $custom_color['button_bevel_color'] ) : '#54770F';
 			$defaults['gradient_colors']       = strtolower( $custom_color['button_gradient_top_color'] ) . '|' . strtolower( $custom_color['button_gradient_bottom_color'] );
 			$defaults['gradient_hover_colors'] = strtolower( $custom_color['button_gradient_top_color_hover'] ) . '|' . strtolower( $custom_color['button_gradient_bottom_color_hover'] );
@@ -180,14 +191,15 @@ function fusion_builder_title_image_rollover( $title_image_rollover ) {
  * Pass on the portfolio_link_icon_target to FB.
  *
  * @since 5.1
- * @param int $portfolio_link_icon_target side header width.
+ * @param int $portfolio_link_icon_target Side header width.
+ * @param int $post_id                    The post-ID.
  * @return bool
  */
-function fusion_builder_portfolio_link_icon_target( $portfolio_link_icon_target ) {
-	return Avada()->settings->get( 'portfolio_link_icon_target' );
+function fusion_builder_portfolio_link_icon_target( $portfolio_link_icon_target, $post_id = 0 ) {
+	return fusion_get_option( 'portfolio_link_icon_target', false, $post_id );
 }
 
-add_filter( 'fusion_builder_portfolio_link_icon_target', 'fusion_builder_portfolio_link_icon_target', 10, 1 );
+add_filter( 'fusion_builder_portfolio_link_icon_target', 'fusion_builder_portfolio_link_icon_target', 10, 2 );
 
 /**
  * Alter the link target attribute.
@@ -195,7 +207,7 @@ add_filter( 'fusion_builder_portfolio_link_icon_target', 'fusion_builder_portfol
  * @since 5.1
  * @param array $link_icon_target The link target.
  * @param array $post_id          The post ID.
- * @return array page option value ( pyre_link_icon_target ).
+ * @return array page option value ( link_icon_target ).
  */
 function fusion_builder_link_icon_target( $link_icon_target, $post_id ) {
 	return fusion_get_page_option( 'link_icon_target', $post_id );
@@ -222,7 +234,7 @@ add_filter( 'fusion_builder_link_icon_url', 'fusion_builder_link_icon_url', 10, 
  * @since 5.1
  * @param array $post_links_target The links target.
  * @param array $post_id           The post ID.
- * @return array page option value ( pyre_post_links_target ).
+ * @return array page option value ( post_links_target ).
  */
 function fusion_builder_post_links_target( $post_links_target, $post_id ) {
 	return fusion_get_page_option( 'post_links_target', $post_id );
@@ -230,28 +242,14 @@ function fusion_builder_post_links_target( $post_links_target, $post_id ) {
 add_filter( 'fusion_builder_post_links_target', 'fusion_builder_post_links_target', 10, 2 );
 
 /**
- * Alter the image rollover icons.
- *
- * @since 5.1
- * @param array $image_rollover_icons Not used in this context.
- * @param array $post_id              The post ID.
- * @return array page option value ( image_rollover_icons ).
- */
-function fusion_builder_image_rollover_icons( $image_rollover_icons, $post_id ) {
-	return fusion_get_page_option( 'image_rollover_icons', $post_id );
-}
-
-add_filter( 'fusion_builder_image_rollover_icons', 'fusion_builder_image_rollover_icons', 10, 2 );
-
-/**
  * Alter post video option.
  *
  * @since   5.1
  * @param   array $post_id Post ID.
- * @return  array page option value ( pyre_video ).
+ * @return  array page option value ( video ).
  */
 function fusion_builder_get_post_video( $post_id ) {
-	return get_post_meta( $post_id, 'pyre_video', true );
+	return fusion_get_page_option( 'video', $post_id );
 }
 add_filter( 'fusion_builder_post_video', 'fusion_builder_get_post_video', 10, 1 );
 
@@ -261,7 +259,7 @@ add_filter( 'fusion_builder_post_video', 'fusion_builder_get_post_video', 10, 1 
  * @since 5.1
  * @param string $video_url The URL of the video.
  * @param array  $post_id   The post ID.
- * @return array page option value ( pyre_video_url ).
+ * @return array page option value ( video_url ).
  */
 function fusion_builder_video_url( $video_url, $post_id ) {
 	return fusion_get_page_option( 'video_url', $post_id );
@@ -313,6 +311,8 @@ function fusion_builder_tagline_box_style( $styles, $defaults, $count ) {
 		// If the scheme exists and has options then create style block.
 		$accent_color          = ( isset( $custom_color['button_accent_color'] ) ) ? strtolower( $custom_color['button_accent_color'] ) : '#ffffff';
 		$accent_hover_color    = ( isset( $custom_color['button_accent_hover_color'] ) ) ? strtolower( $custom_color['button_accent_hover_color'] ) : '#ffffff';
+		$border_color          = ( isset( $custom_color['button_border_color'] ) ) ? strtolower( $custom_color['button_border_color'] ) : '#ffffff';
+		$border_hover_color    = ( isset( $custom_color['button_border_hover_color'] ) ) ? strtolower( $custom_color['button_border_hover_color'] ) : '#ffffff';
 		$bevel_color           = ( isset( $custom_color['button_bevel_color'] ) ) ? strtolower( $custom_color['button_bevel_color'] ) : '#54770F';
 		$gradient_colors       = strtolower( $custom_color['button_gradient_top_color'] ) . '|' . strtolower( $custom_color['button_gradient_bottom_color'] );
 		$gradient_hover_colors = strtolower( $custom_color['button_gradient_top_color_hover'] ) . '|' . strtolower( $custom_color['button_gradient_bottom_color_hover'] );
@@ -341,13 +341,13 @@ function fusion_builder_tagline_box_style( $styles, $defaults, $count ) {
 
 		$text_color_styles       = 'color:' . $accent_color . ';';
 		$text_color_hover_styles = 'color:' . $accent_hover_color . ';';
-		$general_styles          = 'border-color:' . $accent_color . ';';
-		$hover_styles            = 'border-color:' . $accent_hover_color . ';';
+		$general_styles          = 'border-color:' . $border_color . ';';
+		$hover_styles            = 'border-color:' . $border_hover_color . ';';
 
 		if ( $gradient_colors ) {
 			// Checking for deprecated separators.
 			$grad_colors = explode( '|', $gradient_colors );
-			if ( 1 == count( $grad_colors ) || empty( $grad_colors[1] ) || $grad_colors[0] == $grad_colors[1] ) {
+			if ( 1 === count( $grad_colors ) || empty( $grad_colors[1] ) || $grad_colors[0] == $grad_colors[1] ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 				$gradient_styles = "background: {$grad_colors[0]};";
 			} else {
 				$gradient_styles =
@@ -362,7 +362,7 @@ function fusion_builder_tagline_box_style( $styles, $defaults, $count ) {
 		if ( $gradient_hover_colors ) {
 			// Checking for deprecated separators.
 			$grad_colors = explode( '|', $gradient_hover_colors );
-			if ( 1 == count( $grad_colors ) || empty( $grad_colors[1] ) || $grad_colors[0] == $grad_colors[1] ) {
+			if ( 1 === count( $grad_colors ) || empty( $grad_colors[1] ) || $grad_colors[0] == $grad_colors[1] ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 				$gradient_styles = "background: {$grad_colors[0]};";
 			} else {
 				$gradient_hover_styles =
@@ -375,7 +375,7 @@ function fusion_builder_tagline_box_style( $styles, $defaults, $count ) {
 			}
 		}
 		$styles .= '<style type=\'text/css\'>.reading-box-container-' . $count . ' .button{' . $button_3d_styles . $text_color_styles . $general_styles . $gradient_styles . '} .reading-box-container-' . $count . ' .button:hover{' . $text_color_hover_styles . $hover_styles . $gradient_hover_styles . '}</style>';
-	} // End if().
+	}
 	return $styles;
 }
 add_filter( 'fusion_builder_tagline_box_style', 'fusion_builder_tagline_box_style', 10, 3 );
@@ -398,129 +398,77 @@ function avada_add_fb_styling( $css ) {
 		$dynamic_css         = Fusion_Dynamic_CSS::get_instance();
 		$dynamic_css_helpers = $dynamic_css->get_helpers();
 
-		$css['global']['.widget .tribe-mini-calendar-event .list-date .list-dayname']['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'dates_box_color' ) );
-
-		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-widget-content']['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_bg_color' ) );
-		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li']['border-right-color']    = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_bg_color' ) );
+		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-widget-content']['background-color'] = 'var(--tabs_bg_color)';
+		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li']['border-right-color']    = 'var(--tabs_bg_color)';
 		if ( is_rtl() ) {
-			$css['global']['.rtl .fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li']['border-left-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_bg_color' ) );
+			$css['global']['.rtl .fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li']['border-left-color'] = 'var(--tabs_bg_color)';
 		}
 
-		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-clean .fusion-tabs-nav ul']['border']                = '1px solid ' . Fusion_Sanitize::color( $fusion_settings->get( 'tabs_border_color' ) );
-		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-clean .fusion-tabs-nav ul li']['border-right-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_border_color' ) );
+		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-clean .fusion-tabs-nav ul']['border']                = '1px solid var(--tabs_border_color)';
+		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-clean .fusion-tabs-nav ul li']['border-right-color'] = 'var(--tabs_border_color)';
 		if ( is_rtl() ) {
-			$css['global']['.rtl .fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-clean .fusion-tabs-nav ul li']['border-left-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_border_color' ) );
+			$css['global']['.rtl .fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-clean .fusion-tabs-nav ul li']['border-left-color'] = 'var(--tabs_border_color)';
 		}
 
-		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li a']['border-top-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_inactive_color' ) );
-		$elements = array(
+		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li a']['border-top-color'] = 'var(--tabs_inactive_color)';
+		$elements = [
 			'.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li a',
 			'.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-widget-content .fusion-date-box',
-		);
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background'] = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_inactive_color' ) );
+		];
+		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background'] = 'var(--tabs_inactive_color)';
 
-		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li a:hover']['background']       = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_bg_color' ) );
-		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li a:hover']['border-top-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_bg_color' ) );
-		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li.active a']['background']      = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_bg_color' ) );
+		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li a:hover']['background']       = 'var(--tabs_bg_color)';
+		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li a:hover']['border-top-color'] = 'var(--tabs_bg_color)';
+		$css['global']['.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-nav ul li.active a']['background']      = 'var(--tabs_bg_color)';
 
-		$elements = array(
+		$elements = [
 			'.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-classic',
 			'.fusion-content-widget-area .fusion-tabs-widget .fusion-tabs-widget-content .fusion-tabs-widget-items li',
-		);
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'tabs_border_color' ) );
+		];
+		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = 'var(--tabs_border_color)';
 
-		$css['global']['#wrapper .fusion-date-and-formats .fusion-format-box, .tribe-mini-calendar-event .list-date .list-dayname']['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'dates_box_color' ) );
-		$css['global']['.fusion-menu-item-button .menu-text']['border-color']       = Fusion_Sanitize::color( $fusion_settings->get( 'button_accent_color' ) );
-		$css['global']['.fusion-menu-item-button:hover .menu-text']['border-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'button_accent_hover_color' ) );
-
-		if ( 'yes' == $fusion_settings->get( 'button_span' ) ) {
-			if ( class_exists( 'WooCommerce' ) ) {
-				$css['global']['.woocommerce #customer_login .col-1 .login .form-row']['float']        = 'none';
-				$css['global']['.woocommerce #customer_login .col-1 .login .form-row']['margin-right'] = '0';
-				$css['global']['.woocommerce #customer_login .col-1 .login .button']['margin']         = '0';
-				$css['global']['.woocommerce #customer_login .login .inline']['float']                 = 'left';
-				$css['global']['.woocommerce #customer_login .login .inline']['margin-left']           = '0';
-				$css['global']['.woocommerce #customer_login .login .lost_password']['float']          = 'right';
-				$css['global']['.woocommerce #customer_login .login .lost_password']['margin-top']     = '10px';
-			}
-		}
-		$css['global']['.fusion-secondary-menu .fusion-menu-cart-item img']['border-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'sep_color' ) );
+		$css['global']['.fusion-secondary-menu .fusion-menu-cart-item img']['border-color'] = 'var(--sep_color)';
 		if ( class_exists( 'WooCommerce' ) ) {
-			$elements = array(
+			$elements = [
 				'.product .product-border',
-			);
-			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'title_border_color' ) );
-			$css['global']['.product-images .crossfade-images']['background']            = Fusion_Sanitize::color( $fusion_settings->get( 'title_border_color' ) );
-			$elements = array(
+			];
+			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = 'var(--title_border_color)';
+			$css['global']['.product-images .crossfade-images']['background']            = 'var(--title_border_color)';
+			$elements = [
 				'.fusion-menu-cart-item img',
-				'.quantity',
-				'.quantity .minus',
-				'.quantity .plus',
+				'.fusion-body .quantity',
+				'.fusion-body .quantity .minus',
+				'.fusion-body .quantity .plus',
 				'.woocommerce form.checkout #customer_details .col-1',
 				'.woocommerce form.checkout #customer_details .col-2',
-			);
-			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'sep_color' ) );
-
-			$css['global']['.products .product-list-view']['border-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'timeline_color' ) );
-
-			$elements = array(
-				'.fusion-content-widget-area .widget_layered_nav li.chosen a',
-				'.fusion-content-widget-area .widget_layered_nav li.chosen a:before',
-				'.fusion-content-widget-area .widget_layered_nav li.chosen .count',
-				'.fusion-content-widget-area .widget_layered_nav_filters li.chosen a',
-				'.fusion-content-widget-area .widget_layered_nav_filters li.chosen a:before',
-			);
-			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['color'] = Fusion_Sanitize::color( $fusion_settings->get( 'button_accent_color' ) );
+			];
+			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = 'var(--sep_color)';
 		}
 
-		// We can remove this carousel CSS once we added a fallback.  The dynamic part will already be added from FB.
-		$elements = array(
-			'.fusion-carousel .fusion-carousel-nav .fusion-nav-prev',
-			'.fusion-carousel .fusion-carousel-nav .fusion-nav-next',
-		);
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'carousel_nav_color' ) );
+		$elements = [ '.review blockquote q', '.post-content blockquote', '.fusion-body blockquote', '.checkout .payment_methods .payment_box' ];
+		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = 'var(--testimonial_bg_color)';
 
-		$elements = $dynamic_css_helpers->map_selector( $elements, ':hover' );
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'carousel_hover_color' ) );
+		$elements = [ '.review blockquote q' ];
+		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['color'] = 'var(--testimonial_text_color)';
 
-		// Can remove as once fallback, as added to FB.
-		$css['global']['.fusion-sharing-box .fusion-social-networks a']['font-size']           = Fusion_Sanitize::size( $fusion_settings->get( 'sharing_social_links_font_size' ) );
-		$css['global']['.fusion-sharing-box .fusion-social-networks.boxed-icons a']['padding'] = Fusion_Sanitize::size( $fusion_settings->get( 'sharing_social_links_boxed_padding' ) );
-
-		$elements = array( '.review blockquote q', '.post-content blockquote', '.checkout .payment_methods .payment_box' );
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'testimonial_bg_color' ) );
-
-		$elements = array( '.review blockquote q' );
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['color'] = Fusion_Sanitize::color( $fusion_settings->get( 'testimonial_text_color' ) );
-
-		// Can be removed after fallback.
-		$elements = array(
-			'.fusion-flexslider .flex-direction-nav .flex-prev',
-			'.fusion-flexslider .flex-direction-nav .flex-next',
-		);
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'carousel_nav_color' ) );
-
-		$elements = $dynamic_css_helpers->map_selector( $elements, ':hover' );
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'carousel_hover_color' ) );
-
-		$css['global']['.fontawesome-icon.circle-yes']['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'icon_circle_color' ) );
-		$elements = array(
+		$css['global']['i.fontawesome-icon.circle-yes']['background-color'] = 'var(--icon_circle_color)';
+		$elements = [
 			'.fontawesome-icon.circle-yes',
 			'.content-box-shortcode-timeline',
-		);
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'icon_border_color' ) );
-		$elements = array(
+		];
+		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = 'var(--icon_border_color)';
+		$elements = [
 			'.fontawesome-icon',
 			'.fontawesome-icon.circle-yes',
-		);
+		];
 		if ( class_exists( 'WooCommerce' ) ) {
 			$elements[] = '.avada-myaccount-data .digital-downloads li:before';
 			$elements[] = '.avada-myaccount-data .digital-downloads li:after';
 			$elements[] = '.avada-thank-you .order_details li:before';
 			$elements[] = '.avada-thank-you .order_details li:after';
 		}
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['color'] = Fusion_Sanitize::color( $fusion_settings->get( 'icon_color' ) );
-		$elements = array(
+		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['color'] = 'var(--icon_color)';
+		$elements = [
 			'.search-page-search-form',
 			'.ls-avada',
 			'.avada-skin-rev',
@@ -530,6 +478,7 @@ function avada_add_fb_styling( $css ) {
 			'.fusion-filters',
 			'.single-navigation',
 			'.project-content .project-info .project-info-box',
+			'.fusion-project-details-tb .project-info .project-info-box',
 			'.post .fusion-meta-info',
 			'.fusion-counters-box .fusion-counter-box .counter-box-border',
 			'tr td',
@@ -581,7 +530,7 @@ function avada_add_fb_styling( $css ) {
 			'.panel.entry-content',
 			'#reviews li .comment-text',
 			'.fusion-author-widget .fusion-author-widget-separator .fusion-author-widget-sep',
-		);
+		];
 		if ( is_rtl() ) {
 			$elements[] = '.rtl .side-nav';
 		}
@@ -605,7 +554,7 @@ function avada_add_fb_styling( $css ) {
 			$elements[] = '.fusion-body .avada-myaccount-user';
 			$elements[] = '.fusion-body .avada-myaccount-user .avada-myaccount-user-column';
 			$elements[] = '.woocommerce-pagination .page-numbers';
-			$elements[] = '.woo-tabs-horizontal .woocommerce-tabs > .tabs .active';
+			$elements[] = '.fusion-body.woo-tabs-horizontal .woocommerce-tabs > .entry-content';
 			$elements[] = '.woo-tabs-horizontal .woocommerce-tabs > .tabs';
 			$elements[] = '.woo-tabs-horizontal .woocommerce-tabs > .wc-tab';
 			$elements[] = '.fusion-body .woocommerce-side-nav li a';
@@ -657,64 +606,43 @@ function avada_add_fb_styling( $css ) {
 			$elements[] = '.fusion-body .order-info';
 			$elements[] = '.woocommerce .social-share';
 			$elements[] = '.woocommerce .social-share li';
-			$elements[] = '.quantity .minus, .quantity .qty';
+			$elements[] = '.fusion-body .quantity .minus, .fusion-body .quantity .qty';
 			if ( is_rtl() ) {
 				$elements[] = '.rtl .woocommerce .social-share li';
 			}
-		} // End if().
-		if ( class_exists( 'Tribe__Events__Main' ) ) {
-			$elements[] = 'table.tribe-events-tickets > tbody';
-			$elements[] = '#tribe-events-content table.tribe-events-tickets td';
-			$elements[] = '.sidebar .tribe-mini-calendar-event';
-			$elements[] = '.sidebar .tribe-events-list-widget ol li';
-			$elements[] = '.sidebar .tribe-events-venue-widget li';
-			$elements[] = '.fusion-content-widget-area .tribe-mini-calendar-event';
-			$elements[] = '.fusion-content-widget-area .tribe-events-list-widget ol li';
-			$elements[] = '.fusion-content-widget-area .tribe-events-venue-widget li';
-			$elements[] = '.quantity .minus, .quantity .tribe-ticket-quantity';
-			$elements[] = '.page-tribe-attendee-registration .tribe-block__tickets__registration__event';
-			$elements[] = '.page-tribe-attendee-registration .tribe-block__tickets__registration__event .tribe-block__tickets__registration__tickets';
-			$elements[] = '.page-tribe-attendee-registration .tribe-block__tickets__registration__event .tribe-block__tickets__registration__tickets__header';
-			$elements[] = '.page-tribe-attendee-registration .tribe-block__tickets__item__attendee__fields .tribe-ticket';
 		}
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'sep_color' ) );
 
-		$css['global']['.price_slider_wrapper .ui-widget-content']['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'sep_color' ) );
+		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = 'var(--sep_color)';
+
+		$css['global']['.price_slider_wrapper .ui-widget-content']['background-color'] = 'var(--sep_color)';
 		if ( class_exists( 'GFForms' ) ) {
-			$css['global']['.gform_wrapper .gsection']['border-bottom'] = '1px dotted ' . Fusion_Sanitize::color( $fusion_settings->get( 'sep_color' ) );
+			$css['global']['.gform_wrapper .gsection']['border-bottom'] = '1px dotted var(--sep_color)';
 		}
 
-		$elements = array(
-			'.fusion-blog-layout-grid .post .fusion-content-sep',
-			'.fusion-portfolio.fusion-portfolio-boxed .fusion-content-sep',
-			'.fusion-layout-timeline .post .fusion-content-sep',
-		);
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'grid_separator_color' ) );
-
 		if ( class_exists( 'Tribe__Events__Main' ) ) {
-			$elements = array(
+			$elements = [
 				'.tribe-countdown-timer',
 				'.tribe-countdown-text',
-			);
-			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'countdown_background_color' ) );
-			$elements = array(
+			];
+			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = 'var(--countdown_background_color)';
+			$elements = [
 				'.tribe-countdown-timer .tribe-countdown-number',
-			);
-			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = Fusion_Sanitize::color( $fusion_settings->get( 'countdown_counter_box_color' ) );
-			$elements = array(
+			];
+			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = 'var(--countdown_counter_box_color)';
+			$elements = [
 				'.tribe-countdown-timer .tribe-countdown-number .fusion-tribe-counterdown-over',
 				'.tribe-countdown-timer .tribe-countdown-number .tribe-countdown-under',
-			);
-			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['color'] = Fusion_Sanitize::color( $fusion_settings->get( 'countdown_counter_text_color' ) );
-			$elements = array(
+			];
+			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['color'] = 'var(--countdown_counter_text_color)';
+			$elements = [
 				'.tribe-events-countdown-widget .tribe-countdown-text, .tribe-events-countdown-widget .tribe-countdown-text a',
 				'#slidingbar-area .tribe-events-countdown-widget .tribe-countdown-text, #slidingbar-area .tribe-events-countdown-widget .tribe-countdown-text a',
 				'.tribe-events-countdown-widget .tribe-countdown-text, .tribe-events-countdown-widget .tribe-countdown-text a:hover',
 				'#slidingbar-area .tribe-events-countdown-widget .tribe-countdown-text, #slidingbar-area .tribe-events-countdown-widget .tribe-countdown-text a:hover',
-			);
-			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['color'] = Fusion_Sanitize::color( $fusion_settings->get( 'countdown_heading_text_color' ) );
+			];
+			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['color'] = 'var(--countdown_heading_text_color)';
 		}
-	} // End if().
+	}
 
 	return $css;
 }

@@ -4,10 +4,12 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      4.0.0
+ *
+ * phpcs:ignoreFile WordPress.Security.NonceVerification
  */
 
 // Do not allow directly accessing this file.
@@ -31,7 +33,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 
 
 	/**
-	 * The Theme Options db name.
+	 * The Global Options db name.
 	 *
 	 * @since 5.1.0
 	 * @access public
@@ -46,7 +48,6 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * @param string $avada_option_name The option-name.
 	 */
 	public function __construct( $avada_option_name ) {
-		global $fusion_library;
 
 		// Only run on the dashboard.
 		if ( ! is_admin() ) {
@@ -63,14 +64,14 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 		if ( ! empty( $this->lang ) && ! Avada::$lang_applied ) {
 			Fusion_Multilingual::set_active_language( $this->lang );
 		}
-		$default_old_options = get_option( 'Avada_options', array() );
+		$default_old_options = get_option( 'Avada_options', [] );
 		// For multilingual sites, set the language for the options.
-		if ( ! in_array( $this->lang, array( '', 'en', 'all', null ) ) ) {
-			$old_options = get_option( 'Avada_options_' . Fusion_Multilingual::get_active_language(), array() );
+		if ( ! in_array( $this->lang, [ '', 'en', 'all', null ] ) ) {
+			$old_options = get_option( 'Avada_options_' . Fusion_Multilingual::get_active_language(), [] );
 		} else {
 			$old_options = $default_old_options;
 		}
-		$new_options = get_option( $this->avada_option_name, array() );
+		$new_options = get_option( $this->avada_option_name, [] );
 
 		// If clean install, set builder and encoding active.
 		if ( empty( $old_options ) && empty( $new_options ) ) {
@@ -98,7 +99,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 					$trigger_migration = true;
 				} else {
 					// Get a record of already run migrations and determine if we should continue or not.
-					$migration_run = get_option( 'avada_migrations', array() );
+					$migration_run = get_option( 'avada_migrations', [] );
 					if ( isset( $migration_run[ $this->version ] ) ) {
 						if ( is_array( $migration_run[ $this->version ] ) ) {
 							if ( isset( $migration_run[ $this->version ]['finished'] ) && true !== $migration_run[ $this->version ]['finished'] ) {
@@ -124,78 +125,78 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 		}
 
 		// Define the migration steps.
-		$this->steps = array(
-			array(
+		$this->steps = [
+			[
 				'callback'    => '__return_true',
 				'description' => esc_html__( 'Preparing to run Upgrade', 'Avada' ),
-			),
-			array(
-				'callback'    => array( $this, 'migrate_sliders' ),
+			],
+			[
+				'callback'    => [ $this, 'migrate_sliders' ],
 				'description' => esc_html__( 'Slider controls', 'Avada' ),
-			),
-			array(
-				'callback'    => array( $this, 'migrate_checkboxes' ),
+			],
+			[
+				'callback'    => [ $this, 'migrate_checkboxes' ],
 				'description' => esc_html__( 'Checkbox & Switch controls', 'Avada' ),
-			),
-			array(
-				'callback'    => array( $this, 'dimension' ),
+			],
+			[
+				'callback'    => [ $this, 'dimension' ],
 				'description' => esc_html__( 'Dimension controls', 'Avada' ),
-			),
+			],
 			// Caution: social-icons migration is placed before the colors migrations.
 			// We're doing this to avoid mis-sanitizations of multi-color entries.
-			array(
-				'callback'    => array( $this, 'social' ),
+			[
+				'callback'    => [ $this, 'social' ],
 				'description' => esc_html__( 'Social Networks', 'Avada' ),
-			),
-			array(
-				'callback'    => array( $this, 'color_alpha' ),
+			],
+			[
+				'callback'    => [ $this, 'color_alpha' ],
 				'description' => esc_html__( 'HEX to RGBA colors conversion', 'Avada' ),
-			),
-			array(
-				'callback'    => array( $this, 'color_hex' ),
+			],
+			[
+				'callback'    => [ $this, 'color_hex' ],
 				'description' => esc_html__( 'HEX colors', 'Avada' ),
-			),
-			array(
-				'callback'    => array( $this, 'media_files' ),
+			],
+			[
+				'callback'    => [ $this, 'media_files' ],
 				'description' => esc_html__( 'Media Files', 'Avada' ),
-			),
-			array(
-				'callback'    => array( $this, 'spacing_1' ),
+			],
+			[
+				'callback'    => [ $this, 'spacing_1' ],
 				'description' => esc_html__( 'Spacing Options', 'Avada' ),
-			),
-			array(
-				'callback'    => array( $this, 'custom_fonts' ),
+			],
+			[
+				'callback'    => [ $this, 'custom_fonts' ],
 				'description' => esc_html__( 'Custom Fonts', 'Avada' ),
-			),
-			array(
-				'callback'    => array( $this, 'typography_1' ),
+			],
+			[
+				'callback'    => [ $this, 'typography_1' ],
 				/* translators: %1$s, %2$s: Numbers. */
 				'description' => sprintf( esc_html__( 'Typography Options (step %1$s of %2$s)', 'Avada' ), '1', '2' ),
-			),
-			array(
-				'callback'    => array( $this, 'typography_2' ),
+			],
+			[
+				'callback'    => [ $this, 'typography_2' ],
 				/* translators: %1$s, %2$s: Numbers. */
 				'description' => sprintf( esc_html__( 'Typography Options (step %1$s of %2$s)', 'Avada' ), '2', '2' ),
-			),
-			array(
-				'callback'    => array( $this, 'other_options' ),
+			],
+			[
+				'callback'    => [ $this, 'other_options' ],
 				'description' => esc_html__( 'Other Options', 'Avada' ),
-			),
-		);
+			],
+		];
 
 		// Run the parent class constructor.
 		parent::__construct();
 
 		// Copy the old options to the new options for new migrations.
 		if ( $_GET && isset( $_GET['new'] ) && 1 == $_GET['new'] ) {
-			$migration_run                               = get_option( 'avada_migrations', array() );
+			$migration_run                               = get_option( 'avada_migrations', [] );
 			$migration_run[ $this->version ]['started']  = true;
 			$migration_run[ $this->version ]['finished'] = false;
 			if ( ! isset( $migration_run['copied'] ) ) {
 				$migration_run['copied'] = false;
 			}
 			// Copy default options.
-			$old_options = get_option( 'Avada_options', array() );
+			$old_options = get_option( 'Avada_options', [] );
 			if ( false == $migration_run['copied'] ) {
 				update_option( $this->avada_option_name, $old_options );
 			}
@@ -205,9 +206,9 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				foreach ( Fusion_Multilingual::get_available_languages() as $language ) {
 					// Process secondary languages.
 					// 'en' & 'all' have already been handled before we check for multilingual.
-					if ( ! in_array( $language, array( '', 'en', 'all', null ) ) ) {
+					if ( ! in_array( $language, [ '', 'en', 'all', null ] ) ) {
 						// Get the old language options.
-						$old_language_options = get_option( 'Avada_options_' . $language, array() );
+						$old_language_options = get_option( 'Avada_options_' . $language, [] );
 						// If the old language options are empty, use the standard options instead.
 						if ( empty( $old_language_options ) ) {
 							$old_language_options = $old_options;
@@ -230,10 +231,10 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * @access public
 	 */
 	public function migrate_checkboxes() {
-		$options = get_option( $this->avada_option_name, array() );
+		$options = get_option( $this->avada_option_name, [] );
 
 		// Logic switch options, from disable to enable.
-		$zero_options = array(
+		$zero_options = [
 			'blog_pn_nav',
 			'post_meta_author',
 			'post_meta_date',
@@ -264,8 +265,6 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 			'disable_megamenu',
 			'avada_rev_styles',
 			'avada_styles_dropdowns',
-			'use_animate_css',
-			'disable_mobile_animate_css',
 			'disable_mobile_image_hovers',
 			'status_yt',
 			'status_vimeo',
@@ -280,12 +279,12 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 			'woocommerce_avada_ordering',
 			'woocommerce_disable_crossfade_effect',
 			'disable_woo_gallery',
-		);
+		];
 
 		$this->fields = Avada_Options::get_option_fields();
 
 		foreach ( $this->fields as $field ) {
-			if ( isset( $field['type'] ) && isset( $field['id'] ) && in_array( $field['type'], array( 'checkbox', 'switch', 'toggle' ) ) ) {
+			if ( isset( $field['type'] ) && isset( $field['id'] ) && in_array( $field['type'], [ 'checkbox', 'switch', 'toggle' ] ) ) {
 				$initial_value = $options[ $field['id'] ];
 				if ( isset( $options[ $field['id'] ] ) ) {
 					$value = $options[ $field['id'] ];
@@ -302,7 +301,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				}
 				$value                   = (int) $value;
 				$options[ $field['id'] ] = ( $value ) ? '1' : '0';
-				Avada_Migrate::generate_debug_log( array( $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ) );
+				Avada_Migrate::generate_debug_log( [ $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ] );
 			}
 		}
 
@@ -320,59 +319,59 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * @access public
 	 */
 	public function spacing_1() {
-		$spacing_options = array(
-			'logo_margin'         => array(
+		$spacing_options = [
+			'logo_margin'         => [
 				'top'    => 'margin_logo_top',
 				'bottom' => 'margin_logo_bottom',
 				'left'   => 'margin_logo_left',
 				'right'  => 'margin_logo_right',
 				'units'  => 'px',
-			),
-			'header_padding'      => array(
+			],
+			'header_padding'      => [
 				'top'    => 'margin_header_top',
 				'bottom' => 'margin_header_bottom',
 				'left'   => 'padding_header_left',
 				'right'  => 'padding_header_right',
 				'units'  => 'px',
-			),
-			'main_padding'        => array(
+			],
+			'main_padding'        => [
 				'top'    => 'main_top_padding',
 				'bottom' => 'main_bottom_padding',
 				'units'  => 'px',
-			),
-			'footer_area_padding' => array(
+			],
+			'footer_area_padding' => [
 				'top'    => 'footer_area_top_padding',
 				'bottom' => 'footer_area_bottom_padding',
 				'left'   => 'footer_area_left_padding',
 				'right'  => 'footer_area_right_padding',
 				'units'  => 'px',
-			),
-			'copyright_padding'   => array(
+			],
+			'copyright_padding'   => [
 				'top'    => 'copyright_top_padding',
 				'bottom' => 'copyright_bottom_padding',
 				'units'  => 'px',
-			),
-			'col_margin'          => array(
+			],
+			'col_margin'          => [
 				'top'    => 'col_top_margin',
 				'bottom' => 'col_bottom_margin',
 				'units'  => 'px',
-			),
-			'tagline_margin'      => array(
+			],
+			'tagline_margin'      => [
 				'top'    => 'tagline_margin_top',
 				'bottom' => 'tagline_margin_bottom',
 				'units'  => 'px',
-			),
-			'title_margin'        => array(
+			],
+			'title_margin'        => [
 				'top'    => 'title_top_margin',
 				'bottom' => 'title_bottom_margin',
 				'units'  => 'px',
-			),
-			'content_box_margin'  => array(
+			],
+			'content_box_margin'  => [
 				'top'    => 'content_box_margin_top',
 				'bottom' => 'content_box_margin_bottom',
 				'units'  => 'px',
-			),
-		);
+			],
+		];
 		$this->spacing_options( $spacing_options );
 	}
 
@@ -383,33 +382,33 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * @access public
 	 */
 	public function typography_1() {
-		$typography_options = array(
-			'body_typography' => array(
-				'font-family' => array(
+		$typography_options = [
+			'body_typography' => [
+				'font-family' => [
 					'google'   => 'google_body',
 					'standard' => 'standard_body',
 					'custom'   => false,
-				),
+				],
 				'font-size'   => 'body_font_size',
 				'line-height' => 'body_font_lh',
 				'font-weight' => 'font_weight_body',
 				'color'       => 'body_text_color',
-			),
-			'nav_typography'  => array(
-				'font-family'    => array(
+			],
+			'nav_typography'  => [
+				'font-family'    => [
 					'google'   => 'google_nav',
 					'standard' => 'standard_nav',
 					'custom'   => true,
-				),
+				],
 				'font-weight'    => 'font_weight_menu',
 				'letter-spacing' => 'menu_font_ls',
-			),
-			'h1_typography'   => array(
-				'font-family'    => array(
+			],
+			'h1_typography'   => [
+				'font-family'    => [
 					'google'   => 'google_headings',
 					'standard' => 'standard_headings',
 					'custom'   => true,
-				),
+				],
 				'font-size'      => 'h1_font_size',
 				'line-height'    => 'h1_font_lh',
 				'font-weight'    => 'font_weight_headings',
@@ -419,13 +418,13 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				'margin-bottom'  => 'h1_bottom_margin',
 				'margin-units'   => 'em',
 
-			),
-			'h2_typography'   => array(
-				'font-family'    => array(
+			],
+			'h2_typography'   => [
+				'font-family'    => [
 					'google'   => 'google_headings',
 					'standard' => 'standard_headings',
 					'custom'   => true,
-				),
+				],
 				'font-size'      => 'h2_font_size',
 				'line-height'    => 'h2_font_lh',
 				'font-weight'    => 'font_weight_headings',
@@ -434,13 +433,13 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				'margin-top'     => 'h2_top_margin',
 				'margin-bottom'  => 'h2_bottom_margin',
 				'margin-units'   => 'em',
-			),
-			'h3_typography'   => array(
-				'font-family'    => array(
+			],
+			'h3_typography'   => [
+				'font-family'    => [
 					'google'   => 'google_headings',
 					'standard' => 'standard_headings',
 					'custom'   => true,
-				),
+				],
 				'font-size'      => 'h3_font_size',
 				'line-height'    => 'h3_font_lh',
 				'font-weight'    => 'font_weight_headings',
@@ -449,8 +448,8 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				'margin-top'     => 'h3_top_margin',
 				'margin-bottom'  => 'h3_bottom_margin',
 				'margin-units'   => 'em',
-			),
-		);
+			],
+		];
 		$this->migrate_typography_fields( $typography_options );
 	}
 
@@ -461,13 +460,13 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * @access public
 	 */
 	public function typography_2() {
-		$typography_options = array(
-			'h4_typography'              => array(
-				'font-family'    => array(
+		$typography_options = [
+			'h4_typography'              => [
+				'font-family'    => [
 					'google'   => 'google_headings',
 					'standard' => 'standard_headings',
 					'custom'   => true,
-				),
+				],
 				'font-size'      => 'h4_font_size',
 				'line-height'    => 'h4_font_lh',
 				'font-weight'    => 'font_weight_headings',
@@ -476,13 +475,13 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				'margin-top'     => 'h4_top_margin',
 				'margin-bottom'  => 'h4_bottom_margin',
 				'margin-units'   => 'em',
-			),
-			'h5_typography'              => array(
-				'font-family'    => array(
+			],
+			'h5_typography'              => [
+				'font-family'    => [
 					'google'   => 'google_headings',
 					'standard' => 'standard_headings',
 					'custom'   => true,
-				),
+				],
 				'font-size'      => 'h5_font_size',
 				'line-height'    => 'h5_font_lh',
 				'font-weight'    => 'font_weight_headings',
@@ -491,13 +490,13 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				'margin-top'     => 'h5_top_margin',
 				'margin-bottom'  => 'h5_bottom_margin',
 				'margin-units'   => 'em',
-			),
-			'h6_typography'              => array(
-				'font-family'    => array(
+			],
+			'h6_typography'              => [
+				'font-family'    => [
 					'google'   => 'google_headings',
 					'standard' => 'standard_headings',
 					'custom'   => true,
-				),
+				],
 				'font-size'      => 'h6_font_size',
 				'line-height'    => 'h6_font_lh',
 				'font-weight'    => 'font_weight_headings',
@@ -506,27 +505,27 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				'margin-top'     => 'h6_top_margin',
 				'margin-bottom'  => 'h6_bottom_margin',
 				'margin-units'   => 'em',
-			),
-			'button_typography'          => array(
-				'font-family'    => array(
+			],
+			'button_typography'          => [
+				'font-family'    => [
 					'google'   => 'google_button',
 					'standard' => 'standard_button',
 					'custom'   => false,
-				),
+				],
 				'font-weight'    => 'font_weight_button',
 				'letter-spacing' => 'button_font_ls',
-			),
-			'footer_headings_typography' => array(
-				'font-family' => array(
+			],
+			'footer_headings_typography' => [
+				'font-family' => [
 					'google'   => 'google_footer_headings',
 					'standard' => 'standard_footer_headings',
 					'custom'   => false,
-				),
+				],
 				'font-size'   => 'footw_font_size',
 				'font-weight' => 'font_weight_footer_headings',
 				'color'       => 'footer_headings_color',
-			),
-		);
+			],
+		];
 		$this->migrate_typography_fields( $typography_options );
 	}
 
@@ -534,7 +533,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * Migrate sliders.
 	 */
 	public function migrate_sliders() {
-		$options      = get_option( $this->avada_option_name, array() );
+		$options      = get_option( $this->avada_option_name, [] );
 		$this->fields = Avada_Options::get_option_fields();
 
 		foreach ( $this->fields as $field ) {
@@ -580,10 +579,10 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 					if ( isset( $field['default'] ) ) {
 						$options[ $field['id'] ] = Fusion_Sanitize::number( $field['default'] );
 					}
-				} // End if().
-				Avada_Migrate::generate_debug_log( array( $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ) );
-			} // End if().
-		} // End foreach().
+				}
+				Avada_Migrate::generate_debug_log( [ $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ] );
+			}
+		}
 
 		// Update the options with our modifications.
 		update_option( $this->avada_option_name, $options );
@@ -593,7 +592,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * Add the 'px' suffix to integers if needed.
 	 */
 	public function dimension() {
-		$options      = get_option( $this->avada_option_name, array() );
+		$options      = get_option( $this->avada_option_name, [] );
 		$this->fields = Avada_Options::get_option_fields();
 
 		foreach ( $this->fields as $field ) {
@@ -626,23 +625,23 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 
 				$numeric_value = Fusion_Sanitize::number( $options[ $field['id'] ] );
 				if ( $numeric_value == $options[ $field['id'] ] ) {
-					$percent_settings = array(
+					$percent_settings = [
 						'sidebar_width',
 						'sidebar_2_1_width',
 						'sidebar_2_2_width',
 						'ec_sidebar_width',
 						'ec_sidebar_2_1_width',
 						'ec_sidebar_2_2_width',
-					);
+					];
 					if ( in_array( $field['id'], $percent_settings ) ) {
 						$options[ $field['id'] ] = $numeric_value . '%';
 					} else {
 						$options[ $field['id'] ] = intval( $options[ $field['id'] ] ) . 'px';
 					}
 				}
-				Avada_Migrate::generate_debug_log( array( $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ) );
-			} // End if().
-		} // End foreach().
+				Avada_Migrate::generate_debug_log( [ $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ] );
+			}
+		}
 
 		// Update the options with our modifications.
 		update_option( $this->avada_option_name, $options );
@@ -652,7 +651,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * Color-alpha options.
 	 */
 	public function color_alpha() {
-		$options      = get_option( $this->avada_option_name, array() );
+		$options      = get_option( $this->avada_option_name, [] );
 		$this->fields = Avada_Options::get_option_fields();
 
 		foreach ( $this->fields as $field ) {
@@ -664,12 +663,12 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				if ( ! isset( $options[ $field['id'] ] ) ) {
 					$value = $field['default'];
 				} elseif ( empty( $options[ $field['id'] ] ) ) {
-					$to_transparent = array(
+					$to_transparent = [
 						'button_gradient_top_color',
 						'button_gradient_bottom_color',
 						'button_gradient_top_color_hover',
 						'button_gradient_bottom_color_hover',
-					);
+					];
 					$value          = $field['default'];
 					if ( in_array( $field['id'], $to_transparent ) ) {
 						$value = 'rgba(255,255,255,0)';
@@ -680,10 +679,10 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				// Hack for fields that used to inherit their value from the primary color.
 				if ( in_array(
 					$field['id'],
-					array(
+					[
 						'content_box_hover_animation_accent_color',
 						'map_overlay_color',
-					)
+					]
 				) && '' == $value ) {
 					$value = $options['primary_color'];
 				}
@@ -710,9 +709,9 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				}
 				// Make sure value is properly sanitized and then set it.
 				$options[ $field['id'] ] = Fusion_Sanitize::color( $value );
-				Avada_Migrate::generate_debug_log( array( $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ) );
-			} // End if().
-		} // End foreach().
+				Avada_Migrate::generate_debug_log( [ $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ] );
+			}
+		}
 
 		// Update the options with our modifications.
 		update_option( $this->avada_option_name, $options );
@@ -722,7 +721,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * HEX sanitization.
 	 */
 	public function color_hex() {
-		$options      = get_option( $this->avada_option_name, array() );
+		$options      = get_option( $this->avada_option_name, [] );
 		$this->fields = Avada_Options::get_option_fields();
 
 		foreach ( $this->fields as $field ) {
@@ -756,7 +755,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 					} elseif ( isset( $field['default'] ) ) {
 						$options[ $field['id'] ] = Fusion_Color::new_color( $field['default'] )->to_css( 'hex' );
 					}
-					Avada_Migrate::generate_debug_log( array( $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ) );
+					Avada_Migrate::generate_debug_log( [ $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ] );
 				}
 			}
 		}
@@ -769,7 +768,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * Media files migration.
 	 */
 	public function media_files() {
-		$options      = get_option( $this->avada_option_name, array() );
+		$options      = get_option( $this->avada_option_name, [] );
 		$this->fields = Avada_Options::get_option_fields();
 
 		foreach ( $this->fields as $field ) {
@@ -784,7 +783,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 							$options[ $field['id'] ] = $this->single_media_file( $field );
 						}
 					}
-					Avada_Migrate::generate_debug_log( array( $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ) );
+					Avada_Migrate::generate_debug_log( [ $field['id'], $field['id'], $initial_value, $options[ $field['id'] ] ] );
 				}
 			}
 		}
@@ -803,7 +802,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 */
 	public function single_media_file( $field ) {
 		global $wpdb;
-		$options = get_option( $this->avada_option_name, array() );
+		$options = get_option( $this->avada_option_name, [] );
 
 		// Try to get the image from the media library.
 		$attachment = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE guid=%s;", $options[ $field['id'] ] ) );
@@ -824,9 +823,9 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 			}
 		}
 
-		$new_media = array(
+		$new_media = [
 			'url' => $options[ $field['id'] ],
-		);
+		];
 
 		if ( is_array( $attachment ) && isset( $attachment[0] ) ) {
 			$attachment_id   = $attachment[0];
@@ -838,9 +837,9 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				wp_generate_attachment_metadata( $attachment_id, $file_path );
 			}
 
-			$new_media = array(
+			$new_media = [
 				'url' => $attachment_url,
-			);
+			];
 			if ( isset( $attachment_meta['width'] ) ) {
 				$new_media['width'] = $attachment_meta['width'];
 			}
@@ -862,8 +861,8 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * @param array $spacing_options The spacing options to convert.
 	 * @return void
 	 */
-	public function spacing_options( $spacing_options = array() ) {
-		$options      = get_option( $this->avada_option_name, array() );
+	public function spacing_options( $spacing_options = [] ) {
+		$options      = get_option( $this->avada_option_name, [] );
 		$this->fields = Avada_Options::get_option_fields();
 
 		foreach ( $this->fields as $field ) {
@@ -876,7 +875,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 						if ( isset( $field['default'] ) ) {
 							$options[ $field['id'] ] = $field['default'];
 						} else {
-							$options[ $field['id'] ] = array();
+							$options[ $field['id'] ] = [];
 						}
 					}
 					foreach ( $spacing_options[ $field['id'] ] as $direction => $old_setting ) {
@@ -898,12 +897,12 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 							}
 						}
 						if ( 'units' != $direction ) {
-							Avada_Migrate::generate_debug_log( array( $old_setting, $field['id'] . '[' . $direction . ']', $initial_value, $options[ $field['id'] ][ $direction ] ) );
+							Avada_Migrate::generate_debug_log( [ $old_setting, $field['id'] . '[' . $direction . ']', $initial_value, $options[ $field['id'] ][ $direction ] ] );
 						}
 					}
 				}
-			} // End if().
-		} // End foreach().
+			}
+		}
 
 		// Update the options with our modifications.
 		update_option( $this->avada_option_name, $options );
@@ -919,7 +918,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 */
 	public function migrate_typography_fields( $typography_options ) {
 		global $wpdb;
-		$options = get_option( $this->avada_option_name, array() );
+		$options = get_option( $this->avada_option_name, [] );
 
 		$is_custom_font = false;
 		if ( isset( $options['custom_fonts'] ) ) {
@@ -937,10 +936,10 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 		$subset = false;
 		if ( isset( $options['gfont_settings'] ) && ! empty( $options['gfont_settings'] ) ) {
 			if ( false !== strpos( $options['gfont_settings'], 'subset' ) ) {
-				$gfont_settings = wp_parse_args( $options['gfont_settings'], array() );
+				$gfont_settings = wp_parse_args( $options['gfont_settings'], [] );
 			} else {
 				$all_subsets    = Fusion_Data::font_subsets();
-				$gfont_settings = array();
+				$gfont_settings = [];
 				foreach ( $all_subsets as $available_subset ) {
 					if ( false !== strpos( $options['gfont_settings'], $available_subset ) ) {
 						$gfont_settings['subset'][] = $available_subset;
@@ -955,7 +954,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 						$subsets = explode( ',', $gfont_settings['subset'] );
 					} else {
 						$all_subsets = Fusion_Data::font_subsets();
-						$subsets     = array();
+						$subsets     = [];
 						foreach ( $all_subsets as $available_subset ) {
 							if ( false !== strpos( $options['gfont_settings'], $available_subset ) ) {
 								$subsets[] = $available_subset;
@@ -972,7 +971,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 			} else {
 				$subset = ( isset( $gfont_settings['subset'] ) ) ? $gfont_settings['subset'] : false;
 			}
-		} // End if().
+		}
 		$subset = ( 'latin' == $subset ) ? false : $subset;
 
 		$this->fields = Avada_Options::get_option_fields();
@@ -983,7 +982,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				 * Convert typography fields.
 				 */
 				if ( isset( $field['id'] ) && array_key_exists( $field['id'], $typography_options ) ) {
-					$options[ $field['id'] ] = array();
+					$options[ $field['id'] ] = [];
 
 					/**
 					 * Font-family.
@@ -992,19 +991,19 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 						if ( is_array( $typography_options[ $field['id'] ]['font-family'] ) ) {
 							// Standard fonts.
 							if ( isset( $typography_options[ $field['id'] ]['font-family']['standard'] ) && isset( $options[ $typography_options[ $field['id'] ]['font-family']['standard'] ] ) ) {
-								if ( ! in_array( $options[ $typography_options[ $field['id'] ]['font-family']['standard'] ], array( '', 'None', 'none', 'Select Font' ) ) ) {
+								if ( ! in_array( $options[ $typography_options[ $field['id'] ]['font-family']['standard'] ], [ '', 'None', 'none', 'Select Font' ] ) ) {
 									$options[ $field['id'] ]['font-family'] = $options[ $typography_options[ $field['id'] ]['font-family']['standard'] ];
 								} elseif ( 'body_typography' != $field['id'] && isset( $options['body_typography']['font-backup'] ) ) {
 									$options[ $field['id'] ]['font-backup'] = $options['body_typography']['font-backup'];
 								}
 							}
 							// Google fonts.
-							if ( isset( $typography_options[ $field['id'] ]['font-family']['google'] ) && isset( $options[ $typography_options[ $field['id'] ]['font-family']['google'] ] ) && ! in_array( $options[ $typography_options[ $field['id'] ]['font-family']['google'] ], array( '', 'None', 'none' ) ) ) {
+							if ( isset( $typography_options[ $field['id'] ]['font-family']['google'] ) && isset( $options[ $typography_options[ $field['id'] ]['font-family']['google'] ] ) && ! in_array( $options[ $typography_options[ $field['id'] ]['font-family']['google'] ], [ '', 'None', 'none' ] ) ) {
 								$options[ $field['id'] ]['font-family'] = $options[ $typography_options[ $field['id'] ]['font-family']['google'] ];
 								$options[ $field['id'] ]['google']      = 'true';
 								// Use standard font as backup font.
 								if ( isset( $typography_options[ $field['id'] ]['font-family']['standard'] ) && isset( $options[ $typography_options[ $field['id'] ]['font-family']['standard'] ] ) ) {
-									if ( ! in_array( $options[ $typography_options[ $field['id'] ]['font-family']['standard'] ], array( '', 'None', 'none', 'Select Font' ) ) ) {
+									if ( ! in_array( $options[ $typography_options[ $field['id'] ]['font-family']['standard'] ], [ '', 'None', 'none', 'Select Font' ] ) ) {
 										$options[ $field['id'] ]['font-backup'] = $options[ $typography_options[ $field['id'] ]['font-family']['standard'] ];
 									} else {
 										$options[ $field['id'] ]['font-backup'] = 'Arial, Helvetica, sans-serif';
@@ -1121,9 +1120,9 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 					if ( $subset ) {
 						$options[ $field['id'] ]['subsets'] = $subset;
 					}
-				} // End if().
-			} // End if().
-		} // End foreach().
+				}
+			}
+		}
 
 		// Update the options with our modifications.
 		update_option( $this->avada_option_name, $options );
@@ -1134,7 +1133,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 */
 	public function custom_fonts() {
 		global $wpdb;
-		$options        = get_option( $this->avada_option_name, array() );
+		$options        = get_option( $this->avada_option_name, [] );
 		$is_custom_font = (
 			(
 				( isset( $options['custom_font_woff']['url'] ) && $options['custom_font_woff']['url'] ) &&
@@ -1179,52 +1178,52 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 			return;
 		}
 
-		$options['custom_fonts'] = array(
-			'avadaredux_repeater_data' => array(
-				array(
+		$options['custom_fonts'] = [
+			'avadaredux_repeater_data' => [
+				[
 					'title' => '',
-				),
-			),
-			'name'                     => array(
+				],
+			],
+			'name'                     => [
 				$custom_font_name,
-			),
-			'woff'                     => array(
-				array(
+			],
+			'woff'                     => [
+				[
 					'url'       => $custom_font_woff,
 					'id'        => $attachment_woff[0],
 					'height'    => '',
 					'width'     => '',
 					'thumbnail' => trailingslashit( includes_url() ) . 'images/media/default.png',
-				),
-			),
-			'ttf'                      => array(
-				array(
+				],
+			],
+			'ttf'                      => [
+				[
 					'url'       => $custom_font_ttf,
 					'id'        => $attachment_ttf[0],
 					'height'    => '',
 					'width'     => '',
 					'thumbnail' => trailingslashit( includes_url() ) . 'images/media/default.png',
-				),
-			),
-			'svg'                      => array(
-				array(
+				],
+			],
+			'svg'                      => [
+				[
 					'url'       => $custom_font_svg,
 					'id'        => $attachment_svg[0],
 					'height'    => '',
 					'width'     => '',
 					'thumbnail' => trailingslashit( includes_url() ) . 'images/media/default.png',
-				),
-			),
-			'eot'                      => array(
-				array(
+				],
+			],
+			'eot'                      => [
+				[
 					'url'       => $custom_font_eot,
 					'id'        => $attachment_eot[0],
 					'height'    => '',
 					'width'     => '',
 					'thumbnail' => trailingslashit( includes_url() ) . 'images/media/default.png',
-				),
-			),
-		);
+				],
+			],
+		];
 
 		// Update the options with our modifications.
 		update_option( $this->avada_option_name, $options );
@@ -1234,13 +1233,13 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * Social networks.
 	 */
 	public function social() {
-		$options = get_option( $this->avada_option_name, array() );
+		$options = get_option( $this->avada_option_name, [] );
 		/**
 		 * Convert social-sorter control to the new format.
 		 * We used to have multiple separate settings, all saved as strings.
 		 * We'll be converting this to a single setting, but an array.
 		 */
-		$new_social = array();
+		$new_social = [];
 		if ( isset( $options['social_sorter'] ) ) {
 			/**
 			 * Setting is saved as a comma-separated string with all values included.
@@ -1272,7 +1271,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 			$options['footer_social_links_color_type'] = ( $use_brand_colors_on_footer ) ? 'brand' : 'custom';
 			$options['header_social_links_color_type'] = ( $use_brand_colors_on_header ) ? 'brand' : 'custom';
 
-			$active_icons = array();
+			$active_icons = [];
 			// Find active acons and their colors.
 			foreach ( $values as $key => $row ) {
 				// Check if there's a setting with that name.
@@ -1283,11 +1282,11 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				}
 			}
 
-			$new_social['avadaredux_repeater_data'] = array();
+			$new_social['avadaredux_repeater_data'] = [];
 			foreach ( $active_icons as $active_icon ) {
-				$new_social['avadaredux_repeater_data'][] = array(
+				$new_social['avadaredux_repeater_data'][] = [
 					'title' => '',
-				);
+				];
 			}
 			// Process each row in the array separately.
 			foreach ( $values as $key => $row ) {
@@ -1298,7 +1297,7 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 					}
 					// Check if a URL is defined for this social network.
 					if ( isset( $active_icon_key ) && isset( $options[ $options[ $row ] ] ) && ! empty( $options[ $options[ $row ] ] ) ) {
-						$new_social['icon'][ $active_icon_key ] = str_replace( array( 'google', 'googleplus' ), 'gplus', str_replace( '_link', '', $options[ $row ] ) );
+						$new_social['icon'][ $active_icon_key ] = str_replace( [ 'google', 'googleplus' ], 'gplus', str_replace( '_link', '', $options[ $row ] ) );
 						$new_social['url'][ $active_icon_key ]  = $options[ $options[ $row ] ];
 					}
 				}
@@ -1310,9 +1309,9 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				// Get the key for the custom icon by counting other icons.
 				$custom_icon_key = count( $new_social['icon'] );
 				// Set the 'avadaredux_repeater_data' for this icon.
-				$new_social['avadaredux_repeater_data'][ $custom_icon_key ] = array(
+				$new_social['avadaredux_repeater_data'][ $custom_icon_key ] = [
 					'title' => '',
-				);
+				];
 				// Set the icon type to custom.
 				$new_social['icon'][ $custom_icon_key ] = 'custom';
 				// Set the icon name.
@@ -1327,19 +1326,19 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				// and set the retina checkbox to 1.
 				if ( isset( $options['custom_icon_image_retina'] ) && ! empty( $options['custom_icon_image_retina'] ) ) {
 					$new_social['custom_source'][ $custom_icon_key ] = $this->single_media_file(
-						array(
+						[
 							'id' => 'custom_icon_image_retina',
-						)
+						]
 					);
 				} else {
 					$new_social['custom_source'][ $custom_icon_key ] = $this->single_media_file(
-						array(
+						[
 							'id' => 'custom_icon_image',
-						)
+						]
 					);
 				}
 			}
-		} // End if().
+		}
 		$options['social_media_icons'] = $new_social;
 
 		/**
@@ -1361,10 +1360,10 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	 * Various other options that don't fit anywhere else.
 	 */
 	public function other_options() {
-		$options = get_option( $this->avada_option_name, array() );
+		$options = get_option( $this->avada_option_name, [] );
 
 		// Convert the "round" option to "50%".
-		$round_options = array(
+		$round_options = [
 			'content_box_icon_circle_radius',
 			'content_box_icon_circle_radius',
 			'social_links_boxed_radius',
@@ -1374,35 +1373,35 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 			'imageframe_border_radius',
 			'person_border_radius',
 			'flip_boxes_border_radius',
-		);
+		];
 		foreach ( $round_options as $round_option ) {
 			if ( isset( $options[ $round_option ] ) ) {
 				$initial_value = ( isset( $options[ $round_option ] ) ) ? $options[ $round_option ] : 'UNDEFINED';
 				if ( 'round' == strtolower( trim( $options[ $round_option ] ) ) ) {
 					$options[ $round_option ] = '50%';
 				}
-				Avada_Migrate::generate_debug_log( array( $round_option, $round_option, $initial_value, $options[ $round_option ] ) );
+				Avada_Migrate::generate_debug_log( [ $round_option, $round_option, $initial_value, $options[ $round_option ] ] );
 			}
 		}
 
-		$dimensions_fields = array(
-			'slider_nav_box_dimensions' => array(
+		$dimensions_fields = [
+			'slider_nav_box_dimensions' => [
 				'width'  => 'slider_nav_box_width',
 				'height' => 'slider_nav_box_height',
-			),
-			'tfes_dimensions'           => array(
+			],
+			'tfes_dimensions'           => [
 				'width'  => 'tfes_slider_width',
 				'height' => 'tfes_slider_height',
-			),
-			'gmap_dimensions'           => array(
+			],
+			'gmap_dimensions'           => [
 				'width'  => 'gmap_width',
 				'height' => 'gmap_height',
-			),
-			'lightbox_video_dimensions' => array(
+			],
+			'lightbox_video_dimensions' => [
 				'width'  => 'lightbox_video_width',
 				'height' => 'lightbox_video_height',
-			),
-		);
+			],
+		];
 
 		$this->fields = Avada_Options::get_option_fields();
 
@@ -1419,23 +1418,23 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 				$height               = $options[ $args['height'] ];
 				$initial_value_height = $height;
 			}
-			$options[ $dimensions_field ] = array(
+			$options[ $dimensions_field ] = [
 				'width'  => Fusion_Sanitize::size( $width ),
 				'height' => Fusion_Sanitize::size( $height ),
-			);
-			Avada_Migrate::generate_debug_log( array( $args['width'], $dimensions_field . '[width]', $initial_value_width, $options[ $dimensions_field ]['width'] ) );
-			Avada_Migrate::generate_debug_log( array( $args['height'], $dimensions_field . '[height]', $initial_value_height, $options[ $dimensions_field ]['height'] ) );
+			];
+			Avada_Migrate::generate_debug_log( [ $args['width'], $dimensions_field . '[width]', $initial_value_width, $options[ $dimensions_field ]['width'] ] );
+			Avada_Migrate::generate_debug_log( [ $args['height'], $dimensions_field . '[height]', $initial_value_height, $options[ $dimensions_field ]['height'] ] );
 		}
 
-		$capitalization_check_fields = array(
+		$capitalization_check_fields = [
 			'excerpt_base',
 			'sidenav_behavior',
-		);
+		];
 		foreach ( $capitalization_check_fields as $capitalization_check_field ) {
 			if ( isset( $options[ $capitalization_check_field ] ) ) {
 				$initial_value                          = $options[ $capitalization_check_field ];
 				$options[ $capitalization_check_field ] = ucfirst( $options[ $capitalization_check_field ] );
-				Avada_Migrate::generate_debug_log( array( $capitalization_check_field, $capitalization_check_field, $initial_value, $options[ $capitalization_check_field ] ) );
+				Avada_Migrate::generate_debug_log( [ $capitalization_check_field, $capitalization_check_field, $initial_value, $options[ $capitalization_check_field ] ] );
 			}
 		}
 
@@ -1453,16 +1452,16 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 			$options['pagination_box_padding'] = trim( $options['pagination_box_padding'] );
 			if ( strpos( $options['pagination_box_padding'], ' ' ) ) {
 				$values                            = explode( ' ', $options['pagination_box_padding'] );
-				$options['pagination_box_padding'] = array(
+				$options['pagination_box_padding'] = [
 					'height' => $values[0],
 					'width'  => $values[1],
-				);
+				];
 			} else {
 				$value                             = $options['pagination_box_padding'];
-				$options['pagination_box_padding'] = array(
+				$options['pagination_box_padding'] = [
 					'width'  => $value,
 					'height' => $value,
-				);
+				];
 			}
 		}
 		// Update the options with our modifications.
@@ -1475,17 +1474,17 @@ class Avada_AvadaRedux_Migration extends Avada_Migrate {
 	public function finished() {
 
 		// Make sure initial values are set without need to save.
-		$options = get_option( $this->avada_option_name, array() );
+		$options = get_option( $this->avada_option_name, [] );
 
 		// Disable builder needs switched here because logic switch wont trigger earlier due option being removed.
 		update_option( 'avada_disable_builder', $options['disable_builder'] );
 		update_option( 'avada_disable_encoding', $options['disable_code_block_encoding'] );
 
 		// Reset the css.
-		update_option( 'fusion_dynamic_css_posts', array() );
+		update_option( 'fusion_dynamic_css_posts', [] );
 
 		// Update the 'avada_migrations' option.
-		$migration_run                               = get_option( 'avada_migrations', array() );
+		$migration_run                               = get_option( 'avada_migrations', [] );
 		$migration_run[ $this->version ]['finished'] = true;
 		unset( $migration_run['copied'] );
 		update_option( 'avada_migrations', $migration_run );

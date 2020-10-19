@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -18,7 +18,7 @@ $text            = Avada()->settings->get( 'privacy_bar_text' );
 $content         = Avada()->privacy_embeds->get_privacy_content();
 $content_count   = is_array( $content ) ? count( $content ) : 0;
 $column_size     = 0 !== $content_count ? 12 / $content_count : 0;
-$more            = '0' !== Avada()->settings->get( 'privacy_bar_more' ) && 0 !== $content_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+$more            = '0' !== Avada()->settings->get( 'privacy_bar_more' ) && 0 !== $content_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 $button_text     = Avada()->settings->get( 'privacy_bar_button_text' );
 $button_alt_text = Avada()->settings->get( 'privacy_bar_update_text' );
 $settings_text   = Avada()->settings->get( 'privacy_bar_more_text' );
@@ -27,10 +27,10 @@ $settings_text   = Avada()->settings->get( 'privacy_bar_more_text' );
 	<div class="fusion-privacy-bar-main">
 		<span><?php echo do_shortcode( $text ); ?>
 			<?php if ( $more ) : ?>
-				<a href="#" class="fusion-privacy-bar-learn-more"><?php echo esc_attr( $settings_text ); ?> <i class="fusion-icon-angle-down"></i></a>
+				<a href="#" class="fusion-privacy-bar-learn-more"><?php echo esc_attr( $settings_text ); ?> <i class="fusion-icon-angle-down" aria-hidden="true"></i></a>
 			<?php endif; ?>
 		</span>
-		<a href="#" class="fusion-privacy-bar-acceptance fusion-button fusion-button-default fusion-button-default-size" data-alt-text="<?php echo esc_attr( $button_alt_text ); ?>" data-orig-text="<?php echo esc_attr( $button_text ); ?>">
+		<a href="#" class="fusion-privacy-bar-acceptance fusion-button fusion-button-default fusion-button-default-size fusion-button-span-no" data-alt-text="<?php echo esc_attr( $button_alt_text ); ?>" data-orig-text="<?php echo esc_attr( $button_text ); ?>">
 			<?php echo esc_html( $button_text ); ?>
 		</a>
 	</div>
@@ -38,7 +38,7 @@ $settings_text   = Avada()->settings->get( 'privacy_bar_more_text' );
 	<div class="fusion-privacy-bar-full">
 		<div class="fusion-row">
 			<div class="fusion-columns row fusion-columns-<?php echo esc_attr( $content_count ); ?> columns columns-<?php echo esc_attr( $content_count ); ?>">
-				<?php foreach ( $content as $id => $column ) : // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited ?>
+				<?php foreach ( $content as $id => $column ) : // phpcs:ignore WordPress.WP.GlobalVariablesOverride ?>
 				<div class="fusion-column col-lg-<?php echo esc_attr( $column_size ); ?> col-md-<?php echo esc_attr( $column_size ); ?> col-sm-<?php echo esc_attr( $column_size ); ?>">
 					<?php if ( '' !== $column['title'] ) : ?>
 						<h4 class="column-title"><?php echo esc_html( $column['title'] ); ?></h4>
@@ -54,7 +54,7 @@ $settings_text   = Avada()->settings->get( 'privacy_bar_more_text' );
 						<ul class="fusion-privacy-choices">
 
 						<?php if ( is_array( $embeds ) ) : ?>
-							<?php foreach ( $embeds as $id => $embed ) : // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited ?>
+							<?php foreach ( $embeds as $id => $embed ) : // phpcs:ignore WordPress.WP.GlobalVariablesOverride ?>
 								<?php $selected = Avada()->privacy_embeds->is_selected( $id ) ? 'checked' : ''; ?>
 
 								<?php if ( 'tracking' !== $id ) : ?>

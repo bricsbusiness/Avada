@@ -23,13 +23,13 @@ if ( ! function_exists( 'fusion_redux_validate_dimension' ) ) {
 	 */
 	function fusion_redux_validate_dimension( $field, $value, $existing_value ) {
 
-		$return = array();
+		$return = [];
 
 		$value = trim( strtolower( $value ) );
-		if ( in_array( $value, array( 'auto', 'initial', 'inherit' ), true ) ) {
-			return array(
+		if ( in_array( $value, [ 'auto', 'initial', 'inherit' ], true ) ) {
+			return [
 				'value' => $value,
-			);
+			];
 		}
 		$warning = false;
 
@@ -38,7 +38,7 @@ if ( ! function_exists( 'fusion_redux_validate_dimension' ) ) {
 		}
 
 		if ( '' === $existing_value || null === $existing_value || false === $existing_value && class_exists( 'Avada' ) ) {
-			$existing_value = Avada()->settings->get( $field['id'] );
+			$existing_value = fusion_get_theme_option( $field['id'] );
 		}
 
 		if ( '' === $value || null === $value || false === $value ) {
@@ -47,10 +47,10 @@ if ( ! function_exists( 'fusion_redux_validate_dimension' ) ) {
 
 		// If using calc() return the value.
 		if ( false !== strpos( $value, 'calc' ) ) {
-			return array(
+			return [
 				'warning' => $field,
 				'value'   => $value,
-			);
+			];
 		}
 
 		// Remove spaces from the value.
@@ -68,7 +68,7 @@ if ( ! function_exists( 'fusion_redux_validate_dimension' ) ) {
 		}
 
 		// An array of valid CSS units.
-		$valid_units = array( 'rem', 'em', 'ex', '%', 'px', 'cm', 'mm', 'in', 'pt', 'pc', 'vh', 'vw', 'vmin', 'vmax' );
+		$valid_units = [ 'rem', 'em', 'ex', '%', 'px', 'cm', 'mm', 'in', 'pt', 'pc', 'vh', 'vw', 'vmin', 'vmax' ];
 
 		// If we can't find a valid CSS unit in the value,
 		// show a warning message and fallback to using pixels.
@@ -85,7 +85,7 @@ if ( ! function_exists( 'fusion_redux_validate_dimension' ) ) {
 			/* translators: %1$s: The fallback value. %2$s: The saved value. %3$s: User-entered value. */
 			$replaced_units_message = esc_html__( 'We could not find a valid unit for this field, falling back to "%1$s". Saved value "%2$s" and not "%3$s".', 'Avada' );
 			/* translators: %1$s: The fallback value. %2$s: The saved value. %3$s: User-entered value. */
-			$units_message          = esc_html__( 'No units were entered, falling back to using pixels. Saved value "%2$s" and not "%3$s".', 'Avada' );
+			$units_message = esc_html__( 'No units were entered, falling back to using pixels. Saved value "%2$s" and not "%3$s".', 'Avada' );
 			if ( empty( $value_unit ) ) {
 				$message    = $units_message;
 				$value_unit = 'px';
@@ -115,7 +115,7 @@ if ( ! function_exists( 'fusion_redux_validate_dimension' ) ) {
 		return $return;
 
 	}
-}// End if().
+}
 
 if ( ! function_exists( 'fusion_redux_validate_font_size' ) ) {
 	/**
@@ -129,12 +129,12 @@ if ( ! function_exists( 'fusion_redux_validate_font_size' ) ) {
 	 */
 	function fusion_redux_validate_font_size( $field, $value, $existing_value ) {
 		$warning = false;
-		$value = trim( strtolower( $value ) );
+		$value   = trim( strtolower( $value ) );
 
-		$return = array();
+		$return = [];
 
 		if ( '' === $existing_value || null === $existing_value || false === $existing_value && class_exists( 'Avada' ) ) {
-			$existing_value = Avada()->settings->get( $field['id'] );
+			$existing_value = fusion_get_theme_option( $field['id'] );
 		}
 
 		if ( '' === $value || null === $value || false === $value ) {
@@ -156,7 +156,7 @@ if ( ! function_exists( 'fusion_redux_validate_font_size' ) ) {
 		}
 
 		// An array of valid CSS units.
-		$valid_units = array( 'rem', 'em', 'px' );
+		$valid_units = [ 'rem', 'em', 'px' ];
 
 		// If we can't find a valid CSS unit in the value.
 		// show a warning message and fallback to using pixels.
@@ -168,7 +168,7 @@ if ( ! function_exists( 'fusion_redux_validate_font_size' ) ) {
 			/* translators: %1$s: The fallback value. %2$s: The saved value. %3$s: User-entered value. %4$s: A list of valid units. */
 			$replaced_units_message = esc_html__( 'We could not find a valid unit for this field, falling back to "%1$s". Valid units are %4$s. Saved value "%2$s" and not "%3$s.".', 'Avada' );
 			/* translators: %1$s: The fallback value. %2$s: The saved value. %3$s: User-entered value. %4$s: A list of valid units. */
-			$units_message          = esc_html__( 'No units were entered, falling back to using pixels. Saved value "%2$s" and not "%3$s".', 'Avada' );
+			$units_message = esc_html__( 'No units were entered, falling back to using pixels. Saved value "%2$s" and not "%3$s".', 'Avada' );
 			if ( empty( $value_unit ) ) {
 				$message    = $units_message;
 				$value_unit = 'px';
@@ -199,7 +199,7 @@ if ( ! function_exists( 'fusion_redux_validate_font_size' ) ) {
 		return $return;
 
 	}
-}// End if().
+}
 
 if ( ! function_exists( 'fusion_redux_validate_typography' ) ) {
 	/**
@@ -213,30 +213,30 @@ if ( ! function_exists( 'fusion_redux_validate_typography' ) ) {
 	 */
 	function fusion_redux_validate_typography( $field, $value, $existing_value ) {
 
-		$return = array();
+		$return = [];
 
-		$limit_units_fields = array(
+		$limit_units_fields = [
 			'font-size',
 			'line-height',
 			'letter-spacing',
-		);
+		];
 		if ( is_array( $value ) ) {
 			// An array of valid CSS units.
-			$valid_units = array( 'px', 'rem', 'em' );
-			$warning     = array();
-			$message     = array();
+			$valid_units = [ 'px', 'rem', 'em' ];
+			$warning     = [];
+			$message     = [];
 
 			$imploded_valid_units = implode( ', ', $valid_units );
 
 			foreach ( $value as $key => $subvalue ) {
 				$replaced_units_message = '';
 				$units_message          = '';
-				$subvalue_numeric = '';
-				$subvalue_unit = '';
-				$warning[ $key ] = false;
+				$subvalue_numeric       = '';
+				$subvalue_unit          = '';
+				$warning[ $key ]        = false;
 				if ( in_array( $key, $limit_units_fields, true ) ) {
 					if ( '' === $existing_value[ $key ] || null === $existing_value[ $key ] || false === $existing_value[ $key ] && class_exists( 'Avada' ) ) {
-						$existing_value[ $key ] = Avada()->settings->get( $field['id'], $key );
+						$existing_value[ $key ] = fusion_get_theme_option( $field['id'], $key );
 					}
 					if ( '' === $subvalue || null === $subvalue || false === $subvalue ) {
 						$subvalue = $existing_value[ $key ];
@@ -276,20 +276,20 @@ if ( ! function_exists( 'fusion_redux_validate_typography' ) ) {
 						/* translators: %1$s: The value. %2$s: Fallback value. %3$s: A list of valid units. %4$s: Saved value. %5$s: User-entered value. */
 						$replaced_units_message = esc_html__( 'We could not find a valid unit for %1$s, falling back to "%2$s". Valid units are %3$s. Saved value "%4$s" and not "%5$s.".', 'Avada' );
 						/* translators: %1$s: The value. %2$s: Fallback value. %3$s: A list of valid units. %4$s: Saved value. %5$s: User-entered value. */
-						$units_message          = esc_html__( 'No units were entered for %1$s, falling back to using pixels. Saved value "%4$s" and not "%5$s".', 'Avada' );
+						$units_message = esc_html__( 'No units were entered for %1$s, falling back to using pixels. Saved value "%4$s" and not "%5$s".', 'Avada' );
 						if ( empty( $subvalue_unit ) ) {
 							$message[]     = sprintf( $units_message, $key, $subvalue_unit, $imploded_valid_units, $subvalue_numeric . $subvalue_unit, $subvalue );
 							$subvalue_unit = 'px';
 							$unit_found    = true;
 						} else {
-							$unit_found           = false;
+							$unit_found = false;
 							foreach ( $valid_units as $valid_unit ) {
 								if ( $unit_found ) {
 									continue;
 								}
 								if ( false !== strrpos( $subvalue_unit, $valid_unit ) ) {
 									$subvalue_unit = $valid_unit;
-									$unit_found = true;
+									$unit_found    = true;
 								}
 							}
 							if ( ! $unit_found ) {
@@ -302,18 +302,18 @@ if ( ! function_exists( 'fusion_redux_validate_typography' ) ) {
 						}
 					}
 					$value[ $key ] = $subvalue_numeric . $subvalue_unit;
-				}// End if().
-			}// End foreach().
+				}
+			}
 
 			// Take care of font-weight sanitization.
 			if ( ! class_exists( 'Fusion_Redux_Get_GoogleFonts' ) ) {
 				include_once wp_normalize_path( Fusion::$template_dir_path . '/includes/fusionredux/custom-fields/typography/googlefonts.php' );
 			}
-			$googlefonts    = Fusion_Redux_Get_GoogleFonts::get_instance();
-			$font_family    = $value['font-family'];
+			$googlefonts = Fusion_Redux_Get_GoogleFonts::get_instance();
+			$font_family = $value['font-family'];
 			if ( isset( $googlefonts->fonts[ $font_family ] ) ) {
 				$variants       = $googlefonts->fonts[ $font_family ]['variants'];
-				$valid_variants = array();
+				$valid_variants = [];
 				foreach ( $variants as $variant ) {
 					if ( isset( $variant['id'] ) ) {
 						$valid_variants[] = $variant['id'];
@@ -337,8 +337,15 @@ if ( ! function_exists( 'fusion_redux_validate_typography' ) ) {
 						$value['font-weight'] = $valid_variants[0];
 					}
 				}
+
+				$value['font-weight'] = ( 'regular' === $value['font-weight'] ) ? '400' : $value['font-weight'];
 			}
-		}// End if().
+
+			if ( isset( $value['letter-spacing'] ) && is_numeric( $value['letter-spacing'] ) ) {
+				$value['letter-spacing'] = (string) $value['letter-spacing'];
+				$value['letter-spacing'] = trim( $value['letter-spacing'] ) . 'px';
+			}
+		}
 		if ( ! empty( $message ) ) {
 			$field['msg']      = implode( ' ', $message );
 			$return['warning'] = $field;
@@ -349,7 +356,7 @@ if ( ! function_exists( 'fusion_redux_validate_typography' ) ) {
 		return $return;
 
 	}
-}// End if().
+}
 
 if ( ! function_exists( 'fusion_redux_validate_dimensions' ) ) {
 	/**
@@ -363,18 +370,18 @@ if ( ! function_exists( 'fusion_redux_validate_dimensions' ) ) {
 	 */
 	function fusion_redux_validate_dimensions( $field, $value, $existing_value ) {
 
-		$warning       = array();
-		$error_message = array();
+		$warning       = [];
+		$error_message = [];
 
-		$return = array();
+		$return = [];
 
 		// An array of valid CSS units.
-		$valid_units = array( 'rem', 'em', 'ex', '%', 'px', 'cm', 'mm', 'in', 'pt', 'pc', 'vh', 'vw', 'vmin', 'vmax' );
+		$valid_units = [ 'rem', 'em', 'ex', '%', 'px', 'cm', 'mm', 'in', 'pt', 'pc', 'vh', 'vw', 'vmin', 'vmax' ];
 
 		if ( ! is_array( $value ) ) {
-			return array(
+			return [
 				'value' => $value,
-			);
+			];
 		}
 		foreach ( $value as $key => $subvalue ) {
 			$warning[ $key ] = false;
@@ -384,7 +391,7 @@ if ( ! function_exists( 'fusion_redux_validate_dimensions' ) ) {
 			}
 
 			if ( ! isset( $existing_value[ $key ] ) || '' === $existing_value[ $key ] || null === $existing_value[ $key ] || false === $existing_value[ $key ] && class_exists( 'Avada' ) ) {
-				$existing_value = Avada()->settings->get( $field['id'], $key );
+				$existing_value = fusion_get_theme_option( $field['id'], $key );
 			}
 
 			if ( '' === $subvalue || null === $subvalue || false === $subvalue ) {
@@ -417,7 +424,7 @@ if ( ! function_exists( 'fusion_redux_validate_dimensions' ) ) {
 				/* translators: %1$s: Fallback value. %2$s: Saved value. %3$s: User-entered value. */
 				$replaced_units_message = esc_html__( 'We could not find a valid unit for this field, falling back to "%1$s". Saved value "%2$s" and not "%3$s".', 'Avada' );
 				/* translators: %2$s: Saved value. %3$s: User-entered value. */
-				$units_message          = esc_html__( 'No units were entered, falling back to using pixels. Saved value "%2$s" and not "%3$s".', 'Avada' );
+				$units_message = esc_html__( 'No units were entered, falling back to using pixels. Saved value "%2$s" and not "%3$s".', 'Avada' );
 				if ( empty( $subvalue_unit ) ) {
 					$message       = $units_message;
 					$subvalue_unit = 'px';
@@ -439,13 +446,13 @@ if ( ! function_exists( 'fusion_redux_validate_dimensions' ) ) {
 				if ( ! $subunit_found ) {
 					$subvalue_unit = 'px';
 				}
-				$error_message[]   = sprintf( $message, $subvalue_unit, $subvalue_numeric . $subvalue_unit, $subvalue );
+				$error_message[] = sprintf( $message, $subvalue_unit, $subvalue_numeric . $subvalue_unit, $subvalue );
 
 			}
 
 			$return['value'][ $key ] = $subvalue_numeric . $subvalue_unit;
 
-		}// End foreach().
+		}
 		if ( ! empty( $error_message ) ) {
 			$field['msg']      = implode( ' ', $error_message );
 			$return['warning'] = $field;
@@ -454,7 +461,7 @@ if ( ! function_exists( 'fusion_redux_validate_dimensions' ) ) {
 		return $return;
 
 	}
-}// End if().
+}
 
 if ( ! function_exists( 'fusion_redux_validate_color_rgba' ) ) {
 	/**
@@ -468,14 +475,14 @@ if ( ! function_exists( 'fusion_redux_validate_color_rgba' ) ) {
 	 */
 	function fusion_redux_validate_color_rgba( $field, $value, $existing_value ) {
 
-		$return = array();
+		$return = [];
 
-		$error = false;
+		$error           = false;
 		$sanitized_value = Fusion_Sanitize::color( $value );
 		$return['value'] = $sanitized_value;
 
-		if ( $value != $sanitized_value ) {
-			$error = true;
+		if ( $value != $sanitized_value ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
+			$error        = true;
 			$field['msg'] = sprintf(
 				/* translators: The saved value and the user-entered value. */
 				esc_html__( 'Sanitized value and saved as %1$s instead of %2$s.', 'Avada' ),
@@ -500,17 +507,17 @@ if ( ! function_exists( 'fusion_redux_validate_color_hex' ) ) {
 	 */
 	function fusion_redux_validate_color_hex( $field, $value, $existing_value ) {
 
-		$return = array();
+		$return = [];
 
-		$error = false;
+		$error           = false;
 		$sanitized_value = Fusion_Sanitize::color( $value );
 		if ( false !== strpos( $sanitized_value, 'rgba' ) ) {
 			$sanitized_value = Fusion_Color::new_color( $sanitized_value )->to_css( 'hex' );
 		}
 		$return['value'] = $sanitized_value;
 
-		if ( $value != $sanitized_value ) {
-			$error = true;
+		if ( $value != $sanitized_value ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
+			$error        = true;
 			$field['msg'] = sprintf(
 				/* translators: The saved value and the user-entered value. */
 				esc_html__( 'Sanitized value and saved as %1$s instead of %2$s.', 'Avada' ),
@@ -534,7 +541,7 @@ if ( ! function_exists( 'fusion_redux_validate_custom_fonts' ) ) {
 	 * @return array
 	 */
 	function fusion_redux_validate_custom_fonts( $field, $value, $existing_value ) {
-		$return = array();
+		$return = [];
 
 		if ( isset( $value['name'] ) ) {
 
@@ -544,9 +551,9 @@ if ( ! function_exists( 'fusion_redux_validate_custom_fonts' ) ) {
 			}
 		}
 
-		return array(
+		return [
 			'value' => $value,
-		);
+		];
 	}
 }
 
@@ -562,10 +569,10 @@ if ( ! function_exists( 'fusion_fusionredux_validate_select' ) ) {
 	 */
 	function fusion_fusionredux_validate_select( $field, $value, $existing_value ) {
 
-		return ( isset( $field['multi'] ) && $field['multi'] && 'fusion-theme-options-fake-value' === $value ) ? array(
-			'value' => array(),
-		) : array(
+		return ( isset( $field['multi'] ) && $field['multi'] && 'fusion-theme-options-fake-value' === $value ) ? [
+			'value' => [],
+		] : [
 			'value' => $value,
-		);
+		];
 	}
 }

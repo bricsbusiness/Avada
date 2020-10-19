@@ -187,7 +187,7 @@ if ( ! class_exists( 'FusionReduxFramework_media' ) ) {
 
 			echo '<div class="' . $hide . 'screenshot">';
 			echo '<a class="of-uploaded-image" href="' . $this->value['url'] . '" target="_blank">';
-			echo '<img class="fusionredux-option-image" id="image_' . $this->field['id'] . '" src="' . $this->value['thumbnail'] . '" alt="" target="_blank" rel="external" />';
+			echo '<img class="fusionredux-option-image" id="image_' . $this->field['id'] . '" src="' . $this->value['thumbnail'] . '" target="_blank" rel="external" />';
 			echo '</a>';
 			echo '</div>';
 

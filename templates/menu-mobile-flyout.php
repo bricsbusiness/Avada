@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -13,11 +13,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit( 'Direct script access denied.' );
 }
-
-$header_content_3 = Avada()->settings->get( 'header_v4_content' );
 ?>
 <div class="fusion-flyout-menu-icons fusion-flyout-mobile-menu-icons">
-	<?php avada_flyout_menu_woo_cart(); ?>
+	<?php echo avada_flyout_menu_woo_cart(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 
 	<?php if ( 'menu' === Avada()->settings->get( 'slidingbar_toggle_style' ) && Avada()->settings->get( 'mobile_slidingbar_widgets' ) ) : ?>
 		<?php $sliding_bar_label = esc_attr__( 'Toggle Sliding Bar', 'Avada' ); ?>

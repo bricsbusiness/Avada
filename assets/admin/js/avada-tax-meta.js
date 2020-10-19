@@ -7,7 +7,7 @@
 	/**
 	 * Initialize all color pickers.
 	 *
-	 * @returns {void}
+	 * @return {void}
 	 */
 	avadaTaxMeta.initColorPickers = function() {
 		jQuery( '.avada-tax-color' ).each( function() {
@@ -45,9 +45,9 @@
 	 * Color change event handler.
 	 *
 	 * @param {string} [value]        The current value.
-	 * @param {object} [self]         The $this object.
-	 * @param {object} [defaultReset] The reset element.
-	 * @returns {void}
+	 * @param {Object} [self]         The $this object.
+	 * @param {Object} [defaultReset] The reset element.
+	 * @return {void}
 	 */
 	avadaTaxMeta.colorChange = function( value, self, defaultReset ) {
 		var defaultColor = self.data( 'default' );
@@ -70,9 +70,9 @@
 	/**
 	 * Color clear event handler.
 	 *
-	 * @param {object} [event] Event refrence.
-	 * @param {object} [self]  Reference to the element.
-	 * @returns {void}
+	 * @param {Object} [event] Event refrence.
+	 * @param {Object} [self]  Reference to the element.
+	 * @return {void}
 	 */
 	avadaTaxMeta.colorClear = function( event, self ) {
 		var defaultColor = self.data( 'default' );
@@ -90,7 +90,7 @@
 	/**
 	 * Initialize media frame popups and their actions.
 	 *
-	 * @returns {void}
+	 * @return {void}
 	 */
 	avadaTaxMeta.initMediaFrames = function() {
 		var frame,
@@ -98,7 +98,8 @@
 			addImgLink   = metaBox.find( '.avada-tax-image-upload' ),
 			delImgLink   = metaBox.find( '.avada-tax-image-upload-clear' ),
 			imgContainer = metaBox.find( '.avada-tax-image-preview' ),
-			imgIdInput   = metaBox.find( '.avada-tax-image-url' ),
+			imgIdInput   = metaBox.find( '.avada-tax-image' ),
+			imgUrlInput  = metaBox.find( '.avada-tax-image-url' ),
 			pContainer   = '';
 
 		// On image link click.
@@ -125,10 +126,18 @@
 			frame.on( 'select', function() {
 
 				// Get media attachment details from the frame state.
-				var attachment = frame.state().get( 'selection' ).first().toJSON();
+				var attachment = frame.state().get( 'selection' ).first().toJSON(),
+					imgDataObj = {
+						id: attachment.id,
+						url: attachment.url,
+						width: attachment.width,
+						height: attachment.height,
+						thumbnail: ''
+					};
 
 				// Send the attachment id to our hidden input.
-				pContainer.find( imgIdInput ).val( attachment.url ).trigger( 'change' );
+				pContainer.find( imgIdInput ).val( JSON.stringify( imgDataObj ) ).trigger( 'change' );
+				pContainer.find( imgUrlInput ).val( imgDataObj.url ).trigger( 'change' );
 
 				// Hide the add image link.
 				pContainer.find( addImgLink ).addClass( 'hidden' );
@@ -158,15 +167,16 @@
 
 			// Delete the image id from the hidden input.
 			pContainer.find( imgIdInput ).val( '' ).trigger( 'change' );
+			pContainer.find( imgUrlInput ).val( '' );
 		} );
 	};
 
 	/**
 	 * Perform clear form operations on ajax complete.
 	 *
-	 * @param {object} [event]
-	 * @param {object} [xhr]
-	 * @returns {void}
+	 * @param {Object} [event]
+	 * @param {Object} [xhr]
+	 * @return {void}
 	 */
 	avadaTaxMeta.onAjaxComplete = function( event, xhr ) {
 		var $response;
@@ -191,13 +201,13 @@
 					}
 				}
 			} );
-		} catch ( err ) {}
+		} catch ( err ) {} // eslint-disable-line no-empty
 	};
 
 	/**
 	 * Clears avada taxonomy meta form fields.
 	 *
-	 * @returns {void}
+	 * @return {void}
 	 */
 	avadaTaxMeta.clearFormFields = function() {
 
@@ -216,7 +226,7 @@
 		} );
 
 		// Update button set.
-		jQuery.each( jQuery( '.avada-tax-button-set a' ), function( i, item ) { // jshint ignore:line
+		jQuery.each( jQuery( '.avada-tax-button-set a' ), function() {
 			var $radiosetcontainer;
 			$radiosetcontainer = jQuery( this ).parents( '.avada-tax-button-set' );
 			$radiosetcontainer.find( '.ui-state-active' ).removeClass( 'ui-state-active' );
@@ -228,7 +238,7 @@
 	/**
 	 * Enable dependencies.
 	 *
-	 * @returns {void}
+	 * @return {void}
 	 */
 	avadaTaxMeta.enableDependencies = function() {
 		jQuery( '.avada-tax-dependency' ).each( function() {
@@ -239,7 +249,7 @@
 	/**
 	 * Loop through dependencies and show/hide.
 	 *
-	 * @returns {void}
+	 * @return {void}
 	 */
 	avadaTaxMeta.avadaTaxLoopDependencies = function( $container ) {
 		var $passed = false;
@@ -263,7 +273,7 @@
 	/**
 	 * Check if dependency active or not.
 	 *
-	 * @returns {boolean}
+	 * @return {boolean}
 	 */
 	avadaTaxMeta.avadaTaxCheckDependency = function( $currentValue, $desiredValue, $comparison ) {
 		if ( '==' === $comparison || '=' === $comparison ) {
@@ -295,7 +305,7 @@
 		return false;
 	};
 
-  jQuery( '.avada-tax-button-set a' ).on( 'click', function( e ) {
+	jQuery( '.avada-tax-button-set a' ).on( 'click', function( e ) {
 		var $radiosetcontainer;
 
 		e.preventDefault();

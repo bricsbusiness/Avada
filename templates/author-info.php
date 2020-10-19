@@ -1,10 +1,10 @@
-<?php
+<?php // phpcs:disable WPThemeReview.Templates.ReservedFileNamePrefix
 /**
  * Author-info template.
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -15,11 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <?php
-global $social_icons;
+$social_icons = fusion_get_social_icons_class();
 
 // Initialize needed variables.
 $author             = get_user_by( 'id', get_query_var( 'author' ) );
-$author_id          = $author->ID;
+$author_id          = (int) $author->ID;
 $author_name        = get_the_author_meta( 'display_name', $author_id );
 $author_avatar      = get_avatar( get_the_author_meta( 'email', $author_id ), '82' );
 $author_description = get_the_author_meta( 'description', $author_id );
@@ -34,7 +34,7 @@ if ( empty( $author_description ) ) {
 ?>
 <div class="fusion-author">
 	<div class="fusion-author-avatar">
-		<?php echo $author_avatar; // WPCS: XSS ok. ?>
+		<?php echo $author_avatar; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	</div>
 	<div class="fusion-author-info">
 		<h3 class="fusion-author-title<?php echo ( Avada()->settings->get( 'disable_date_rich_snippet_pages' ) && Avada()->settings->get( 'disable_rich_snippet_author' ) ) ? ' vcard' : ''; ?>">
@@ -46,11 +46,11 @@ if ( empty( $author_description ) ) {
 			);
 			?>
 			<?php // If user can edit his profile, offer a link for it. ?>
-			<?php if ( current_user_can( 'edit_users' ) || get_current_user_id() == $author_id ) : ?>
+			<?php if ( current_user_can( 'edit_users' ) || get_current_user_id() === $author_id ) : ?>
 				<span class="fusion-edit-profile">(<a href="<?php echo esc_url_raw( admin_url( 'profile.php?user_id=' . $author_id ) ); ?>"><?php esc_attr_e( 'Edit profile', 'Avada' ); ?></a>)</span>
 			<?php endif; ?>
 		</h3>
-		<?php echo $author_description; // WPCS: XSS ok. ?>
+		<?php echo $author_description; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	</div>
 
 	<div style="clear:both;"></div>
@@ -58,14 +58,13 @@ if ( empty( $author_description ) ) {
 	<div class="fusion-author-social clearfix">
 		<div class="fusion-author-tagline">
 			<?php if ( $author_custom ) : ?>
-				<?php echo $author_custom; // WPCS: XSS ok. ?>
+				<?php echo $author_custom; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<?php endif; ?>
 		</div>
 
 		<?php
-
 		// Get the social icons for the author set on his profile page.
-		$author_social_icon_options = array(
+		$author_social_icon_options = [
 			'authorpage'        => 'yes',
 			'author_id'         => $author_id,
 			'position'          => 'author',
@@ -75,10 +74,9 @@ if ( empty( $author_description ) ) {
 			'icon_boxed_radius' => Fusion_Sanitize::size( Avada()->settings->get( 'social_links_boxed_radius' ) ),
 			'tooltip_placement' => Avada()->settings->get( 'social_links_tooltip_placement' ),
 			'linktarget'        => Avada()->settings->get( 'social_icons_new' ),
-		);
+		];
 
-		echo Avada()->social_sharing->render_social_icons( $author_social_icon_options ); // WPCS: XSS ok.
-
+		echo fusion_library()->social_sharing->render_social_icons( $author_social_icon_options ); // phpcs:ignore WordPress.Security.EscapeOutput
 		?>
 	</div>
 </div>

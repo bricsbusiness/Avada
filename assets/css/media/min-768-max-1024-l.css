@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .fullwidth-box {
   background-attachment: scroll !important;
 }

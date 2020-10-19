@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -23,7 +23,7 @@ class Avada_Sidebars {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'widgets_init', array( $this, 'widgets_init' ) );
+		add_action( 'widgets_init', [ $this, 'widgets_init' ] );
 	}
 
 	/**
@@ -33,7 +33,7 @@ class Avada_Sidebars {
 
 		// Main Blog widget area.
 		register_sidebar(
-			array(
+			[
 				'name'          => 'Blog Sidebar',
 				'id'            => 'avada-blog-sidebar',
 				'description'   => __( 'Default Sidebar of Avada', 'Avada' ),
@@ -41,7 +41,7 @@ class Avada_Sidebars {
 				'after_widget'  => '</section>',
 				'before_title'  => '<div class="heading"><h4 class="widget-title">',
 				'after_title'   => '</h4></div>',
-			)
+			]
 		);
 
 		// Footer widget areas.
@@ -55,14 +55,14 @@ class Avada_Sidebars {
 		for ( $i = 1; $i < $columns; $i++ ) {
 
 			register_sidebar(
-				array(
+				[
 					'name'          => sprintf( 'Footer Widget %s', $i ),
 					'id'            => 'avada-footer-widget-' . $i,
 					'before_widget' => '<section id="%1$s" class="fusion-footer-widget-column widget %2$s">',
 					'after_widget'  => '<div style="clear:both;"></div></section>',
 					'before_title'  => '<h4 class="widget-title">',
 					'after_title'   => '</h4>',
-				)
+				]
 			);
 
 		}
@@ -78,14 +78,14 @@ class Avada_Sidebars {
 		for ( $i = 1; $i < $columns; $i++ ) {
 
 			register_sidebar(
-				array(
+				[
 					'name'          => sprintf( 'Sliding Bar Widget %s', $i ),
 					'id'            => 'avada-slidingbar-widget-' . $i,
 					'before_widget' => '<section id="%1$s" class="fusion-slidingbar-widget-column widget %2$s">',
 					'after_widget'  => '<div style="clear:both;"></div></section>',
 					'before_title'  => '<h4 class="widget-title">',
 					'after_title'   => '</h4>',
-				)
+				]
 			);
 
 		}

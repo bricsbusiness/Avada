@@ -6,11 +6,6 @@
  * @subpackage Fusion-Patcher
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Takes care of adding the admin notices.
  * This class works in conjunction with Fusion_Patcher_Admin_Screen
@@ -98,11 +93,11 @@ class Fusion_Patcher_Admin_Notices {
 	 */
 	public static function get_messages() {
 		// Get the option.
-		$messages = get_site_option( self::$option_name, array() );
+		$messages = get_site_option( self::$option_name, [] );
 		// Make sure the option is formatted as an array.
 		// If not an array, then return an empty array to avoid errors.
 		if ( ! is_array( $messages ) ) {
-			return array();
+			return [];
 		}
 		return $messages;
 	}
@@ -123,7 +118,7 @@ class Fusion_Patcher_Admin_Notices {
 			delete_site_option( self::$option_name );
 			return;
 		}
-		$options = get_site_option( self::$option_name, array() );
+		$options = get_site_option( self::$option_name, [] );
 		if ( is_array( $options ) && isset( $options[ $context ] ) ) {
 			unset( $options[ $context ] );
 		}

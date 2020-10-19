@@ -210,7 +210,7 @@
 				// Select3 JS
 				//*****************************************************************
 
-				// JWp6 plugin giving us problems.  They need to update.
+				// JWp6 plugin giving us problems. They need to update.
 				if (  wp_script_is ( 'jquerySelect3' )) {
 					wp_deregister_script( 'jquerySelect3' );
 					wp_dequeue_script('jquerySelect3');
@@ -284,11 +284,12 @@
 					true
 				);
 
+				$google_api = 'googleapis.com';
 				wp_enqueue_script(
 					'webfontloader',
-					'https://ajax.googleapis.com/ajax/libs/webfont/1.5.0/webfont.js',
+					'https://ajax.' . $google_api . '/ajax/libs/webfont/1.6.26/webfont.js',
 					array( 'jquery' ),
-					'1.5.0',
+					'1.6.26',
 					true
 				);
 			}

@@ -4,75 +4,126 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
+/**
+ * Page page settings
+ *
+ * @param array $sections An array of our sections.
+ * @return array
+ */
+function avada_page_options_tab_page( $sections ) {
+	$override = function_exists( 'Fusion_Template_Builder' ) ? Fusion_Template_Builder()->get_override( 'content' ) : false;
+	$override = ( $override && 'global' === $override->ID ) ? false : $override;
 
-$screen = get_current_screen();
+	$page_bg_color = Fusion_Color::new_color(
+		[
+			'color'    => Avada()->settings->get( 'bg_color' ),
+			'fallback' => '#ffffff',
+		]
+	);
 
-$this->dimension(
-	array(
-		'main_top_padding',
-		'main_bottom_padding',
-	),
-	esc_attr__( 'Page Content Padding', 'Avada' ),
-	/* translators: Additional description (defaults). */
-	sprintf( esc_html__( 'In pixels ex: 20px. %s', 'Avada' ), Avada()->settings->get_default_description( 'main_padding', array( 'top', 'bottom' ) ) )
-);
+	$sections['page'] = [
+		'label'    => esc_html__( 'Layout', 'Avada' ),
+		'id'       => 'page',
+		'alt_icon' => 'fusiona-file',
+		'fields'   => [],
+	];
 
-if ( 'product' === $screen->post_type ) {
-	$this->radio_buttonset(
-		'portfolio_width_100',
-		esc_attr__( 'Use 100% Width Page', 'Avada' ),
-		array(
+	// Template override, add notice.
+	if ( $override ) {
+		$sections['page']['fields']['page_override_info'] = [
+			'id'          => 'content_info',
+			'label'       => '',
+			/* translators: The edit link. Text of link is the title. */
+			'description' => '<div class="fusion-redux-important-notice">' . Fusion_Template_Builder()->get_override_text( $override, 'content' ) . '</div>',
+			'dependency'  => [],
+			'type'        => 'custom',
+		];
+		return $sections;
+	}
+
+	$sections['page']['fields']['layout'] = [
+		'id'          => 'layout',
+		'label'       => esc_attr__( 'Layout', 'Avada' ),
+		'choices'     => [
 			'default' => esc_attr__( 'Default', 'Avada' ),
-			'yes'     => esc_attr__( 'Yes', 'Avada' ),
+			'wide'    => esc_attr__( 'Wide', 'Avada' ),
+			'boxed'   => esc_attr__( 'Boxed', 'Avada' ),
+		],
+		/* translators: Additional description (defaults). */
+		'description' => sprintf( esc_attr__( 'Select boxed or wide layout. %s', 'Avada' ), Avada()->settings->get_default_description( 'layout', '', 'select' ) ),
+		'dependency'  => [],
+		'type'        => 'radio-buttonset',
+		'default'     => 'default',
+	];
+
+	// Background page options.
+	$sections['page']['fields']['bg_color']  = [
+		'id'          => 'bg_color',
+		'label'       => esc_attr__( 'Background Color For Page', 'Avada' ),
+		/* translators: Additional description (defaults). */
+		'description' => sprintf( esc_html__( 'Controls the background color for the page. When the color value is set to anything below 100&#37; opacity, the color will overlay the background image if one is uploaded. Hex code, ex: #000. %s', 'Avada' ), Avada()->settings->get_default_description( 'bg_color' ) ),
+		'dependency'  => [],
+		'default'     => $page_bg_color->color,
+		'type'        => 'color-alpha',
+	];
+	$sections['page']['fields']['bg_image']  = [
+		'id'          => 'bg_image',
+		'label'       => esc_attr__( 'Background Image For Page', 'Avada' ),
+		'alpha'       => true,
+		/* translators: Additional description (defaults). */
+		'description' => sprintf( esc_attr__( 'Select an image to use for a full page background. %s', 'Avada' ), Avada()->settings->get_default_description( 'bg_image', 'url' ) ),
+		'dependency'  => [],
+		'type'        => 'media',
+	];
+	$sections['page']['fields']['bg_full']   = [
+		'id'          => 'bg_full',
+		'label'       => esc_attr__( '100% Background Image', 'Avada' ),
+		/* translators: Additional description (defaults). */
+		'description' => sprintf( esc_html__( 'Choose to have the background image display at 100&#37;. %s', 'Avada' ), Avada()->settings->get_default_description( 'bg_full', '', 'yesno' ) ),
+		'choices'     => [
+			'default' => esc_attr__( 'Default', 'Avada' ),
 			'no'      => esc_attr__( 'No', 'Avada' ),
-		),
+			'yes'     => esc_attr__( 'Yes', 'Avada' ),
+		],
+		'dependency'  => [
+			[
+				'field'      => 'bg_image',
+				'value'      => '',
+				'comparison' => '!=',
+			],
+		],
+		'type'        => 'radio-buttonset',
+		'map'         => 'yesno',
+		'default'     => 'no',
+	];
+	$sections['page']['fields']['bg_repeat'] = [
+		'id'          => 'bg_repeat',
+		'label'       => esc_attr__( 'Background Repeat', 'Avada' ),
 		/* translators: Additional description (defaults). */
-		sprintf( esc_html__( 'Choose to set this post to 100&#37; browser width. %s', 'Avada' ), Avada()->settings->get_default_description( 'product_width_100', '', 'yesno' ) )
-	);
-}
+		'description' => sprintf( esc_html__( 'Select how the background image repeats. %s', 'Avada' ), Avada()->settings->get_default_description( 'bg_repeat', '', 'select' ) ),
+		'choices'     => [
+			'default'   => esc_attr__( 'Default', 'Avada' ),
+			'repeat'    => esc_attr__( 'Tile', 'Avada' ),
+			'repeat-x'  => esc_attr__( 'Tile Horizontally', 'Avada' ),
+			'repeat-y'  => esc_attr__( 'Tile Vertically', 'Avada' ),
+			'no-repeat' => esc_attr__( 'No Repeat', 'Avada' ),
+		],
+		'dependency'  => [
+			[
+				'field'      => 'bg_image',
+				'value'      => '',
+				'comparison' => '!=',
+			],
+		],
+		'type'        => 'select',
+	];
 
-$this->text(
-	'hundredp_padding',
-	esc_html__( '100% Width Padding', 'Avada' ),
-	/* translators: Additional description (defaults). */
-	sprintf( esc_html__( 'Controls the left and right padding for page content when using 100&#37; site width, 100&#37; width page template or 100&#37; width post option. This does not affect Fusion Builder containers.  Enter value including any valid CSS unit, ex: 30px. %s', 'Avada' ), Avada()->settings->get_default_description( 'hundredp_padding' ) )
-);
-
-if ( 'page' === $screen->post_type ) {
-	$this->radio_buttonset(
-		'show_first_featured_image',
-		esc_attr__( 'Disable First Featured Image', 'Avada' ),
-		array(
-			'yes' => esc_attr__( 'Yes', 'Avada' ),
-			'no'  => esc_attr__( 'No', 'Avada' ),
-
-		),
-		esc_html__( 'Disable the 1st featured image on page.', 'Avada' ),
-		'no'
-	);
-}
-
-if ( 'tribe_events' === $screen->post_type ) {
-	$this->radio_buttonset(
-		'share_box',
-		esc_attr__( 'Show Social Share Box', 'Avada' ),
-		array(
-			'default' => esc_attr__( 'Default', 'Avada' ),
-			'yes'     => esc_attr__( 'Show', 'Avada' ),
-			'no'      => esc_attr__( 'Hide', 'Avada' ),
-		),
-		/* translators: Additional description (defaults). */
-		sprintf( esc_html__( 'Choose to show or hide the social share box. %s', 'Avada' ), Avada()->settings->get_default_description( 'events_social_sharing_box', '', 'showhide' ) )
-	);
+	return $sections;
 }
 
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

@@ -6,11 +6,6 @@
  * @since 1.0.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Icons handler.
  *
@@ -25,7 +20,7 @@ class Fusion_Icon {
 	 * @since 1.0
 	 * @var array
 	 */
-	private $data = array();
+	private $data = [];
 
 	/**
 	 * Iterator.
@@ -92,18 +87,18 @@ class Fusion_Icon {
 		$name = ucwords( $name );
 
 		// Show Directional Variants in Parenthesis.
-		$directions = array(
+		$directions        = [
 			'/up$/i',
 			'/down$/i',
 			'/left$/i',
 			'/right$/i',
-		);
-		$directions_format = array( '(Up)', '(Down)', '(Left)', '(Right)' );
-		$name = preg_replace( $directions, $directions_format, $name );
+		];
+		$directions_format = [ '(Up)', '(Down)', '(Left)', '(Right)' ];
+		$name              = preg_replace( $directions, $directions_format, $name );
 
 		// Use Word "Outlined" in Place of "O".
-		$outlined_variants = array( '/\so$/i', '/\so\s/i' );
-		$name = preg_replace( $outlined_variants, ' Outlined ', $name );
+		$outlined_variants = [ '/\so$/i', '/\so\s/i' ];
+		$name              = preg_replace( $outlined_variants, ' Outlined ', $name );
 
 		// Remove Trailing Characters.
 		$name = trim( $name );
@@ -121,6 +116,52 @@ if ( ! function_exists( 'fusion_get_icons_array' ) ) {
 	function fusion_get_icons_array() {
 		$path = Fusion_Font_Awesome::is_fa_pro_enabled() ? '/assets/fonts/fontawesome/icons_pro.php' : '/assets/fonts/fontawesome/icons_free.php';
 
-		return include wp_normalize_path( FUSION_LIBRARY_PATH . $path );
+		return include FUSION_LIBRARY_PATH . $path;
+	}
+}
+
+if ( ! function_exists( 'fusion_font_awesome_name_handler' ) ) {
+	/**
+	 * Tweaks the icon names.
+	 *
+	 * @static
+	 * @access public
+	 * @since 1.0
+	 * @param string $icon The icon.
+	 * @return string
+	 */
+	function fusion_font_awesome_name_handler( $icon ) {
+
+		$fa_icon = '';
+		if ( isset( $icon ) && ! empty( $icon ) ) {
+
+			// Custom icon is used so we need to remove our prefix.
+			if ( 'fusion-prefix-' === substr( $icon, 0, 14 ) ) {
+				return str_replace( 'fusion-prefix-', '', $icon );
+			}
+
+			// FA icon, but we need to handle BC.
+			$fa_icon = $icon;
+			if ( 'icon-' === substr( $icon, 0, 5 ) || 'fa-' !== substr( $icon, 0, 3 ) ) {
+				$icon      = str_replace( 'icon-', 'fa-', $icon );
+				$fa_icon   = $icon;
+				$old_icons = Fusion_Data::old_icons();
+
+				if ( array_key_exists( str_replace( 'fa-', '', $icon ), $old_icons ) ) {
+					$fa_icon = 'fa-' . $old_icons[ str_replace( 'fa-', '', $icon ) ];
+				} elseif ( 'fa-' !== substr( $icon, 0, 3 ) ) {
+					$fa_icon = 'fa-' . $icon;
+				}
+			} elseif ( 'fa-' !== substr( $icon, 0, 3 ) ) {
+				$fa_icon = 'fa-' . $icon;
+			}
+
+			// We add fa-fw class in menu walker, for side headers.
+			if ( false === strpos( str_replace( ' fa-fw', '', trim( $fa_icon ) ), ' ' ) ) {
+				$fa_icon = ' fa ' . $fa_icon;
+			}
+		}
+
+		return $fa_icon;
 	}
 }

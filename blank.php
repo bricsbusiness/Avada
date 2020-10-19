@@ -21,15 +21,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php while ( have_posts() ) : ?>
 		<?php the_post(); ?>
 		<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<?php echo fusion_render_rich_snippets_for_pages(); // WPCS: XSS ok. ?>
-			<?php avada_featured_images_for_pages(); ?>
+			<?php echo fusion_render_rich_snippets_for_pages(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<?php avada_singular_featured_image(); ?>
 			<div class="post-content">
 				<?php the_content(); ?>
 			</div>
 		</div>
 	<?php endwhile; ?>
 </section>
-<?php
-get_footer();
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */
+<?php get_footer(); ?>

@@ -6,11 +6,6 @@
  * @since 1.0.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Gets the options from separate files and unites them.
  */
@@ -23,7 +18,7 @@ class Fusion_Options {
 	 * @access public
 	 * @var array
 	 */
-	public $section_names = array();
+	public $section_names = [];
 
 	/**
 	 * An array of our sections.
@@ -31,7 +26,7 @@ class Fusion_Options {
 	 * @access public
 	 * @var array
 	 */
-	public $sections = array();
+	public $sections = [];
 
 	/**
 	 * An array of our fields.
@@ -90,7 +85,7 @@ class Fusion_Options {
 	 * @return array
 	 */
 	protected function get_section_names() {
-		return array();
+		return [];
 	}
 
 	/**
@@ -126,7 +121,7 @@ class Fusion_Options {
 	 */
 	public function set_sections() {
 
-		$sections = array();
+		$sections = [];
 		foreach ( $this->section_names as $section ) {
 			$sections = call_user_func( $this->function_prefix . $section, $sections );
 		}
@@ -147,7 +142,7 @@ class Fusion_Options {
 
 		// Get the options object.
 		$options = $this->get_options();
-		$fields  = array();
+		$fields  = [];
 
 		// Start parsing sections.
 		foreach ( $options->sections as $section ) {
@@ -167,7 +162,7 @@ class Fusion_Options {
 				}
 
 				// For normal fields, we'll just add the field ID to our array.
-				if ( ! in_array( $field['type'], array( 'sub-section', 'accordion' ), true ) ) {
+				if ( ! in_array( $field['type'], [ 'sub-section', 'accordion' ], true ) ) {
 					if ( isset( $field['id'] ) ) {
 						$fields[] = $field['id'];
 					}
@@ -208,7 +203,7 @@ class Fusion_Options {
 				}
 
 				// This is a sub-section or an accordion.
-				if ( isset( $field['type'] ) && in_array( $field['type'], array( 'sub-section', 'accordion' ), true ) ) {
+				if ( isset( $field['type'] ) && in_array( $field['type'], [ 'sub-section', 'accordion' ], true ) ) {
 
 					// Start parsing the fields inside the sub-section/accordion.
 					foreach ( $field['fields'] as $sub_field ) {
@@ -232,10 +227,10 @@ class Fusion_Options {
 	 *
 	 * @access protected
 	 * @since 1.0.0
-	 * @return array
+	 * @return array|Object
 	 */
 	protected function get_options() {
-		return array();
+		return [];
 	}
 
 	/**

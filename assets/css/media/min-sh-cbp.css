@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .ilightbox-holder.supportTouch div.ilightbox-container {
   overflow: visible;
 }
@@ -17,6 +18,12 @@
   position: relative;
   margin: 0;
 }
+.widget.tribe-events-list-widget.fusion-widget-align-right .tribe-events-list-widget-events {
+  justify-content: end;
+}
+.widget.tribe-events-list-widget.fusion-widget-align-center .tribe-events-list-widget-events {
+  justify-content: center;
+}
 .fusion-body .fusion-footer-widget-area-center .widget.tweets:not(.fusion-widget-align-left):not(.fusion-widget-align-right) .jtwt .jtwt_tweet {
   padding: 0;
 }
@@ -24,6 +31,16 @@
   top: 0;
   position: relative;
   margin: 0;
+}
+.no-overflow-y body {
+  padding-right: 9px !important;
+}
+.no-overflow-y .modal {
+  overflow-y: hidden;
+}
+.no-overflow-y .fusion-sliding-bar-position-top,
+.no-overflow-y .fusion-sliding-bar-position-bottom {
+  right: 9px;
 }
 .no-desktop-totop .to-top-container {
   display: none;

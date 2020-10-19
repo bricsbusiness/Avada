@@ -4,19 +4,20 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.1
  */
 
 // The $order_id is inherited from the Avada_Woocommerce::view_order() method.
-if ( ! $order = wc_get_order( $order_id ) ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+$order = wc_get_order( $order_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+if ( ! $order ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 	return;
 }
 
 $order_items           = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
-$show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
+$show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', [ 'completed', 'processing' ] ) );
 $show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();
 $downloads             = $order->get_downloadable_items();
 $show_downloads        = $order->has_downloadable_item() && $order->is_download_permitted();
@@ -43,7 +44,7 @@ $show_downloads        = $order->has_downloadable_item() && $order->is_download_
 				$product_permalink = apply_filters( 'woocommerce_order_item_permalink', $is_visible ? $product->get_permalink( $item ) : '', $item, $order );
 
 				if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
-					return;
+					continue;
 				}
 				?>
 				<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'woocommerce-table__line-item order_item', $item, $order ) ); ?>">
@@ -53,17 +54,17 @@ $show_downloads        = $order->has_downloadable_item() && $order->is_download_
 								<span class="product-thumbnail">
 									<?php $thumbnail = $product->get_image(); ?>
 									<?php if ( ! $product_permalink ) : ?>
-										<?php echo $thumbnail; // WPCS: XSS ok. ?>
+										<?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 									<?php else : ?>
-										<a href="<?php echo esc_url( $product_permalink ); ?>"><?php echo $thumbnail; // WPCS: XSS ok. ?></a>
+										<a href="<?php echo esc_url( $product_permalink ); ?>"><?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
 									<?php endif; ?>
 								</span>
 							<?php endif; ?>
 
 							<div class="product-info">
 								<?php
-								echo apply_filters( 'woocommerce_order_item_name', $product_permalink ? sprintf( '<a href="%s">%s</a>', esc_url( $product_permalink ), esc_html( $item->get_name() ) ) : esc_html( $item->get_name() ), $item, $is_visible ); // WPCS: XSS ok.
-								echo apply_filters( 'woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf( '&times; %s', esc_html( $item->get_quantity() ) ) . '</strong>', $item ); // WPCS: XSS ok.
+								echo apply_filters( 'woocommerce_order_item_name', $product_permalink ? sprintf( '<a href="%s">%s</a>', $product_permalink, $item->get_name() ) : $item->get_name(), $item, $is_visible ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								echo apply_filters( 'woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf( '&times; %s', esc_html( $item->get_quantity() ) ) . '</strong>', $item ); // phpcs:ignore WordPress.Security.EscapeOutput
 
 								// Meta data.
 								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, false );
@@ -78,13 +79,13 @@ $show_downloads        = $order->has_downloadable_item() && $order->is_download_
 					</td>
 
 					<td class="woocommerce-table__product-total product-total">
-						<?php echo $order->get_formatted_line_subtotal( $item ); // WPCS: XSS ok. ?>
+						<?php echo $order->get_formatted_line_subtotal( $item ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					</td>
 				</tr>
 
 				<?php if ( $show_purchase_note && $purchase_note ) : ?>
 					<tr class="woocommerce-table__product-purchase-note product-purchase-note">
-						<td colspan="3"><?php echo wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ); // WPCS: XSS ok. ?></td>
+						<td colspan="3"><?php echo wpautop( do_shortcode( wp_kses_post( $purchase_note ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 					</tr>
 				<?php endif; ?>
 			<?php endforeach; ?>
@@ -94,8 +95,8 @@ $show_downloads        = $order->has_downloadable_item() && $order->is_download_
 		<tfoot>
 			<?php foreach ( $order->get_order_item_totals() as $key => $total ) : ?>
 				<tr>
-					<th scope="row"><?php echo $total['label']; // WPCS: XSS ok. ?></th>
-					<td class="product-total"><?php echo $total['value']; // WPCS: XSS ok. ?></td>
+					<th scope="row"><?php echo $total['label']; // phpcs:ignore WordPress.Security.EscapeOutput ?></th>
+					<td class="product-total"><?php echo $total['value']; // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 				</tr>
 			<?php endforeach; ?>
 		</tfoot>
@@ -121,7 +122,7 @@ $show_downloads        = $order->has_downloadable_item() && $order->is_download_
 
 			<?php $customer_note = $order->get_customer_note(); ?>
 			<?php if ( $customer_note ) : ?>
-				<dt><?php esc_html_e( 'Note:', 'Avada' ); ?></dt> <dd><?php echo wptexturize( $customer_note ); // WPCS: XSS ok. ?></dd>
+				<dt><?php esc_html_e( 'Note:', 'Avada' ); ?></dt> <dd><?php echo wptexturize( $customer_note ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dd>
 			<?php endif; ?>
 
 			<?php
@@ -140,7 +141,7 @@ $show_downloads        = $order->has_downloadable_item() && $order->is_download_
 				<address>
 					<p>
 						<?php $address = $order->get_formatted_billing_address(); ?>
-						<?php echo ( $address ) ? $address : esc_attr__( 'N/A', 'woocommerce' ); // WPCS: XSS ok. ?>
+						<?php echo ( $address ) ? $address : esc_attr__( 'N/A', 'woocommerce' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					</p>
 				</address>
 			</div>
@@ -153,7 +154,7 @@ $show_downloads        = $order->has_downloadable_item() && $order->is_download_
 					<address>
 						<p>
 							<?php $address = $order->get_formatted_shipping_address(); ?>
-							<?php echo ( $address ) ? $address : esc_attr__( 'N/A', 'woocommerce' ); // WPCS: XSS ok. ?>
+							<?php echo ( $address ) ? $address : esc_attr__( 'N/A', 'woocommerce' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 						</p>
 					</address>
 				</div>

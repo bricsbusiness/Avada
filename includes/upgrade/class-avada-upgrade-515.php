@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -36,7 +36,5 @@ class Avada_Upgrade_515 extends Avada_Upgrade_Abstract {
 	 * @access protected
 	 * @since 5.1.5
 	 */
-	protected function migration_process() {
-		return;
-	}
+	protected function migration_process() {}
 }

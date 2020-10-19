@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      3.8.5
@@ -37,7 +37,7 @@ class Avada_Dynamic_CSS {
 	public function __construct() {
 
 		$this->fusion_dynamic_css = Fusion_Dynamic_CSS::get_instance();
-		add_action( 'wp', array( $this, 'init' ) );
+		add_action( 'wp', [ $this, 'init' ] );
 
 	}
 
@@ -50,18 +50,25 @@ class Avada_Dynamic_CSS {
 	 */
 	public function init() {
 
-		add_filter( 'fusion_dynamic_css_stylesheet_dependencies', array( $this, 'stylesheet_dependencies' ) );
+		add_filter( 'fusion_dynamic_css_stylesheet_dependencies', [ $this, 'stylesheet_dependencies' ] );
 
-		// If CSS is cached in file or async media queries are turned off load custom CSS in make_css(), otherwise use
-		// fusion_library_inline_dynamic_css filter.
-		if ( '0' === Avada()->settings->get( 'media_queries_async' ) || 'file' === Avada()->settings->get( 'css_cache_method' ) ) {
-			add_filter( 'fusion_dynamic_css_final', array( $this, 'fusion_add_custom_css_to_dynamic' ), 999 );
+		if ( ! function_exists( 'fusion_is_preview_frame' ) || ! fusion_is_preview_frame() ) {
+			// If CSS is cached in file or async media queries are turned off load custom CSS in make_css(), otherwise use
+			// fusion_library_inline_dynamic_css filter.
+			if ( '0' === Avada()->settings->get( 'media_queries_async' ) || 'file' === Avada()->settings->get( 'css_cache_method' ) ) {
+				add_filter( 'fusion_dynamic_css_final', [ $this, 'fusion_add_custom_css_to_dynamic' ], 999 );
+			} else {
+				add_filter( 'fusion_library_inline_custom_css', [ $this, 'fusion_add_custom_css_to_dynamic' ] );
+			}       
 		} else {
-			add_filter( 'fusion_library_inline_custom_css', array( $this, 'fusion_add_custom_css_to_dynamic' ) );
+			/**
+			* We're in FB preview mode.
+			*  Print custom CSS after 'inline' CSS.
+			*/
+			add_action( 'wp_head', [ $this, 'fusion_dynamic_css_head' ], 1000 );
 		}
-
 		// Backwards-compatibility.
-		add_filter( 'fusion_dynamic_css', array( $this, 'avada_dynamic_css_filter' ) );
+		add_filter( 'fusion_dynamic_css', [ $this, 'avada_dynamic_css_filter' ] );
 
 	}
 
@@ -76,12 +83,32 @@ class Avada_Dynamic_CSS {
 	public function fusion_add_custom_css_to_dynamic( $css ) {
 
 		// Append the user-entered dynamic CSS.
-		$option = get_option( Avada::get_option_name(), array() );
+		$option = get_option( Avada::get_option_name(), [] );
 		if ( isset( $option['custom_css'] ) && ! empty( $option['custom_css'] ) ) {
 			$css .= wp_strip_all_tags( $option['custom_css'] );
 		}
 		return $css;
 
+	}
+
+	/**
+	 * Prints the custom-css option to the <head> section.
+	 * For example when page is displayed in FB preview frame.
+	 *
+	 * @access public
+	 * @since 5.1
+	 */
+	public function fusion_dynamic_css_head() {
+
+		$css = '';
+
+		// Append the user-entered dynamic CSS.
+		$option = get_option( Avada::get_option_name(), [] );
+		if ( isset( $option['custom_css'] ) && ! empty( $option['custom_css'] ) ) {
+			$css = wp_strip_all_tags( $option['custom_css'] );
+		}
+
+		echo '<style type="text/css" id="fusion-builder-custom-css">' . $css . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
 	/**

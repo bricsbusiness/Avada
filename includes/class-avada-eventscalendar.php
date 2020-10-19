@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      3.8.7
@@ -35,31 +35,44 @@ class Avada_EventsCalendar {
 	 * @access public
 	 */
 	public function __construct() {
-		add_action( 'tribe_events_before_the_title', array( $this, 'before_the_title' ) );
-		add_action( 'tribe_events_after_the_title', array( $this, 'after_the_title' ) );
+		add_action( 'tribe_events_before_the_title', [ $this, 'before_the_title' ] );
+		add_action( 'tribe_events_after_the_title', [ $this, 'after_the_title' ] );
 
-		add_filter( 'tribe_events_mobile_breakpoint', array( $this, 'set_mobile_breakpoint' ) );
-		add_action( 'tribe_events_bar_after_template', array( $this, 'add_clearfix' ) );
+		add_filter( 'tribe_events_mobile_breakpoint', [ $this, 'set_mobile_breakpoint' ] );
+		add_action( 'tribe_events_bar_after_template', [ $this, 'add_clearfix' ] );
 
-		add_filter( 'tribe_events_get_the_excerpt', array( $this, 'get_the_excerpt' ), 10, 2 );
+		add_filter( 'tribe_events_get_the_excerpt', [ $this, 'get_the_excerpt' ], 10, 2 );
 
-		add_action( 'tribe_events_pro_tribe_events_shortcode_prepare_photo', array( $this, 'add_packery_library_to_photo_view' ), 20 );
+		add_action( 'tribe_events_pro_tribe_events_shortcode_prepare_photo', [ $this, 'add_packery_library_to_photo_view' ], 20 );
 
-		add_action( 'customize_controls_print_styles', array( $this, 'ec_customizer_styles' ), 999 );
+		add_action( 'customize_controls_print_styles', [ $this, 'ec_customizer_styles' ], 999 );
 
-		add_action( 'tribe_customizer_register_single_event_settings', array( $this, 'add_single_event_notice' ), 10, 2 );
-		add_action( 'tribe_customizer_register_photo_view_settings', array( $this, 'add_photo_view_notice' ), 10, 2 );
-		add_action( 'tribe_customizer_register_month_week_view_settings', array( $this, 'add_month_week_view_notice' ), 10, 2 );
+		add_action( 'tribe_customizer_register_single_event_settings', [ $this, 'add_single_event_notice' ], 10, 2 );
+		add_action( 'tribe_customizer_register_photo_view_settings', [ $this, 'add_photo_view_notice' ], 10, 2 );
+		add_action( 'tribe_customizer_register_month_week_view_settings', [ $this, 'add_month_week_view_notice' ], 10, 2 );
 
-		add_filter( 'tribe_get_map_link_html', array( $this, 'change_map_link_html' ), 10 );
+		add_filter( 'tribe_get_map_link_html', [ $this, 'change_map_link_html' ], 10 );
 
-		add_filter( 'tribe_the_notices', array( $this, 'style_notices' ), 10, 2 );
+		add_filter( 'tribe_the_notices', [ $this, 'style_notices' ], 10, 2 );
 
-		add_filter( 'tribe_get_template_part_content', array( $this, 'position_events_title_bar' ), 10, 5 );
+		add_filter( 'tribe_get_template_part_content', [ $this, 'position_events_title_bar' ], 10, 5 );
 
-		add_filter( 'tribe_get_template_part_content', array( $this, 'sidebar_headings' ), 10, 5 );
+		add_filter( 'tribe_get_template_part_content', [ $this, 'sidebar_headings' ], 10, 5 );
 
-		add_filter( 'the_content', array( $this, 'single_events_blocks_sharing_box' ), 10 );
+		add_filter( 'the_content', [ $this, 'single_events_blocks_sharing_box' ], 10 );
+
+		// V2 Template Adjustments.
+		add_filter( 'tribe_template_html:events/list/event/featured-image', [ $this, 'featured_image_template_adjustments' ], 10, 4 );
+		add_filter( 'tribe_template_html:events/day/event/featured-image', [ $this, 'featured_image_template_adjustments' ], 10, 4 );
+		add_filter( 'tribe_template_html:events/month/calendar-body/day/calendar-events/calendar-event/tooltip/featured-image', [ $this, 'featured_image_template_adjustments' ], 10, 4 );
+		add_filter( 'tribe_template_html:events/photo/event/featured-image', [ $this, 'featured_image_template_adjustments' ], 10, 4 );
+		add_filter( 'tribe_template_html:events/week/grid-body/events-day/event/tooltip/featured-image', [ $this, 'featured_image_template_adjustments' ], 10, 4 );
+		add_filter( 'tribe_template_html:events/month/calendar-body/day/calendar-events/calendar-event/featured-image', [ $this, 'featured_image_template_adjustments' ], 10, 4 );
+		add_filter( 'tribe_template_html:events/week/mobile-events/day/event/featured-image', [ $this, 'featured_image_template_adjustments' ], 10, 4 );
+		/**
+		 * WIP
+		add_filter( 'tribe_template_html:events/month/mobile-events/mobile-day/mobile-event/featured-image', [ $this, 'featured_image_template_adjustments' ], 10, 4 );
+		 */
 	}
 
 	/**
@@ -123,10 +136,10 @@ class Avada_EventsCalendar {
 		<div class="fusion-events-single-title-content">
 			<?php the_title( '<h2 class="tribe-events-single-event-title summary entry-title">', '</h2>' ); ?>
 			<div class="tribe-events-schedule updated published tribe-clearfix">
-				<?php echo tribe_events_event_schedule_details( $event_id, '<h3>', '</h3>' ); // WPCS: XSS ok. ?>
+				<?php echo tribe_events_event_schedule_details( $event_id, '<h3>', '</h3>' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				<?php if ( tribe_get_cost() ) : ?>
 					<span class="tribe-events-divider">|</span>
-					<span class="tribe-events-cost"><?php echo tribe_get_cost( null, true ); // WPCS: XSS ok. ?></span>
+					<span class="tribe-events-cost"><?php echo tribe_get_cost( null, true ); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
 				<?php endif; ?>
 			</div>
 		</div>
@@ -169,7 +182,8 @@ class Avada_EventsCalendar {
 	 * @return void
 	 */
 	public function add_packery_library_to_photo_view() {
-		wp_enqueue_script( 'tribe-events-pro-isotope-packery', FUSION_LIBRARY_URL . '/assets/min/js/library/packery.js', array( 'tribe-events-pro-isotope' ), '', true );
+		$version = Avada::get_theme_version();
+		wp_enqueue_script( 'tribe-events-pro-isotope-packery', FUSION_LIBRARY_URL . '/assets/min/js/library/packery.js', [ 'tribe-events-pro-isotope' ], $version, true );
 	}
 
 	/**
@@ -207,21 +221,21 @@ class Avada_EventsCalendar {
 
 		$manager->add_setting(
 			$customizer->get_setting_name( 'avada_ec_notice_post_title_color', $section ),
-			array(
+			[
 				'type' => 'hidden',
-			)
+			]
 		);
 
 		$manager->add_control(
 			'avada_ec_notice_post_title_color',
-			array(
+			[
 				'label'       => __( 'NOTE', 'Avada' ),
 				/* translators: EC Customizer notice. */
 				'description' => sprintf( __( 'You can control the post title color from Avada theme options panel through the <a href="%1$s" target="_blank">Events Primary Color Overlay Text Color</a> setting. Avada has additional <a href="%2$s" target="_blank">Event Calendar settings</a> in theme options.', 'Avada' ), Avada()->settings->get_setting_link( 'primary_overlay_text_color' ), Avada()->settings->get_setting_link( 'primary_overlay_text_color' ) ),
 				'section'     => $section->id,
 				'settings'    => $customizer->get_setting_name( 'avada_ec_notice_post_title_color', $section ),
 				'type'        => 'hidden',
-			)
+			]
 		);
 	}
 
@@ -239,21 +253,21 @@ class Avada_EventsCalendar {
 
 		$manager->add_setting(
 			$customizer->get_setting_name( 'avada_ec_notice_photo_bg_color', $section ),
-			array(
+			[
 				'type' => 'hidden',
-			)
+			]
 		);
 
 		$manager->add_control(
 			'avada_ec_notice_photo_bg_color',
-			array(
+			[
 				'label'       => __( 'NOTE', 'Avada' ),
 				/* translators: EC Customizer notice. */
 				'description' => sprintf( __( 'You can control the photo background color from Avada theme options panel through the <a href="%1$s" target="_blank">Grid Box Color</a> setting. Avada has additional <a href="%2$s" target="_blank">Event Calendar settings</a> in theme options.', 'Avada' ), Avada()->settings->get_setting_link( 'timeline_bg_color' ), Avada()->settings->get_setting_link( 'primary_overlay_text_color' ) ),
 				'section'     => $section->id,
 				'settings'    => $customizer->get_setting_name( 'avada_ec_notice_photo_bg_color', $section ),
 				'type'        => 'hidden',
-			)
+			]
 		);
 	}
 
@@ -271,21 +285,21 @@ class Avada_EventsCalendar {
 
 		$manager->add_setting(
 			$customizer->get_setting_name( 'avada_ec_notice_highlight_color', $section ),
-			array(
+			[
 				'type' => 'hidden',
-			)
+			]
 		);
 
 		$manager->add_control(
 			'avada_ec_notice_highlight_color',
-			array(
+			[
 				'label'       => __( 'NOTE', 'Avada' ),
 				/* translators: EC Customizer notice. */
 				'description' => sprintf( __( 'You can control the calendar highlight color from Avada theme options panel through the <a href="%1$s" target="_blank">Primary Color</a> setting. Avada has additional <a href="%2$s" target="_blank">Event Calendar settings</a> in theme options.', 'Avada' ), Avada()->settings->get_setting_link( 'primary_color' ), Avada()->settings->get_setting_link( 'primary_overlay_text_color' ) ),
 				'section'     => $section->id,
 				'settings'    => $customizer->get_setting_name( 'avada_ec_notice_highlight_color', $section ),
 				'type'        => 'hidden',
-			)
+			]
 		);
 	}
 
@@ -308,8 +322,8 @@ class Avada_EventsCalendar {
 	 *
 	 * @since 5.5.0
 	 * @access public
-	 * @param string $html The notice markup.
-	 * @param string $notices The actual notices.
+	 * @param string $html    The notice markup.
+	 * @param array  $notices The actual notices.
 	 * @return string The newly styled notice markup.
 	 */
 	public function style_notices( $html, $notices ) {
@@ -338,16 +352,16 @@ class Avada_EventsCalendar {
 			if ( 'disable' === Avada()->settings->get( 'ec_display_page_title' ) ) {
 				return '';
 			} elseif ( 'below' === Avada()->settings->get( 'ec_display_page_title' ) ) {
-				$this->title_bar_html = str_replace( array( '<h1', '</h1>' ), array( '<h2', '</h2>' ), $html );
+				$this->title_bar_html = str_replace( [ '<h1', '</h1>' ], [ '<h2', '</h2>' ], $html );
 
 				$action = 'tribe_events_bar_after_template';
 				if ( class_exists( 'Tribe__Events__Filterbar__View' ) && 'horizontal' === tribe_get_option( 'events_filters_layout' ) ) {
 					$action = 'tribe_events_filter_view_after_template';
 				}
 
-				add_action( $action, array( $this, 'the_events_title_bar' ), 20 );
+				add_action( $action, [ $this, 'the_events_title_bar' ], 20 );
 
-				add_action( 'tribe_events_pro_tribe_events_shortcode_title_bar', array( $this, 'the_events_title_bar' ), 20 );
+				add_action( 'tribe_events_pro_tribe_events_shortcode_title_bar', [ $this, 'the_events_title_bar' ], 20 );
 
 				return '';
 			} else {
@@ -373,10 +387,10 @@ class Avada_EventsCalendar {
 	public function the_events_title_bar( $class_object = false ) {
 		if ( is_object( $class_object ) ) {
 			if ( ! $class_object->is_attribute_truthy( 'tribe-bar' ) ) {
-				echo $this->title_bar_html; // WPCS: XSS ok.
+				echo $this->title_bar_html; // phpcs:ignore WordPress.Security.EscapeOutput
 			}
 		} else {
-			echo $this->title_bar_html; // WPCS: XSS ok.
+			echo $this->title_bar_html; // phpcs:ignore WordPress.Security.EscapeOutput
 		}
 	}
 
@@ -394,7 +408,7 @@ class Avada_EventsCalendar {
 	 */
 	public function sidebar_headings( $html, $template, $file, $slug, $name ) {
 		if ( $slug && false !== strpos( $slug, 'modules/meta/' ) ) {
-			return str_replace( array( '<h2', '</h2>' ), array( '<h4', '</h4>' ), $html );
+			return str_replace( [ '<h2', '</h2>' ], [ '<h4', '</h4>' ], $html );
 		}
 		return $html;
 	}
@@ -408,7 +422,7 @@ class Avada_EventsCalendar {
 	 * @return string The altered contents.
 	 */
 	public function single_events_blocks_sharing_box( $content ) {
-		if ( has_blocks() ) {
+		if ( Fusion_Helper::tribe_is_event() && has_blocks() ) {
 			ob_start();
 			avada_render_social_sharing( 'events' );
 			$sharing_box = ob_get_clean();
@@ -416,5 +430,24 @@ class Avada_EventsCalendar {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Featured image template adjustments to add things like hover effects.
+	 *
+	 * @access public
+	 * @since 6.2
+	 * @param string          $html      The final HTML.
+	 * @param string          $file      Complete path to include the PHP File.
+	 * @param array           $name      Template name.
+	 * @param Tribe__Template $template  Current instance of the Tribe__Template.
+	 * @return string The adjusted featured image template.
+	 */
+	public function featured_image_template_adjustments( $html, $file, $name, $template ) {
+		return str_replace(
+			'featured-image-link',
+			'featured-image-link hover-type-' . Avada()->settings->get( 'ec_hover_type' ),
+			$html
+		);
 	}
 }

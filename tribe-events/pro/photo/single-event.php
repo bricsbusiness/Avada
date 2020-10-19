@@ -22,9 +22,9 @@ global $post;
 <div class="fusion-post-wrapper">
 
 	<?php if ( has_post_thumbnail() ) : ?>
-	<div class="fusion-flexslider flexslider fusion-post-slideshow">
+	<div class="fusion-flexslider flexslider fusion-flexslider-loading fusion-post-slideshow">
 		<ul class="slides">
-			<li class="hover-type-<?php echo Avada()->settings->get( 'ec_hover_type' ); ?>">
+			<li class="fusion-ec-hover-type hover-type-<?php echo Avada()->settings->get( 'ec_hover_type' ); ?>">
 				<a href="<?php the_permalink(); ?>">
 					<span class="screen-reader-text"><?php printf( esc_attr__( 'Go to "%s"', 'Avada' ), get_the_title( $post ) ); ?></span>
 					<?php the_post_thumbnail( 'full' ); ?>

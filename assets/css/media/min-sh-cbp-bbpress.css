@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .fusion-body .fusion-footer-widget-area-center .bbp_widget_login:not(.fusion-widget-mobile-align-left):not(.fusion-widget-mobile-align-right) .bbp-logged-in img.avatar {
   float: none;
   margin: 0;

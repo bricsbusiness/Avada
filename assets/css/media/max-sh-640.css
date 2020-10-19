@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .fusion-body .fusion-page-title-bar {
   max-height: none;
 }
@@ -9,12 +10,10 @@
   margin: 0 0 20px;
   width: auto;
   height: auto;
-  -ms-flex: 0 1 100%;
-      flex: 0 1 100%;
+  flex: 0 1 100%;
 }
 .fusion-body .fusion-blog-layout-medium .fusion-post-content {
-  -ms-flex: 0 1 100%;
-      flex: 0 1 100%;
+  flex: 0 1 100%;
 }
 .fusion-body .fusion-blog-layout-large-alternate .fusion-post-content {
   margin: 0;

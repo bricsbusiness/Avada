@@ -6,11 +6,6 @@
  * @subpackage Fusion-Patcher
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Caches handler for Fusion_Patcher.
  *
@@ -39,13 +34,13 @@ final class Fusion_Patcher_Cache {
 	/**
 	 * Cached patches.
 	 * The cache is formatted like
-	 * array( 'context1' => array(...patches...), 'context2' => array(...patches...) )
+	 * [ 'context1' => [...patches...], 'context2' => [...patches...] ]
 	 *
 	 * @access protected
 	 * @since 1.0.0
 	 * @var array
 	 */
-	protected $cached_patches = array();
+	protected $cached_patches = [];
 
 	/**
 	 * Constructor.
@@ -67,7 +62,7 @@ final class Fusion_Patcher_Cache {
 	 * @param array $args Arguments array inherited from Fusion_Patcher.
 	 * @param array $data The data we want to add to the cache.
 	 */
-	public function set_cache( $args = array(), $data = array() ) {
+	public function set_cache( $args = [], $data = [] ) {
 
 		// Early exit if $args['context'] is not provided.
 		if ( empty( $args ) || ! isset( $args['context'] ) ) {
@@ -75,7 +70,7 @@ final class Fusion_Patcher_Cache {
 		}
 		// Make sure that cached patches are formatted as an array.
 		if ( false === $this->cached_patches ) {
-			$this->cached_patches = array();
+			$this->cached_patches = [];
 		}
 		// Cache the patches.
 		$this->cached_patches[ $args['context'] ] = $data;
@@ -92,24 +87,24 @@ final class Fusion_Patcher_Cache {
 	 * @param array $args Arguments array inherited from Fusion_Patcher.
 	 * @return array|false Returns false on fail, otherwise an array/
 	 */
-	public function get_cache( $args = array() ) {
+	public function get_cache( $args = [] ) {
 
 		// If nothing is cached, return false.
 		if ( false === $this->cached_patches ) {
 			return false;
 		}
 
-		$patches = array();
+		$patches = [];
 
 		// If no arguments are provided then get ALL patches.
 		if ( empty( $args ) || ! isset( $args['context'] ) ) {
 			// No patches were found.
 			if ( ! $this->cached_patches ) {
-				return array();
+				return [];
 			}
 			foreach ( $this->cached_patches as $context => $context_patches ) {
 				if ( ! is_array( $context_patches ) ) {
-					$context_patches = array();
+					$context_patches = [];
 				}
 				$patches = array_merge( $patches, $context_patches );
 			}
@@ -123,7 +118,7 @@ final class Fusion_Patcher_Cache {
 			return $this->cached_patches[ $args['context'] ];
 		}
 		// Nothing found, return an empty array.
-		return array();
+		return [];
 	}
 
 	/**
@@ -135,7 +130,7 @@ final class Fusion_Patcher_Cache {
 	 * @since 1.0.0
 	 * @param array $args Arguments array inherited from Fusion_Patcher.
 	 */
-	public function reset_caches( $args = array() ) {
+	public function reset_caches( $args = [] ) {
 
 		if ( isset( $args['context'] ) ) {
 			if ( isset( $this->cached_patches[ $args['context'] ] ) ) {

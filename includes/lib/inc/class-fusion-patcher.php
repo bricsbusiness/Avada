@@ -6,11 +6,6 @@
  * @subpackage Fusion-Patcher
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * The main Patcher class for Fusion Library.
  *
@@ -25,7 +20,7 @@ class Fusion_Patcher {
 	 * @since 1.0.0
 	 * @var array
 	 */
-	private $args = array();
+	private $args = [];
 
 	/**
 	 * An array of all bundled products.
@@ -37,7 +32,7 @@ class Fusion_Patcher {
 	 * @since 1.0.0
 	 * @var array
 	 */
-	private static $bundled = array();
+	private static $bundled = [];
 
 	/**
 	 * All the instances of this object (array of objects).
@@ -47,7 +42,7 @@ class Fusion_Patcher {
 	 * @since 1.0.0
 	 * @var mixed
 	 */
-	private static $instances = array();
+	private static $instances = [];
 
 	/**
 	 * An instance of the Fusion_Patcher_Apply_Patch class.
@@ -83,7 +78,7 @@ class Fusion_Patcher {
 	 * @since 1.0.0
 	 * @param array $args The arguments we want to pass-on to the patcher.
 	 */
-	public function __construct( $args = array() ) {
+	public function __construct( $args = [] ) {
 
 		$this->args = $args;
 
@@ -92,17 +87,17 @@ class Fusion_Patcher {
 		}
 
 		// Only instantiate the sub-classes if we're on the admin page.
-		$slug            = $args['context'] . '-fusion-patcher';
+		$slug            = $args['context'] . '-patcher';
 		$referer         = fusion_get_referer();
 		$referer         = $referer ? $referer : '';
-		$is_patcher_page = (bool) ( is_admin() && ( ( isset( $_GET['page'] ) && $slug === $_GET['page'] ) || ( false !== strpos( $referer, $slug ) ) ) );
+		$is_patcher_page = (bool) ( is_admin() && ( ( isset( $_GET['page'] ) && $slug === $_GET['page'] ) || ( false !== strpos( $referer, $slug ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 
 		// Add bundled products.
 		$this->add_bundled( $args );
 
 		if ( $is_patcher_page ) {
 			// Enqueue styles & scripts.
-			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
+			add_action( 'admin_enqueue_scripts', [ $this, 'admin_scripts' ] );
 		}
 		$this->args['is_patcher_page'] = $is_patcher_page;
 
@@ -193,8 +188,11 @@ class Fusion_Patcher {
 	 * @since 1.0.0
 	 */
 	public function admin_scripts() {
-
 		wp_enqueue_style( 'fusion-patcher', FUSION_LIBRARY_URL . '/assets/css/fusion-patcher-style.css', false, time() );
+
+		if ( class_exists( 'Avada' ) ) {
+			wp_enqueue_style( 'avada_admin_css', trailingslashit( Avada::$template_dir_url ) . 'assets/admin/css/avada-admin.css', [], AVADA_VERSION );
+		}       
 
 	}
 

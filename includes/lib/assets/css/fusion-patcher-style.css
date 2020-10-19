@@ -1,100 +1,83 @@
-.fusion-important-notice {
-  padding: 30px;
-  background: #fff;
-  margin: 0px 0px 30px;
-}
-
-.fusion-patcher-heading {
-  background-color: #f1f1f1;
-  padding: 1em;
-}
-
-.fusion-patcher-heading .description {
-  margin-top: 0;
-  font-size: 1.1em;
-  font-style: normal;
-}
-
-.fusion-patcher-heading .sub-description {
-  margin: 0;
-}
-
-.fusion-patcher-heading .learn-more {
-  float: right;
-}
-
 .fusion-patcher-table {
-  width: 100%;
-  max-width: 100%;
-  border-collapse: collapse;
   margin-top: 2em;
+  border-collapse: collapse;
 }
 
-.fusion-patcher-table .fusion-patcher-headings th,
-.fusion-patcher-table .fusion-patcher-headings td {
-  border-top: none !important;
-  text-transform: uppercase;
+.fusion-patcher-table tr {
+  border-bottom: 1px solid #dfdfdf;
 }
 
-.fusion-patcher-table > thead tr th,
-.fusion-patcher-table > thead tr td,
-.fusion-patcher-table > tbody tr th,
-.fusion-patcher-table > tbody tr td,
-.fusion-patcher-table > tfoot tr th,
-.fusion-patcher-table > tfoot tr td {
-  padding: 15px 10px 5px;
-  line-height: 1.5;
+.fusion-patcher-table thead th {
+  text-align: start;
+}
+
+.fusion-patcher-table tr th {
+  padding: 0 1em 0.5em 1em;
+}
+.fusion-patcher-table tr td {
+  padding: 1em;
+  line-height: 1.7;
   vertical-align: top;
-  border-top: 1px solid #dedede;
-  text-align: left;
 }
 
-.fusion-patcher-table > tbody tr .patch-status {
+.fusion-patcher-table tr td:first-child {
+  min-width: 5em;
+}
+
+.fusion-patcher-table .patch-id .date {
+  font-size: 0.6em;
+}
+
+.fusion-patcher-table .patch-status {
   text-align: center;
+  vertical-align: middle;
 }
 
-.fusion-patcher-table > tbody tr .patch-apply .button {
-  float: right;
-  margin: 0;
+.fusion-patcher-table .patch-status .fusiona-checkmark {
+  color: #65bc7b;
 }
 
-.fusion-patcher-table > thead > tr > th {
-  vertical-align: baseline;
-  border-bottom: 2px solid #dedede;
+.fusion-patcher-table .patch-status .fusiona-cross {
+  color: #dc3232;
 }
 
-.fusion-patcher-table > caption + thead > thead:first-child > tr:first-child > th,
-.fusion-patcher-table > caption + thead > thead:first-child > tr:first-child > td,
-.fusion-patcher-table > colgroup + thead > thead:first-child > tr:first-child > th,
-.fusion-patcher-table > colgroup + thead > thead:first-child > tr:first-child > td {
-  border-top: 0;
+.avada-dashboard .fusion-patcher-table .patch-apply {
+  vertical-align: middle;
 }
 
-.fusion-patcher-table > tbody + tbody {
-  border-top: 2px solid #dedede;
+.fusion-patcher-table .patch-apply form {
+  text-align: end;
 }
 
-.fusion-patcher-table td.patch-date {
-  min-width: 100px;
+.avada-dashboard .fusion-patcher-table .patch-apply .disabled {
+  font-size: 0.6em;
 }
+
+.fusion-patcher-table .dismiss-notices {
+  margin-top: 1em;
+  font-size: 0.6em;
+
+}
+
+.avada-dashboard .fusion-patcher-table .dismiss-notices .button {
+  color: #dc3232;
+}
+
+.avada-dashboard .fusion-patcher-table .dismiss-notices .button:hover,
+.avada-dashboard .fusion-patcher-table .dismiss-notices .button:focus {
+  color: #dc3232;
+}
+
+/* 
+
 
 .fusion-patcher-table td.patch-product {
   min-width: 120px;
 }
 
-.fusion-patcher-table td > p {
-  margin-top: 0;
-}
 
-.fusion-patcher-table td p.submit {
-  margin: 0;
-  padding: 0;
-}
 
-.fusion-patcher-table td {
-  border-left: none;
-  border-right: none;
-}
+*/
 
 .fusion-patcher-table .patch-failed-warning {
   background: #ffcdd2;
@@ -113,10 +96,6 @@
   padding: 1.5em;
   font-style: normal;
   margin-bottom: 2em;
-}
-
-.about-wrap.fusion-wrap p {
-  max-width: 100%;
 }
 
 .fusion_page_fusion-plugins .theme-wrapper .update-message.notice.notice-warning {

@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.0.0
@@ -73,7 +73,7 @@ class Avada_Sermon_Manager {
 				<div class="wpfc_sermon cf">
 					<?php
 					if ( is_object( $sermon_manager_template ) ) {
-						echo $sermon_manager_template->wpfc_sermon_media(); // WPCS: XSS ok.
+						echo $sermon_manager_template->wpfc_sermon_media(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					} else {
 						wpfc_sermon_files();
 					}
@@ -85,13 +85,13 @@ class Avada_Sermon_Manager {
 		<?php if ( ! $archive ) : ?>
 			<?php
 			if ( is_object( $sermon_manager_template ) ) {
-				echo $sermon_manager_template->wpfc_sermon_media(); // WPCS: XSS ok.
+				echo $sermon_manager_template->wpfc_sermon_media(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				$sermon_manager_template->wpfc_sermon_description();
-				echo $sermon_manager_template->wpfc_sermon_attachments(); // WPCS: XSS ok.
+				echo $sermon_manager_template->wpfc_sermon_attachments(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			} else {
-				echo wpfc_sermon_media(); // WPCS: XSS ok.
+				echo wpfc_sermon_media(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				wpfc_sermon_description();
-				echo wpfc_sermon_attachments(); // WPCS: XSS ok.
+				echo wpfc_sermon_attachments(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 			?>
 			<?php echo the_terms( $post->ID, 'wpfc_sermon_topics', '<p class="sermon_topics">' . esc_attr__( 'Topics: ', 'sermon-manager' ), ',', '', '</p>' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -125,7 +125,7 @@ class Avada_Sermon_Manager {
 	public function render_wpfc_sorting() {
 		if ( class_exists( 'Sermon_Manager_Template_Tags' ) ) {
 			$sermon_manager_template = new Sermon_Manager_Template_Tags();
-			echo $sermon_manager_template->render_wpfc_sorting(); // WPCS: XSS ok.
+			echo $sermon_manager_template->render_wpfc_sorting(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		} else {
 			render_wpfc_sorting();
 		}

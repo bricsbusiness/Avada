@@ -7,11 +7,6 @@
  * @since 1.8
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Downloads Font Awesome font locally and generates the @font-face CSS for them.
  *
@@ -54,9 +49,9 @@ class Fusion_FA_Font_Downloader {
 	 * @param string $subset The Font Awesome subset we're dealing with.
 	 */
 	public function __construct( $subset ) {
-		$this->subset      = $subset;
-		$this->folder_url  = Fusion_Downloader::get_root_url( $this->folder_name );
-		$this->font        = $this->get_font_family();
+		$this->subset     = $subset;
+		$this->folder_url = Fusion_Downloader::get_root_url( $this->folder_name );
+		$this->font       = $this->get_font_family();
 	}
 
 	/**
@@ -67,7 +62,7 @@ class Fusion_FA_Font_Downloader {
 	 * @param array $variants The variants we want to get.
 	 * @return string
 	 */
-	public function get_fontface_css( $variants = array() ) {
+	public function get_fontface_css( $variants = [] ) {
 		if ( ! $this->font ) {
 			return;
 		}
@@ -106,7 +101,7 @@ class Fusion_FA_Font_Downloader {
 		$font_face .= "font-weight:{$variant};";
 
 		// Get the font-url.
-		$font_url = str_replace( array( 'http://', 'https://' ), '//', $this->get_variant_local_url( $variant ) );
+		$font_url = str_replace( [ 'http://', 'https://' ], '//', $this->get_variant_local_url( $variant ) );
 
 		// Get the font-format.
 		$font_face .= "src: url('{$font_url}') format('woff');}";
@@ -159,7 +154,7 @@ class Fusion_FA_Font_Downloader {
 	 * @return array
 	 */
 	public function get_font_files() {
-		$files       = array();
+		$files       = [];
 		$remote_urls = $this->get_font_files_urls_remote();
 		foreach ( $remote_urls as $key => $url ) {
 			$files[ $key ] = Fusion_Downloader::get_filename_from_url( $url );
@@ -178,7 +173,7 @@ class Fusion_FA_Font_Downloader {
 		if ( isset( $this->font['files'] ) ) {
 			return $this->font['files'];
 		}
-		return array();
+		return [];
 	}
 
 	/**
@@ -189,7 +184,7 @@ class Fusion_FA_Font_Downloader {
 	 * @return array
 	 */
 	public function get_font_files_urls_local() {
-		$urls  = array();
+		$urls  = [];
 		$files = $this->get_font_files();
 		foreach ( $files as $key => $file ) {
 			$urls[ $key ] = $this->folder_url . '/' . $file;
@@ -217,38 +212,38 @@ class Fusion_FA_Font_Downloader {
 	 */
 	public function get_font_family() {
 
-		$fonts = array(
-			'fab' => array(
+		$fonts = [
+			'fab' => [
 				'family'   => 'Font Awesome 5 Brands',
-				'variants' => array( 'normal' ),
-				'files'    => array(
-					'normal'  => 'https://pro.fontawesome.com/releases/v' . Fusion_Font_Awesome::$fa_version . '/webfonts/fa-brands-400.woff',
-				),
-			),
-			'fal' => array(
+				'variants' => [ 'normal' ],
+				'files'    => [
+					'normal' => 'https://pro.fontawesome.com/releases/v' . Fusion_Font_Awesome::$fa_version . '/webfonts/fa-brands-400.woff',
+				],
+			],
+			'fal' => [
 				'family'   => 'Font Awesome 5 Pro',
-				'variants' => array( '300' ),
-				'files'    => array(
-					'300'   => 'https://pro.fontawesome.com/releases/v' . Fusion_Font_Awesome::$fa_version . '/webfonts/fa-light-300.woff',
-				),
-			),
-			'fas' => array(
+				'variants' => [ '300' ],
+				'files'    => [
+					'300' => 'https://pro.fontawesome.com/releases/v' . Fusion_Font_Awesome::$fa_version . '/webfonts/fa-light-300.woff',
+				],
+			],
+			'fas' => [
 				'family'   => 'Font Awesome 5 Pro',
-				'variants' => array( '900' ),
-				'files'    => array(
-					'900'   => 'https://pro.fontawesome.com/releases/v' . Fusion_Font_Awesome::$fa_version . '/webfonts/fa-solid-900.woff',
-				),
-			),
-			'far' => array(
+				'variants' => [ '900' ],
+				'files'    => [
+					'900' => 'https://pro.fontawesome.com/releases/v' . Fusion_Font_Awesome::$fa_version . '/webfonts/fa-solid-900.woff',
+				],
+			],
+			'far' => [
 				'family'   => 'Font Awesome 5 Pro',
-				'variants' => array( '400' ),
-				'files'    => array(
-					'400'   => 'https://pro.fontawesome.com/releases/v' . Fusion_Font_Awesome::$fa_version . '/webfonts/fa-regular-400.woff',
-				),
-			),
-		);
+				'variants' => [ '400' ],
+				'files'    => [
+					'400' => 'https://pro.fontawesome.com/releases/v' . Fusion_Font_Awesome::$fa_version . '/webfonts/fa-regular-400.woff',
+				],
+			],
+		];
 
-		return isset( $fonts[ $this->subset ] ) ? $fonts[ $this->subset ] : array();
+		return isset( $fonts[ $this->subset ] ) ? $fonts[ $this->subset ] : [];
 	}
 
 	/**
@@ -259,13 +254,13 @@ class Fusion_FA_Font_Downloader {
 	 * @param array $variants An array of variants to download. Leave empty to download all.
 	 * @return void
 	 */
-	public function download_font_family( $variants = array() ) {
+	public function download_font_family( $variants = [] ) {
 		if ( isset( $this->font['files'] ) ) {
 			if ( empty( $variants ) ) {
 				$variants = $this->font['variants'];
 			}
 			foreach ( $this->font['files'] as $variant => $file ) {
-				if ( in_array( $variant, $variants ) ) {
+				if ( in_array( $variant, $variants ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 					$downloader = new Fusion_Downloader( $file, $this->folder_name );
 					$downloader->download_file();
 				}

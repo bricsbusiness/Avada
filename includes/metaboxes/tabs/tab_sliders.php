@@ -4,193 +4,228 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
+/**
+ * Sliders page settings
+ *
+ * @param array $sections An array of our sections.
+ * @return array
+ */
+function avada_page_options_tab_sliders( $sections ) {
+	global $wpdb;
 
-$this->select(
-	'slider_type',
-	esc_attr__( 'Slider Type', 'Avada' ),
-	array(
-		'no'      => esc_attr__( 'No Slider', 'Avada' ),
-		'layer'   => 'LayerSlider',
-		'flex'    => esc_attr__( 'Fusion Slider', 'Avada' ),
-		'rev'     => 'Slider Revolution',
-		'elastic' => 'Elastic Slider',
-	),
-	esc_html__( 'Select the type of slider that displays.', 'Avada' )
-);
+	$active_slider_types = avada_get_available_sliders_dropdown();
+	$sliders_array       = avada_get_available_sliders_array();
 
-global $wpdb;
-$slides_array[0] = esc_html__( 'Select a slider', 'Avada' );
-if ( class_exists( 'LS_Sliders' ) ) {
+	$sections['sliders'] = [
+		'label'    => esc_html__( 'Sliders', 'Avada' ),
+		'id'       => 'sliders',
+		'alt_icon' => 'fusiona-slider',
+		'fields'   => [],
+	];
 
-	// Get sliders.
-	$sliders = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}layerslider WHERE flag_hidden = '0' AND flag_deleted = '0' ORDER BY date_c ASC" );
-
-	if ( ! empty( $sliders ) ) {
-		foreach ( $sliders as $key => $item ) {
-			$slides[ $item->id ] = $item->name . ' (#' . $item->id . ')';
-		}
+	if ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) {
+		// Click here for Avada Slider, Revolution Slider or Layer Slider.
+		$sections['sliders']['fields']['sliders_note'] = [
+			'label'       => '',
+			'description' => '<div class="fusion-redux-important-notice">' . avada_get_sliders_note( $sliders_array, $active_slider_types ) . '</div>',
+			'id'          => 'sliders_note',
+			'type'        => 'custom',
+		];
 	}
 
-	if ( isset( $slides ) && ! empty( $slides ) ) {
-		foreach ( $slides as $key => $val ) {
-			$slides_array[ $key ] = $val;
-		}
+	$sections['sliders']['fields']['slider_type'] = [
+		'id'              => 'slider_type',
+		'label'           => esc_attr__( 'Slider Type', 'Avada' ),
+		'description'     => esc_html__( 'Select the type of slider that displays.', 'Avada' ),
+		'choices'         => $active_slider_types,
+		'default'         => 'no',
+		'dependency'      => [],
+		'type'            => 'select',
+		'transport'       => 'postMessage',
+		'partial_refresh' => [
+			'fusion_slider_change' => [
+				'selector'            => '#sliders-container',
+				'container_inclusive' => false,
+				'render_callback'     => [ 'Avada_Partial_Refresh_Callbacks', 'avada_slider' ],
+			],
+		],
+	];
+
+	if ( class_exists( 'LS_Sliders' ) ) {
+		$sections['sliders']['fields']['slider'] = [
+			'id'              => 'slider',
+			'label'           => esc_attr__( 'Select LayerSlider', 'Avada' ),
+			'description'     => esc_html__( 'Select the unique name of the slider.', 'Avada' ),
+			'choices'         => $sliders_array['layer_sliders'],
+			'dependency'      => [
+				[
+					'field'      => 'slider_type',
+					'value'      => 'layer',
+					'comparison' => '==',
+				],
+			],
+			'type'            => 'select',
+			'transport'       => 'postMessage',
+			'partial_refresh' => [
+				'fusion_slider_change' => [
+					'selector'            => '#sliders-container',
+					'container_inclusive' => false,
+					'render_callback'     => [ 'Avada_Partial_Refresh_Callbacks', 'avada_slider' ],
+				],
+			],
+		];
 	}
-}
 
-$this->select(
-	'slider',
-	esc_attr__( 'Select LayerSlider', 'Avada' ),
-	$slides_array,
-	esc_html__( 'Select the unique name of the slider.', 'Avada' ),
-	array(
-		array(
-			'field'      => 'slider_type',
-			'value'      => 'layer',
-			'comparison' => '==',
-		),
-	)
-);
+	if ( method_exists( 'FusionCore_Plugin', 'get_fusion_sliders' ) ) {
 
-if ( method_exists( 'FusionCore_Plugin', 'get_fusion_sliders' ) ) {
-	$slides_array = FusionCore_Plugin::get_fusion_sliders( esc_html__( 'Select a slider', 'Avada' ) );
+		$sections['sliders']['fields']['wooslider'] = [
+			'id'              => 'wooslider',
+			'label'           => esc_attr__( 'Select Avada Slider', 'Avada' ),
+			'description'     => esc_html__( 'Select the unique name of the slider.', 'Avada' ),
+			'choices'         => $sliders_array['fusion_sliders'],
+			'dependency'      => [
+				[
+					'field'      => 'slider_type',
+					'value'      => 'flex',
+					'comparison' => '==',
+				],
+			],
+			'type'            => 'select',
+			'transport'       => 'postMessage',
+			'partial_refresh' => [
+				'fusion_slider_change' => [
+					'selector'            => '#sliders-container',
+					'container_inclusive' => false,
+					'render_callback'     => [ 'Avada_Partial_Refresh_Callbacks', 'avada_slider' ],
+				],
+			],
+		];
+	}
 
-	$this->select(
-		'wooslider',
-		esc_attr__( 'Select Fusion Slider', 'Avada' ),
-		$slides_array,
-		esc_html__( 'Select the unique name of the slider.', 'Avada' ),
-		array(
-			array(
+	if ( function_exists( 'rev_slider_shortcode' ) ) {
+		$sections['sliders']['fields']['revslider'] = [
+			'id'              => 'revslider',
+			'label'           => esc_attr__( 'Select Slider Revolution Slider', 'Avada' ),
+			'description'     => esc_html__( 'Select the unique name of the slider.', 'Avada' ),
+			'choices'         => $sliders_array['rev_sliders'],
+			'dependency'      => [
+				[
+					'field'      => 'slider_type',
+					'value'      => 'rev',
+					'comparison' => '==',
+				],
+			],
+			'type'            => 'select',
+			'transport'       => 'postMessage',
+			'partial_refresh' => [
+				'fusion_slider_change' => [
+					'selector'            => '#sliders-container',
+					'container_inclusive' => false,
+					'render_callback'     => [ 'Avada_Partial_Refresh_Callbacks', 'avada_slider' ],
+				],
+			],
+		];
+	}
+
+	if ( true === taxonomy_exists( 'themefusion_es_groups' ) ) {
+		$sections['sliders']['fields']['elasticslider'] = [
+			'id'              => 'elasticslider',
+			'label'           => esc_attr__( 'Select Elastic Slider', 'Avada' ),
+			'description'     => esc_html__( 'Select the unique name of the slider.', 'Avada' ),
+			'choices'         => $sliders_array['elastic_sliders'],
+			'dependency'      => [
+				[
+					'field'      => 'slider_type',
+					'value'      => 'elastic',
+					'comparison' => '==',
+				],
+			],
+			'type'            => 'select',
+			'transport'       => 'postMessage',
+			'partial_refresh' => [
+				'fusion_slider_change' => [
+					'selector'            => '#sliders-container',
+					'container_inclusive' => false,
+					'render_callback'     => [ 'Avada_Partial_Refresh_Callbacks', 'avada_slider' ],
+				],
+			],
+		];
+	}
+
+	$sections['sliders']['fields']['slider_position'] = [
+		'id'          => 'slider_position',
+		'label'       => esc_attr__( 'Slider Position', 'Avada' ),
+		/* translators: Additional description (defaults). */
+		'description' => sprintf( esc_html__( 'Select if the slider shows below or above the header. Only works for top header position. %s', 'Avada' ), Avada()->settings->get_default_description( 'slider_position', '', 'select' ) ),
+		'choices'     => [
+			'default' => esc_attr__( 'Default', 'Avada' ),
+			'below'   => esc_attr__( 'Below', 'Avada' ),
+			'above'   => esc_attr__( 'Above', 'Avada' ),
+		],
+		'default'     => 'default',
+		'dependency'  => [
+			[
 				'field'      => 'slider_type',
-				'value'      => 'flex',
+				'value'      => 'no',
+				'comparison' => '!=',
+			],
+		],
+		'type'        => 'radio-buttonset',
+	];
+
+	$sections['sliders']['fields']['avada_rev_styles'] = [
+		'id'          => 'avada_rev_styles',
+		'label'       => esc_attr__( 'Disable Avada Styles For Slider Revolution', 'Avada' ),
+		/* translators: Additional description (defaults). */
+		'description' => sprintf( esc_html__( 'Choose to enable or disable Avada styles for Slider Revolution. %s', 'Avada' ), Avada()->settings->get_default_description( 'avada_rev_styles', '', 'reverseyesno' ) ),
+		'choices'     => [
+			'default' => esc_attr__( 'Default', 'Avada' ),
+			'yes'     => esc_attr__( 'Yes', 'Avada' ),
+			'no'      => esc_attr__( 'No', 'Avada' ),
+		],
+		'default'     => 'default',
+		'dependency'  => [
+			[
+				'field'      => 'slider_type',
+				'value'      => 'rev',
 				'comparison' => '==',
-			),
-		)
-	);
+			],
+		],
+		'type'        => 'radio-buttonset',
+		'map'         => 'reverseyesno',
+	];
+
+	$sections['sliders']['fields']['fallback'] = [
+		'id'          => 'fallback',
+		'label'       => esc_attr__( 'Slider Fallback Image', 'Avada' ),
+		'description' => esc_html__( 'This image will override the slider on mobile devices.', 'Avada' ),
+		'dependency'  => [
+			[
+				'field'      => 'slider_type',
+				'value'      => 'no',
+				'comparison' => '!=',
+			],
+			[
+				'field'      => 'slider_type',
+				'value'      => '',
+				'comparison' => '!=',
+			],
+		],
+		'type'        => 'media',
+	];
+
+	$sections['sliders']['fields']['demo_slider'] = [
+		'id'      => 'demo_slider',
+		'default' => '',
+		'type'    => 'hidden',
+	];
+
+	return $sections;
 }
 
-global $wpdb;
-$revsliders[0] = esc_attr__( 'Select a slider', 'Avada' );
-
-if ( function_exists( 'rev_slider_shortcode' ) ) {
-	$slider_object = new RevSliderSlider();
-	$sliders_array = $slider_object->getArrSliders();
-
-	if ( $sliders_array ) {
-		foreach ( $sliders_array as $slider ) {
-			$revsliders[ $slider->getAlias() ] = $slider->getTitle() . ' (#' . $slider->getID() . ')';
-		}
-	}
-}
-
-$this->select(
-	'revslider',
-	esc_attr__( 'Select Slider Revolution Slider', 'Avada' ),
-	$revsliders,
-	esc_html__( 'Select the unique name of the slider.', 'Avada' ),
-	array(
-		array(
-			'field'      => 'slider_type',
-			'value'      => 'rev',
-			'comparison' => '==',
-		),
-	)
-);
-
-$slides_array    = array();
-$slides_array[0] = esc_html__( 'Select a slider', 'Avada' );
-$slides          = get_terms( 'themefusion_es_groups' );
-if ( $slides && ! isset( $slides->errors ) ) {
-	$slides = maybe_unserialize( $slides );
-	foreach ( $slides as $key => $val ) {
-		$slides_array[ $val->slug ] = $val->name . ' (#' . $val->term_id . ')';
-	}
-}
-$this->select(
-	'elasticslider',
-	esc_attr__( 'Select Elastic Slider', 'Avada' ),
-	$slides_array,
-	esc_html__( 'Select the unique name of the slider.', 'Avada' ),
-	array(
-		array(
-			'field'      => 'slider_type',
-			'value'      => 'elastic',
-			'comparison' => '==',
-		),
-	)
-);
-
-$this->radio_buttonset(
-	'slider_position',
-	esc_attr__( 'Slider Position', 'Avada' ),
-	array(
-		'default' => esc_attr__( 'Default', 'Avada' ),
-		'below'   => esc_attr__( 'Below', 'Avada' ),
-		'above'   => esc_attr__( 'Above', 'Avada' ),
-	),
-	/* translators: Additional description (defaults). */
-	sprintf( esc_html__( 'Select if the slider shows below or above the header. Only works for top header position. %s', 'Avada' ), Avada()->settings->get_default_description( 'slider_position', '', 'select' ) ),
-	'',
-	array(
-		array(
-			'field'      => 'slider_type',
-			'value'      => 'no',
-			'comparison' => '!=',
-		),
-	)
-);
-
-$this->radio_buttonset(
-	'avada_rev_styles',
-	esc_attr__( 'Disable Avada Styles For Slider Revolution', 'Avada' ),
-	array(
-		'default' => esc_attr__( 'Default', 'Avada' ),
-		'yes'     => esc_attr__( 'Yes', 'Avada' ),
-		'no'      => esc_attr__( 'No', 'Avada' ),
-	),
-	/* translators: Additional description (defaults). */
-	sprintf( esc_html__( 'Choose to enable or disable Avada styles for Slider Revolution. %s', 'Avada' ), Avada()->settings->get_default_description( 'avada_rev_styles', '', 'reverseyesno' ) ),
-	'',
-	array(
-		array(
-			'field'      => 'slider_type',
-			'value'      => 'rev',
-			'comparison' => '==',
-		),
-	)
-);
-
-$this->upload(
-	'fallback',
-	esc_attr__( 'Slider Fallback Image', 'Avada' ),
-	esc_html__( 'This image will override the slider on mobile devices.', 'Avada' ),
-	array(
-		array(
-			'field'      => 'slider_type',
-			'value'      => 'no',
-			'comparison' => '!=',
-		),
-		array(
-			'field'      => 'slider_type',
-			'value'      => '',
-			'comparison' => '!=',
-		),
-	)
-);
-
-// New hidden field for demo slider contents, to allow demo slider placeholder.
-$this->hidden(
-	'demo_slider',
-	''
-);
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

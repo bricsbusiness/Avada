@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -26,7 +26,7 @@ class Avada_Options {
 	 * @access public
 	 * @var array
 	 */
-	public $section_names = array();
+	public $section_names = [];
 
 	/**
 	 * An array of our sections.
@@ -34,7 +34,7 @@ class Avada_Options {
 	 * @access public
 	 * @var array
 	 */
-	public $sections = array();
+	public $sections = [];
 
 	/**
 	 * An array of our fields.
@@ -60,13 +60,13 @@ class Avada_Options {
 	 */
 	private function __construct() {
 
-		Avada::$is_updating = ( $_GET && isset( $_GET['avada_update'] ) && '1' == $_GET['avada_update'] ) ? true : false;
+		Avada::$is_updating = ( $_GET && isset( $_GET['avada_update'] ) && '1' == $_GET['avada_update'] ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.PHP.StrictComparisons.LooseComparison
 
 		/**
 		 * The array of sections by ID.
 		 * These are used in the filenames AND the function-names.
 		 */
-		$this->section_names = array(
+		$this->section_names = [
 			'layout',
 			'responsive',
 			'colors',
@@ -74,6 +74,7 @@ class Avada_Options {
 			'menu',
 			'logo',
 			'page_title_bar',
+			'breadcrumbs',
 			'sliding_bar',
 			'footer',
 			'sidebars',
@@ -85,6 +86,7 @@ class Avada_Options {
 			'slideshows',
 			'elastic_slider',
 			'lightbox',
+			'forms',
 			'contact',
 			'search',
 			'privacy',
@@ -95,7 +97,7 @@ class Avada_Options {
 			'woocommerce',
 			'events_calendar',
 			'custom_css',
-		);
+		];
 
 		// Include the section files.
 		$this->include_files();
@@ -106,7 +108,7 @@ class Avada_Options {
 		// Set the $fields.
 		$this->set_fields();
 
-		add_filter( 'fusion_settings_all_fields', array( __CLASS__, 'get_option_fields' ) );
+		add_filter( 'fusion_settings_all_fields', [ __CLASS__, 'get_option_fields' ] );
 
 	}
 
@@ -143,7 +145,7 @@ class Avada_Options {
 	 */
 	public function set_sections() {
 
-		$sections = array();
+		$sections = [];
 		foreach ( $this->section_names as $section ) {
 			// Make sure the function exists before call_user_func().
 			if ( ! function_exists( 'avada_options_section_' . $section ) ) {
@@ -167,8 +169,8 @@ class Avada_Options {
 	public function fields_array() {
 
 		// Get the options object.
-		$avada_new_options = Avada::$options;
-		$fields            = array();
+		$avada_new_options = Avada::get_options();
+		$fields            = [];
 
 		// Start parsing sections.
 		foreach ( $avada_new_options->sections as $section ) {
@@ -188,7 +190,7 @@ class Avada_Options {
 				}
 
 				// For normal fields, we'll just add the field ID to our array.
-				if ( ! in_array( $field['type'], array( 'sub-section', 'accordion' ) ) ) {
+				if ( ! in_array( $field['type'], [ 'sub-section', 'accordion' ], true ) ) {
 					if ( isset( $field['id'] ) ) {
 						$fields[] = $field['id'];
 					}
@@ -229,7 +231,7 @@ class Avada_Options {
 				}
 
 				// This is a sub-section or an accordion.
-				if ( isset( $field['type'] ) && in_array( $field['type'], array( 'sub-section', 'accordion' ) ) ) {
+				if ( isset( $field['type'] ) && in_array( $field['type'], [ 'sub-section', 'accordion' ], true ) ) {
 
 					// Start parsing the fields inside the sub-section/accordion.
 					foreach ( $field['fields'] as $sub_field ) {
@@ -255,7 +257,7 @@ class Avada_Options {
 	 * @param array $fields The existing fields.
 	 * @return array
 	 */
-	public static function get_option_fields( $fields = array() ) {
+	public static function get_option_fields( $fields = [] ) {
 
 		if ( ! is_array( self::$fields ) || ! self::$fields || empty( self::$fields ) ) {
 			$instance = self::get_instance();

@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -33,7 +33,7 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 		 * @param int    $depth  Depth of menu item. Used for padding.
 		 * @param array  $args   Not used.
 		 */
-		public function start_lvl( &$output, $depth = 0, $args = array() ) {}
+		public function start_lvl( &$output, $depth = 0, $args = [] ) {}
 
 		/**
 		 * Ends the list of after the elements are added.
@@ -46,7 +46,7 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 		 * @param int    $depth  Depth of menu item. Used for padding.
 		 * @param array  $args   Not used.
 		 */
-		public function end_lvl( &$output, $depth = 0, $args = array() ) {}
+		public function end_lvl( &$output, $depth = 0, $args = [] ) {}
 
 		/**
 		 * Start the element output.
@@ -60,20 +60,23 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 		 * @param array  $args   Not used.
 		 * @param int    $id     Not used.
 		 */
-		public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
+		public function start_el( &$output, $item, $depth = 0, $args = [], $id = 0 ) {
 			global $_wp_nav_menu_max_depth, $wp_registered_sidebars;
+
 			$_wp_nav_menu_max_depth = $depth > $_wp_nav_menu_max_depth ? $depth : $_wp_nav_menu_max_depth; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+
+			$depth = (int) $depth;
 
 			ob_start();
 			$item_id      = esc_attr( $item->ID );
-			$removed_args = array(
+			$removed_args = [
 				'action',
 				'customlink-tab',
 				'edit-menu-item',
 				'menu-item',
 				'page-tab',
 				'_wpnonce',
-			);
+			];
 
 			$original_title = '';
 			if ( 'taxonomy' === $item->type ) {
@@ -86,11 +89,11 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 				$original_title  = get_the_title( $original_object->ID );
 			}
 
-			$classes = array(
+			$classes = [
 				'menu-item menu-item-depth-' . $depth,
 				'menu-item-' . esc_attr( $item->object ),
-				'menu-item-edit-' . ( ( isset( $_GET['edit-menu-item'] ) && $item_id == $_GET['edit-menu-item'] ) ? 'active' : 'inactive' ),
-			);
+				'menu-item-edit-' . ( ( isset( $_GET['edit-menu-item'] ) && sanitize_text_field( wp_unslash( $_GET['edit-menu-item'] ) ) === $item_id ) ? 'active' : 'inactive' ), // phpcs:ignore WordPress.Security.NonceVerification
+			];
 
 			$title = $item->title;
 
@@ -98,16 +101,16 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 				$classes[] = 'menu-item-invalid';
 				/* translators: %s: title of menu item which is invalid */
 				$title = sprintf( esc_html__( '%s (Invalid)', 'Avada' ), $item->title );
-			} elseif ( isset( $item->post_status ) && 'draft' == $item->post_status ) {
+			} elseif ( isset( $item->post_status ) && 'draft' === $item->post_status ) {
 				$classes[] = 'pending';
 				/* translators: %s: title of menu item in draft status */
 				$title = sprintf( esc_html__( '%s (Pending)', 'Avada' ), $item->title );
 			}
 
-			$title = ( ! isset( $item->label ) || '' == $item->label ) ? $title : $item->label;
+			$title = ( ! isset( $item->label ) || '' === $item->label ) ? $title : $item->label;
 
 			$submenu_text = '';
-			if ( 0 == $depth ) {
+			if ( 0 === $depth ) {
 				$submenu_text = 'style="display:none;"';
 			}
 
@@ -115,32 +118,32 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 			<li id="menu-item-<?php echo esc_attr( $item_id ); ?>" class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>">
 				<dl class="menu-item-bar">
 					<dt class="menu-item-handle">
-						<span class="item-title"><span class="menu-item-title"><?php echo esc_html( $title ); ?></span> <span class="is-submenu" <?php echo $submenu_text; // WPCS: XSS ok. ?>><?php esc_attr_e( 'sub item', 'Avada' ); ?></span></span>
+						<span class="item-title"><span class="menu-item-title"><?php echo esc_html( $title ); ?></span> <span class="is-submenu" <?php echo $submenu_text; // phpcs:ignore WordPress.Security.EscapeOutput ?>><?php esc_attr_e( 'sub item', 'Avada' ); ?></span></span>
 						<span class="item-controls">
 							<span class="item-type"><?php echo esc_html( $item->type_label ); ?></span>
 							<span class="item-order hide-if-js">
 								<?php
 								$url1 = wp_nonce_url(
 									add_query_arg(
-										array(
+										[
 											'action'    => 'move-up-menu-item',
 											'menu-item' => $item_id,
-										),
+										],
 										remove_query_arg( $removed_args, admin_url( 'nav-menus.php' ) )
 									),
 									'move-menu_item'
 								);
 								$url2 = wp_nonce_url(
 									add_query_arg(
-										array(
+										[
 											'action'    => 'move-down-menu-item',
 											'menu-item' => $item_id,
-										),
+										],
 										remove_query_arg( $removed_args, admin_url( 'nav-menus.php' ) )
 									),
 									'move-menu_item'
 								);
-								if ( isset( $_GET['edit-menu-item'] ) && $item_id == $_GET['edit-menu-item'] ) {
+								if ( isset( $_GET['edit-menu-item'] ) && sanitize_text_field( wp_unslash( $_GET['edit-menu-item'] ) ) === $item_id ) { // phpcs:ignore WordPress.Security.NonceVerification
 									$url3 = admin_url( 'nav-menus.php' );
 								} else {
 									$url3 = add_query_arg(
@@ -157,13 +160,13 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 								|
 								<a href="<?php echo esc_url( $url2 ); ?>" class="item-move-down"><abbr title="<?php esc_attr_e( 'Move down', 'Avada' ); ?>">&#8595;</abbr></a>
 							</span>
-							<a class="item-edit" id="edit-<?php echo esc_attr( $item_id ); ?>" title="<?php esc_attr_e( 'Edit Menu Item', 'Avada' ); ?>" href="<?php echo esc_url( $url3 ); ?>"><?php esc_attr_e( 'Edit Menu Item', 'Avada' ); ?></a>
+							<a class="item-edit" id="edit-<?php echo esc_attr( $item_id ); ?>" title="<?php esc_attr_e( 'Edit Menu Item', 'Avada' ); ?>" href="<?php echo esc_url( $url3 ); ?>"><span class="screen-reader-text"><?php esc_attr_e( 'Edit Menu Item', 'Avada' ); ?></span></a>
 						</span>
 					</dt>
 				</dl>
 
 				<div class="menu-item-settings" id="menu-item-settings-<?php echo esc_attr( $item_id ); ?>">
-					<?php if ( 'custom' == $item->type ) : ?>
+					<?php if ( 'custom' === $item->type ) : ?>
 						<p class="field-url description description-wide">
 							<label for="edit-menu-item-url-<?php echo esc_attr( $item_id ); ?>">
 								<?php esc_attr_e( 'URL', 'Avada' ); ?><br />
@@ -209,7 +212,7 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 						</label>
 					</p>
 
-					<?php do_action( 'wp_nav_menu_item_custom_fields', $item_id, $item, $depth, $args ); ?>
+					<?php do_action( 'wp_nav_menu_item_custom_fields', $item_id, $item, $depth, $args, $id ); ?>
 
 					<fieldset class="field-move hide-if-no-js description description-wide">
 						<span class="field-move-visual-label" aria-hidden="true"><?php esc_attr_e( 'Move', 'Avada' ); ?></span>
@@ -221,7 +224,7 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 					</fieldset>
 
 					<div class="menu-item-actions description-wide submitbox">
-						<?php if ( 'custom' != $item->type && false !== $original_title ) : ?>
+						<?php if ( 'custom' !== $item->type && false !== $original_title ) : ?>
 							<p class="link-to-original">
 								<?php /* translators: Title (with link). */ ?>
 								<?php printf( esc_html__( 'Original: %s', 'Avada' ), '<a href="' . esc_attr( $item->url ) . '">' . esc_html( $original_title ) . '</a>' ); ?>
@@ -230,10 +233,10 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 						<?php
 						$url = wp_nonce_url(
 							add_query_arg(
-								array(
+								[
 									'action'    => 'delete-menu-item',
 									'menu-item' => $item_id,
-								),
+								],
 								admin_url( 'nav-menus.php' )
 							),
 							'delete-menu_item_' . $item_id
@@ -242,10 +245,10 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 						<a class="item-delete submitdelete deletion" id="delete-<?php echo esc_attr( $item_id ); ?>" href="<?php echo esc_url( $url ); ?>"><?php esc_attr_e( 'Remove', 'Avada' ); ?></a> <span class="meta-sep hide-if-no-js"> | </span>
 						<?php
 						$url_with_args = add_query_arg(
-							array(
+							[
 								'edit-menu-item' => $item_id,
 								'cancel'         => time(),
-							),
+							],
 							admin_url( 'nav-menus.php' )
 						);
 						?>
@@ -264,6 +267,6 @@ if ( ! class_exists( 'Avada_Nav_Walker_Megamenu' ) ) {
 			$output .= ob_get_clean();
 		}
 	}
-} // End if().
+}
 
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

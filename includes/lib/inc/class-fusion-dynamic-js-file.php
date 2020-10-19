@@ -6,11 +6,6 @@
  * @since 1.0.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Handles enqueueing files dynamically.
  */
@@ -56,11 +51,11 @@ final class Fusion_Dynamic_JS_File extends Fusion_Dynamic_JS_Compiler {
 			}
 		}
 
-		if ( $no_file || ! self::js_file_is_readable() ) {
+		if ( $no_file || ! $this->js_file_is_readable() ) {
 			new Fusion_Dynamic_JS_Separate( $dynamic_js );
-			self::disable_dynamic_js();
+			$this->disable_dynamic_js();
 		} else {
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		}
 	}
 
@@ -72,10 +67,13 @@ final class Fusion_Dynamic_JS_File extends Fusion_Dynamic_JS_Compiler {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
+		global $fusion_library_latest_version;
+
 		// Get an array of external dependencies.
 		$dependencies = array_unique( $this->get_external_dependencies() );
+
 		// Enqueue the script.
-		wp_enqueue_script( 'fusion-scripts', $this->file->get_url(), $dependencies, null, true );
+		wp_enqueue_script( 'fusion-scripts', $this->file->get_url(), $dependencies, $fusion_library_latest_version, true );
 	}
 
 	/**
@@ -103,9 +101,9 @@ final class Fusion_Dynamic_JS_File extends Fusion_Dynamic_JS_Compiler {
 				// Check for 403 / 500.
 				$response = wp_safe_remote_get(
 					$this->file->get_url(),
-					array(
+					[
 						'timeout' => 5,
-					)
+					]
 				);
 
 				$response_code = wp_remote_retrieve_response_code( $response );
@@ -130,7 +128,7 @@ final class Fusion_Dynamic_JS_File extends Fusion_Dynamic_JS_Compiler {
 	 * @return void
 	 */
 	public function disable_dynamic_js() {
-		$options                = get_option( Fusion_Settings::get_option_name(), array() );
+		$options                = (array) get_option( Fusion_Settings::get_option_name(), [] );
 		$options['js_compiler'] = '0';
 
 		update_option( Fusion_Settings::get_option_name(), $options );
@@ -165,10 +163,10 @@ final class Fusion_Dynamic_JS_File extends Fusion_Dynamic_JS_Compiler {
 
 		$filenames = get_transient( 'fusion_dynamic_js_filenames' );
 		if ( ! is_array( $filenames ) ) {
-			$filenames = array();
+			$filenames = [];
 		}
-		$fusion = Fusion::get_instance();
-		$id     = (int) $fusion->get_page_id();
+
+		$id = (int) fusion_library()->get_page_id();
 		if ( isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['PHP_SELF'] ) && isset( $_SERVER['REQUEST_URI'] ) ) {
 			$host = sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) );
 			$self = sanitize_text_field( wp_unslash( $_SERVER['PHP_SELF'] ) );

@@ -1,8 +1,11 @@
-/* global Color */
+/* global Color, FusionAp */
 ( function() {
 
 	// Variable for some backgrounds
-	var alphaImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAAHnlligAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAHJJREFUeNpi+P///4EDBxiAGMgCCCAGFB5AADGCRBgYDh48CCRZIJS9vT2QBAggFBkmBiSAogxFBiCAoHogAKIKAlBUYTELAiAmEtABEECk20G6BOmuIl0CIMBQ/IEMkO0myiSSraaaBhZcbkUOs0HuBwDplz5uFJ3Z4gAAAABJRU5ErkJggg==';
+	var alphaImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAAHnlligAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAHJJREFUeNpi+P///4EDBxiAGMgCCCAGFB5AADGCRBgYDh48CCRZIJS9vT2QBAggFBkmBiSAogxFBiCAoHogAKIKAlBUYTELAiAmEtABEECk20G6BOmuIl0CIMBQ/IEMkO0myiSSraaaBhZcbkUOs0HuBwDplz5uFJ3Z4gAAAABJRU5ErkJggg==',
+		colorPickerPalette = ['#000000', '#ffffff', '#f44336', '#E91E63', '#03A9F4', '#00BCD4', '#8BC34A', '#FFEB3B', '#FFC107', '#FF9800', '#607D8B'],
+		currentColor,
+		lastUsedColor;
 
 	/**
 	 * Overwrite Color to enable support for rbga colors.
@@ -30,12 +33,123 @@
 		return '#' + hex;
 	};
 
+	jQuery.widget( 'wp.wpColorPicker', jQuery.wp.wpColorPicker, {
+		_addListeners: function() {
+			var self = this,
+				wrap,
+				element;
+
+			self._super();
+
+			wrap = self.wrap;
+			element = self.element;
+
+			wrap.closest( '.fusion-colorpicker-container' ).find( 'button.wp-picker-clear' ).on( 'click', function() {
+
+				// Trigger Iris clear button.
+				wrap.find( '.wp-picker-clear' ).trigger( 'click' );
+			} );
+
+			wrap.next().find( '.color-picker-placeholder' ).on( 'blur', function() {
+				var value = jQuery( this ).val();
+
+				wrap.find( '.wp-color-picker' ).val( value ).attr( 'value', value ).trigger( 'change' );
+			} );
+		},
+
+		open: function() {
+			var self = this,
+				element,
+				wrap;
+
+			self._super();
+
+			element = self.element;
+			wrap = self.wrap;
+
+			wrap.closest( '.fusion-colorpicker-container' ).find( '.wp-picker-input-container' ).toggleClass( 'hidden' );
+			element.trigger( 'resize' );
+
+			if ( 'undefined' !== typeof FusionApp ) {
+
+				currentColor = wrap.closest( '.fusion-colorpicker-container' ).find( '.fusion-builder-color-picker-hex' ).val();
+
+				if ( currentColor ) {
+					colorPickerPalette[0] = currentColor;
+				}
+
+				if ( lastUsedColor && colorPickerPalette[0] !== lastUsedColor ) {
+					colorPickerPalette[1] = lastUsedColor;
+				}
+
+				palette = jQuery( '<a class="iris-palette" tabindex="0" />' );
+				if ( wrap.closest( '.fusion-colorpicker-container' ).find( '.iris-palette-container' ).length ) {
+
+					previewHeight = wrap.closest( '.fusion-colorpicker-container' ).find( '.iris-palette-container .iris-palette:nth-child(2)' ).css( 'height' );
+					previewMargin = wrap.closest( '.fusion-colorpicker-container' ).find( '.iris-palette-container .iris-palette:nth-child(2)' ).css( 'margin-left' );
+					container     = wrap.closest( '.fusion-colorpicker-container' ).find( '.iris-palette-container' ).detach().html( '' );
+
+					jQuery.each( colorPickerPalette, function( index, val ) {
+						palette.clone().data( 'color', val )
+							.css( {
+								'background-color': val,
+								'height': previewHeight,
+								'margin-left': previewMargin
+							} ).appendTo( container );
+					});
+
+					// TO panel shortcut.
+					container.append( '<a href="#" style="height:' + previewHeight + ';margin-left:' + previewMargin + ';padding-left:' + previewMargin + ';" class="fusion-color-palette-link" data-fusion-option="color_palette"><span class="fusion-elements-option-tooltip">' + fusionBuilderText.color_palette_options + '</span><i class="fusiona-cog"></i></a>' ).on( 'click', '.fusion-color-palette-link', function( event ) {
+						var $self = jQuery( this );
+
+						if ( event ) {
+							event.preventDefault();
+						}
+
+						if ( 'undefined' !== typeof FusionApp.sidebarView ) {
+							FusionApp.sidebarView.openOption( $self.attr( 'data-fusion-option' ), 'to' );
+						}
+					} );
+
+					wrap.closest( '.fusion-colorpicker-container' ).find( '.iris-picker' ).append( container );
+				}
+			}
+		},
+
+		close: function() {
+			var self = this,
+				wrap;
+
+			// Don't close color picker if clicked on eraser icon.
+			if ( 'undefined' === typeof FusionApp || ( 'undefined' !== typeof event && ! jQuery( event.target ).hasClass( 'wp-picker-clear' ) ) ) {
+				self._super();
+
+				wrap = self.wrap;
+				wrap.next( '.wp-picker-input-container' ).toggleClass( 'hidden' );
+
+				if ( 'undefined' !== typeof FusionApp ) {
+					lastUsedColor = wrap.closest( '.fusion-colorpicker-container' ).find( '.fusion-builder-color-picker-hex' ).val();
+
+					// Color palette or Chart's color picker.
+					if ( wrap.closest( '.fusion-builder-option' ).hasClass( 'color-palette' ) || wrap.closest( '.fusion-builder-option' ).hasClass( 'fusion-color-picker-opened' ) ) {
+						wrap.closest( '.fusion-colorpicker-container' ).find( '.fusion-colorpicker-icon' ).trigger( 'click' );
+					}
+					wrap.next().find( '.color-picker-placeholder' ).val( lastUsedColor ).attr( 'value', lastUsedColor ).trigger( 'change' );
+				}
+			}
+		}
+	} );
+
 	/**
 	 * Overwrite iris
 	 */
 	jQuery.widget( 'a8c.iris', jQuery.a8c.iris, {
 		_create: function() {
 			this._super();
+
+			if ( ! jQuery( this.element[0] ).hasClass( 'fusion-builder-color-picker-hex' ) && ! jQuery( this.element[0] ).hasClass( 'fusion-builder-color-picker-hex-new' ) && ! jQuery( this.element[0] ).hasClass( 'fusion_options' ) ) {
+				return;
+			}
 
 			// Global option for check is mode rbga is enabled
 			this.options.alpha = this.element.data( 'alpha' ) || false;
@@ -169,7 +283,8 @@
 		_addInputListeners: function( input ) {
 			var self            = this,
 			    debounceTimeout = 100,
-			    callback;
+				callback,
+				placeholder = jQuery( '.' + input.attr( 'name' ) );
 
 			callback = function( event ) {
 				var color = new Color( input.val() ),
@@ -191,9 +306,27 @@
 						self._setOption( 'color', color.toString() );
 					}
 				}
+
+				jQuery( placeholder ).val( color.toString() );
+				jQuery( placeholder ).attr( 'value', color.toString() );
 			};
 
 			input.on( 'change', callback ).on( 'keyup', self._debounce( callback, debounceTimeout ) );
+
+			resetCallback = function( event ) {
+				var color = new Color( input.val() ),
+					defaultColor = self._color.toString();
+
+				color = color.toString();
+
+				if ( '' === color && '' !== defaultColor ) {
+					// color = defaultColor;
+				}
+
+				self._setOption( 'color', color );
+			};
+
+			input.on( 'resize', resetCallback );
 
 			// If we initialized hidden, show on first focus. The rest is up to you.
 			if ( self.options.hide ) {
@@ -205,15 +338,26 @@
 
 		_addPalettes: function() {
 			var container = jQuery( '<div class="iris-palette-container" />' ),
-			    palette   = jQuery( '<a class="iris-palette" tabindex="0" />' ),
-			    colors    = ['#000000', '#ffffff', '#f44336', '#E91E63', '#03A9F4', '#00BCD4', '#8BC34A', '#FFEB3B', '#FFC107', '#FF9800', '#607D8B'];
+				palette   = jQuery( '<a class="iris-palette" tabindex="0" />' );
+
+			if ( 'undefined' !== typeof FusionApp && 'undefined' !== typeof FusionApp.settings.color_palette ) {
+				colorPickerPalette = FusionApp.settings.color_palette.split( '|' );
+
+				// Add two default colors.
+				colorPickerPalette.unshift( '#000000', '#ffffff' );
+			} else if ( 'undefined' !== typeof fusionColorPalette && 'undefined' !== typeof fusionColorPalette.color_palette ) {
+				colorPickerPalette = fusionColorPalette.color_palette.split( '|' );
+
+				// Add two default colors.
+				colorPickerPalette.unshift( '#000000', '#ffffff' );
+			}
 
 			// Do we have an existing container? Empty and reuse it.
 			if ( this.picker.find( '.iris-palette-container' ).length ) {
 				container = this.picker.find( '.iris-palette-container' ).detach().html( '' );
 			}
 
-			jQuery.each( colors, function( index, val ) {
+			jQuery.each( colorPickerPalette, function( index, val ) {
 				palette.clone().data( 'color', val )
 					.css( 'backgroundColor', val ).appendTo( container )
 					.height( 10 ).width( 10 );

@@ -6,7 +6,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -158,7 +158,7 @@ class Avada {
 	 * @access public
 	 * @var array
 	 */
-	public static $bundled_plugins = array();
+	public static $bundled_plugins = [];
 
 	/**
 	 * Fusion.
@@ -175,14 +175,6 @@ class Avada {
 	 * @var object
 	 */
 	public $init;
-
-	/**
-	 * Avada_Social_Sharing.
-	 *
-	 * @access public
-	 * @var object
-	 */
-	public $social_sharing;
 
 	/**
 	 * Avada_Template.
@@ -257,6 +249,15 @@ class Avada {
 	public $registration;
 
 	/**
+	 * Avada_Slider_Revolution.
+	 *
+	 * @access public
+	 * @since 6.0
+	 * @var object Avada_Slider_Revolution
+	 */
+	public $slider_revolution;
+
+	/**
 	 * Avada_Sermon_Manager
 	 *
 	 * @access public
@@ -279,6 +280,14 @@ class Avada {
 	 * @var object Avada_PWA
 	 */
 	public $pwa;
+
+	/**
+	 * Avada_Block_Editor
+	 *
+	 * @access public
+	 * @var object Avada_Block_Editor
+	 */
+	public $block_editor;
 
 	/**
 	 * Access the single instance of this class.
@@ -336,36 +345,34 @@ class Avada {
 		// Instantiate secondary classes.
 		$this->settings     = Avada_Settings::get_instance();
 		$this->registration = new Fusion_Product_Registration(
-			array(
+			[
 				'type'    => 'theme',
 				'name'    => 'Avada',
-				'bundled' => array(
-					'fusion-core'                 => 'Fusion Core',
-					'fusion-builder'              => 'Fusion Builder',
+				'bundled' => [
+					'fusion-core'                 => 'Avada Core',
+					'fusion-builder'              => 'Avada Builder',
 					'fusion-white-label-branding' => 'Fusion White Label Branding',
-				),
-			)
+				],
+			]
 		);
 
-		$this->init           = new Avada_Init();
-		$this->social_sharing = new Avada_Social_Sharing();
-		$this->template       = new Avada_Template();
-		$this->blog           = new Avada_Blog();
-		$this->images         = new Avada_Images();
-		$this->head           = new Avada_Head();
-		$this->layout         = new Avada_Layout();
-		$this->google_map     = new Avada_GoogleMap();
-		$this->remote_install = new Avada_Remote_Installer();
-		$this->fusion_library = Fusion::get_instance();
-		$this->sermon_manager = new Avada_Sermon_Manager();
-		$this->privacy_embeds = new Avada_Privacy_Embeds();
-		$this->pwa            = new Avada_PWA();
+		$this->init              = new Avada_Init();
+		$this->template          = new Avada_Template();
+		$this->blog              = new Avada_Blog();
+		$this->head              = new Avada_Head();
+		$this->layout            = new Avada_Layout();
+		$this->google_map        = new Avada_GoogleMap();
+		$this->remote_install    = new Avada_Remote_Installer();
+		$this->fusion_library    = fusion_library();
+		$this->images            = new Avada_Images();
+		$this->slider_revolution = new Avada_Slider_Revolution();
+		$this->sermon_manager    = new Avada_Sermon_Manager();
+		$this->privacy_embeds    = new Avada_Privacy_Embeds();
+		$this->pwa               = new Avada_PWA();
+		$this->block_editor      = new Avada_Block_Editor();
 
 		// Set the Fusion Library Image Class variable to the Avada one, to avoid duplication.
-		global $fusion_library;
-		if ( $fusion_library ) {
-			$fusion_library->images = $this->images;
-		}
+		fusion_library()->images = $this->images;
 	}
 
 	/**
@@ -375,7 +382,7 @@ class Avada {
 	 * @access public
 	 */
 	public function set_is_updating() {
-		if ( ! self::$is_updating && $_GET && isset( $_GET['avada_update'] ) && '1' == $_GET['avada_update'] ) {
+		if ( ! self::$is_updating && $_GET && isset( $_GET['avada_update'] ) && '1' == $_GET['avada_update'] ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.PHP.StrictComparisons
 			self::$is_updating = true;
 		}
 	}
@@ -432,14 +439,14 @@ class Avada {
 				// Get remote HTML file.
 				$response = wp_remote_get(
 					$url,
-					array(
+					[
 						'user-agent' => 'avada-user-agent',
-					)
+					]
 				);
 
 				// Check for error.
 				if ( is_wp_error( $response ) ) {
-					return array();
+					return [];
 				}
 
 				// Parse remote HTML file.
@@ -447,16 +454,16 @@ class Avada {
 
 				// Check for error.
 				if ( is_wp_error( $data ) ) {
-					return array();
+					return [];
 				}
 
 				$data = json_decode( $data, true );
 
 				if ( ! is_array( $data ) ) {
-					return array();
+					return [];
 				}
 
-				$plugins = array();
+				$plugins = [];
 				foreach ( $data as $plugin ) {
 					if ( $plugin['premium'] ) {
 
@@ -491,23 +498,21 @@ class Avada {
 	 * @access public
 	 */
 	public static function multilingual_options() {
-
-		global $fusion_library;
-		$multilingual = $fusion_library->multilingual;
+		$multilingual = fusion_library()->multilingual;
 
 		// Set the self::$lang.
-		$active_language = Fusion_Multilingual::get_active_language();
-		if ( ! in_array( $active_language, array( '', 'en', 'all' ) ) ) {
+		$active_language = $multilingual::get_active_language();
+		if ( ! in_array( $active_language, [ '', 'en', 'all' ] ) ) { // phpcs:ignore WordPress.PHP.StrictInArray
 			self::$lang = '_' . $active_language;
 		}
 		// Make sure the options are copied if needed.
-		if ( ! in_array( self::$lang, array( '', 'en', 'all' ) ) && ! self::$lang_applied ) {
+		if ( ! in_array( self::$lang, [ '', 'en', 'all' ] ) && ! self::$lang_applied ) { // phpcs:ignore WordPress.PHP.StrictInArray
 			// Set the $option_name property.
 			self::$option_name = self::get_option_name();
 			// Get the options without using a language (defaults).
-			$original_options = get_option( self::$original_option_name, array() );
+			$original_options = get_option( self::$original_option_name, [] );
 			// Get options with a language.
-			$options = get_option( self::$original_option_name . self::$lang, array() );
+			$options = get_option( self::$original_option_name . self::$lang, [] );
 			// If we're not currently performing a migration and the options are not set
 			// then we must copy the default options to the new language.
 			if ( ! self::$is_updating && ! empty( $original_options ) && empty( $options ) ) {
@@ -584,6 +589,36 @@ class Avada {
 	 */
 	public static function get_language_is_all() {
 		return self::$language_is_all;
+	}
+
+	/**
+	 * Gets the $options.
+	 *
+	 * @static
+	 * @access public
+	 * @since 6.0
+	 * @return Avada_Options
+	 */
+	public static function get_options() {
+		if ( ! self::$options ) {
+			self::$options = Avada_Options::get_instance();
+		}
+		return self::$options;
+	}
+
+	/**
+	 * Gets the Avada_Images object.
+	 *
+	 * NOTE: Do not remove, needed for users updating from 6.1.2.
+	 *
+	 * @since 2.2.0
+	 * @return Avada_Images
+	 */
+	public function get_images_obj() {
+		if ( ! $this->images ) {
+			$this->images = new Avada_Images();
+		}
+		return $this->images;
 	}
 }
 

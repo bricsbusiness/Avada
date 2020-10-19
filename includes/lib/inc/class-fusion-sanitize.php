@@ -6,11 +6,6 @@
  * @since 1.0.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * A collection of sanitization methods.
  */
@@ -28,7 +23,7 @@ class Fusion_Sanitize {
 		// Trim the value.
 		$value = trim( $value );
 
-		if ( in_array( $value, array( 'auto', 'inherit', 'initial' ), true ) ) {
+		if ( in_array( $value, [ 'auto', 'inherit', 'initial' ], true ) ) {
 			return $value;
 		}
 
@@ -66,7 +61,7 @@ class Fusion_Sanitize {
 		$value = trim( $value );
 
 		// The array of valid units.
-		$units = array( 'px', 'rem', 'em', '%', 'vmin', 'vmax', 'vh', 'vw', 'ex', 'cm', 'mm', 'in', 'pt', 'pc', 'ch' );
+		$units = [ 'px', 'rem', 'em', '%', 'vmin', 'vmax', 'vh', 'vw', 'ex', 'cm', 'mm', 'in', 'pt', 'pc', 'ch' ];
 
 		foreach ( $units as $unit ) {
 
@@ -92,12 +87,12 @@ class Fusion_Sanitize {
 	 */
 	public static function get_value_with_unit( $value, $unit = 'px', $unit_handling = 'add' ) {
 
-		$raw_values = array();
+		$raw_values = [];
 
 		// Trim the value.
 		$value = trim( $value );
 
-		if ( in_array( $value, array( 'auto', 'inherit', 'initial' ), true ) ) {
+		if ( in_array( $value, [ 'auto', 'inherit', 'initial' ], true ) ) {
 			return $value;
 		}
 
@@ -113,6 +108,12 @@ class Fusion_Sanitize {
 		if ( is_array( $values ) && ! empty( $values ) ) {
 			foreach ( $values as $value ) {
 				$raw_value = self::number( $value );
+
+				// Isn't a number, do not add unit.
+				if ( ! is_numeric( $raw_value ) ) {
+					$raw_values[] = $value;
+					continue;
+				}
 
 				if ( $value === $raw_value ) {
 					$value = $raw_value . $unit;
@@ -205,11 +206,11 @@ class Fusion_Sanitize {
 		if ( $implode ) {
 			return $color_obj->to_css( 'rgb' );
 		}
-		return array(
+		return [
 			$color_obj->red,
 			$color_obj->green,
 			$color_obj->blue,
-		);
+		];
 	}
 
 	/**
@@ -231,6 +232,7 @@ class Fusion_Sanitize {
 	 * > must be escaped with a backslash so that the resulting URI value is a URI token: '\(', '\)'.
 	 *
 	 * @param  string $url The URL to modify.
+	 * @return string The modified URL.
 	 */
 	public static function css_asset_url( $url ) {
 
@@ -253,10 +255,7 @@ class Fusion_Sanitize {
 	 * @return string     Full URL without scheme.
 	 */
 	public static function get_url_with_correct_scheme( $url ) {
-
-		$url = set_url_scheme( $url );
-
-		return $url;
+		return set_url_scheme( $url );
 	}
 
 	/**
@@ -281,7 +280,7 @@ class Fusion_Sanitize {
 	 * @return array The correctly ordered version of $to_be_ordered.
 	 */
 	public static function order_array_like_array( array $to_be_ordered, array $order_like ) {
-		$ordered = array();
+		$ordered = [];
 
 		foreach ( $order_like as $key => $value ) {
 			if ( array_key_exists( $key, $to_be_ordered ) ) {
@@ -317,14 +316,14 @@ class Fusion_Sanitize {
 	 * @param array $values An array of CSS values.
 	 * @return string       The combined value.
 	 */
-	public static function add_css_values( $values = array() ) {
+	public static function add_css_values( $values = [] ) {
 
 		if ( ! is_array( $values ) || empty( $values ) ) {
 			return '0';
 		}
 
-		$units       = array();
-		$numerics    = array();
+		$units       = [];
+		$numerics    = [];
 		$should_calc = false;
 		// Figure out what we're dealing with.
 		foreach ( $values as $key => $value ) {
@@ -344,7 +343,7 @@ class Fusion_Sanitize {
 
 			// Add unit to the array of units used.
 			$unit = trim( self::get_unit( $value ) );
-			if ( ! empty( $unit ) && ! in_array( $unit, $units ) ) {
+			if ( ! empty( $unit ) && ! in_array( $unit, $units, true ) ) {
 				$units[] = $unit;
 			}
 
@@ -394,7 +393,7 @@ class Fusion_Sanitize {
 		}
 
 		// Remove multiple spaces.
-		$result = str_replace( array( '     ', '    ', '   ', '  ' ), ' ', $result );
+		$result = str_replace( [ '     ', '    ', '   ', '  ' ], ' ', $result );
 		// A simple tweak to make sure that negative values are substracted.
 		$result = str_replace( '+ -', ' - ', $result );
 		// The above might have resulted is a couple of double-spaces, so make them single again.
@@ -419,11 +418,6 @@ class Fusion_Sanitize {
 		$number = self::number( $value );
 		$units  = self::get_unit( $value );
 
-		// Return the value as-is if in pixels.
-		if ( 'px' === $units ) {
-			return $value;
-		}
-
 		// Calculate size if em/rem.
 		if ( 'em' === $units || 'rem' === $units ) {
 			return intval( $number * $body_font_size ) . 'px';
@@ -435,7 +429,7 @@ class Fusion_Sanitize {
 		}
 
 		// Fallback to the value as-is.
-		return $value;
+		return intval( $number ) . 'px';
 	}
 
 	/**
@@ -448,7 +442,7 @@ class Fusion_Sanitize {
 	 * @return string The changed font size.
 	 */
 	public static function convert_font_size_to_px( $font_size, $base_font_size ) {
-		$font_size_unit = self::get_unit( $font_size );
+		$font_size_unit   = self::get_unit( $font_size );
 		$font_size_number = self::number( $font_size );
 
 		if ( 'rem' === $font_size_unit ) {
@@ -456,7 +450,7 @@ class Fusion_Sanitize {
 			$base_font_size = $body_font_size ? $body_font_size : $base_font_size;
 		}
 
-		$base_font_size_unit = self::get_unit( $base_font_size );
+		$base_font_size_unit   = self::get_unit( $base_font_size );
 		$base_font_size_number = self::number( $base_font_size );
 
 		if ( ! $font_size_number ) {

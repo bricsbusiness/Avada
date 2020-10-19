@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Importer
  * @since      5.2
@@ -101,7 +101,7 @@ function fusion_parse_import_data( $import_array ) {
 				}
 				$current_sidebars[ $import_sidebar ][] = $title . '-' . $new_index;
 				if ( array_key_exists( $title, $new_widgets ) ) {
-					if ( 'nav_menu' == $title & ! is_numeric( $index ) ) {
+					if ( 'nav_menu' === $title & ! is_numeric( $index ) ) {
 						$menu                                = wp_get_nav_menu_object( $index );
 						$menu_id                             = $menu->term_id;
 						$new_widgets[ $title ][ $new_index ] = $menu_id;
@@ -112,7 +112,7 @@ function fusion_parse_import_data( $import_array ) {
 					unset( $new_widgets[ $title ]['_multiwidget'] );
 					$new_widgets[ $title ]['_multiwidget'] = $multiwidget;
 				} else {
-					if ( 'nav_menu' == $title & ! is_numeric( $index ) ) {
+					if ( 'nav_menu' === $title & ! is_numeric( $index ) ) {
 						$menu                              = wp_get_nav_menu_object( $index );
 						$menu_id                           = $menu->term_id;
 						$current_widget_data[ $new_index ] = $menu_id;
@@ -121,14 +121,14 @@ function fusion_parse_import_data( $import_array ) {
 					}
 					$current_multiwidget = isset( $current_widget_data['_multiwidget'] ) ? $current_widget_data['_multiwidget'] : false;
 					$new_multiwidget     = isset( $widget_data[ $title ]['_multiwidget'] ) ? $widget_data[ $title ]['_multiwidget'] : false;
-					$multiwidget         = ( $current_multiwidget != $new_multiwidget ) ? $current_multiwidget : 1;
+					$multiwidget         = ( $current_multiwidget != $new_multiwidget ) ? $current_multiwidget : 1; // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 					unset( $current_widget_data['_multiwidget'] );
 					$current_widget_data['_multiwidget'] = $multiwidget;
 					$new_widgets[ $title ]               = $current_widget_data;
 				}
-			} // End if().
-		} // End foreach().
-	} // End foreach().
+			}
+		}
+	}
 
 	if ( isset( $new_widgets ) && isset( $current_sidebars ) ) {
 		update_option( 'sidebars_widgets', $current_sidebars );
@@ -153,13 +153,13 @@ function fusion_get_new_widget_name( $widget_name, $widget_index ) {
 	$current_sidebars = get_option( 'sidebars_widgets' );
 	$all_widget_array = array();
 	foreach ( $current_sidebars as $sidebar => $widgets ) {
-		if ( ! empty( $widgets ) && is_array( $widgets ) && 'wp_inactive_widgets' != $sidebar ) {
+		if ( ! empty( $widgets ) && is_array( $widgets ) && 'wp_inactive_widgets' !== $sidebar ) {
 			foreach ( $widgets as $widget ) {
 				$all_widget_array[] = $widget;
 			}
 		}
 	}
-	while ( in_array( $widget_name . '-' . $widget_index, $all_widget_array ) ) {
+	while ( in_array( $widget_name . '-' . $widget_index, $all_widget_array, true ) ) {
 		$widget_index++;
 	}
 	$new_widget_name = $widget_name . '-' . $widget_index;
@@ -192,9 +192,10 @@ function fusion_fs_importer_replace_url( $matches ) {
 		foreach ( $matches as $key => $match ) {
 			if ( false !== strpos( $match, 'wp-content/uploads/sites/' ) ) {
 
-				if ( false !== $meta_arr = @unserialize( $match ) ) {
+				$meta_arr = maybe_unserialize( $match );
+				if ( false !== $meta_arr && is_array( $meta_arr ) ) {
 					foreach ( $meta_arr as $k => $v ) {
-						if ( false !== strpos( $v, 'wp-content/uploads/sites/' ) ) {
+						if ( is_string( $v ) && false !== strpos( $v, 'wp-content/uploads/sites/' ) ) {
 							$parts = explode( 'wp-content/uploads/sites/', $v );
 							if ( isset( $parts[1] ) ) {
 								$sub_parts = explode( '/', $parts[1] );
@@ -207,7 +208,7 @@ function fusion_fs_importer_replace_url( $matches ) {
 							}
 						}
 					}
-					return serialize( $meta_arr );
+					return serialize( $meta_arr ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 				} else {
 					$parts = explode( 'wp-content/uploads/sites/', $match );
 					if ( isset( $parts[1] ) ) {

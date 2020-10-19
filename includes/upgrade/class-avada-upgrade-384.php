@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -43,7 +43,7 @@ class Avada_Upgrade_384 extends Avada_Upgrade_Abstract {
 			if ( version_compare( $theme_version, '3.8', '>=' ) && version_compare( $theme_version, '3.8.5', '<' ) ) {
 				$smof_data_to_decode = get_option( 'Avada_options' );
 
-				$encoded_field_names = array( 'google_analytics', 'space_head', 'space_body', 'custom_css' );
+				$encoded_field_names = [ 'google_analytics', 'space_head', 'space_body', 'custom_css' ];
 
 				foreach ( $encoded_field_names as $field_name ) {
 					$decoded_field_value = rawurldecode( $smof_data_to_decode[ $field_name ] );

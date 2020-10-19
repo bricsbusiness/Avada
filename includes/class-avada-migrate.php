@@ -4,10 +4,12 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      4.0.0
+ *
+ * phpcs:ignoreFile WordPress.Security.NonceVerification
  */
 
 // Do not allow directly accessing this file.
@@ -34,7 +36,7 @@ class Avada_Migrate extends Avada_Upgrade {
 	 * @access  public
 	 * @var  array
 	 */
-	public $steps = array();
+	public $steps = [];
 
 	/**
 	 * Should we proceed to the next step?
@@ -58,7 +60,7 @@ class Avada_Migrate extends Avada_Upgrade {
 	 * @access  public
 	 * @var  array
 	 */
-	public $available_languages = array();
+	public $available_languages = [];
 
 	/**
 	 * The active language.
@@ -125,13 +127,13 @@ class Avada_Migrate extends Avada_Upgrade {
 
 		// Raise the memory limit and max_execution_time time.
 		if ( function_exists( 'ini_get' ) ) {
-			$memory = ini_get( 'memory_limit' );
-			$memory_shorthands = array(
+			$memory            = ini_get( 'memory_limit' );
+			$memory_shorthands = [
 				'k' => 1024,
 				'm' => 1048576,
 				'g' => 1073741824,
-			);
-			$memory_last_char = substr( $memory, -1 );
+			];
+			$memory_last_char  = substr( $memory, -1 );
 			if ( array_key_exists( strtolower( $memory_last_char ), $memory_shorthands ) ) {
 				$memory = (int) str_replace( $memory_last_char, '', $memory ) * $memory_shorthands[ strtolower( $memory_last_char ) ];
 			}
@@ -152,7 +154,7 @@ class Avada_Migrate extends Avada_Upgrade {
 
 		// If English is used then make this first in array order.  Also set starting language so that it is migrated first.
 		if ( in_array( 'en', $this->available_languages ) ) {
-			$en_array                  = array( 'en' );
+			$en_array                  = [ 'en' ];
 			$en_key                    = array_search( 'en', $this->available_languages );
 			$available_languages_no_en = $this->available_languages;
 			unset( $available_languages_no_en[ $en_key ] );
@@ -160,7 +162,7 @@ class Avada_Migrate extends Avada_Upgrade {
 			$this->starting_language   = 'en';
 		} else {
 			// If not English then make default language first in array order.  Also set it to be starting language for migration.
-			$default_array                  = array( $this->default_language );
+			$default_array                  = [ $this->default_language ];
 			$default_key                    = array_search( $this->default_language, $this->available_languages );
 			$available_languages_no_default = $this->available_languages;
 			unset( $available_languages_no_default[ $default_key ] );
@@ -188,14 +190,14 @@ class Avada_Migrate extends Avada_Upgrade {
 			}
 
 			$_get_lang = ( isset( $_GET['lang'] ) ) ? sanitize_text_field( wp_unslash( $_GET['lang'] ) ) : '';
-			if ( isset( $_GET['lang'] ) && ! in_array( $_get_lang, array( '', 'en', 'all', null ) ) ) {
+			if ( isset( $_GET['lang'] ) && ! in_array( $_get_lang, [ '', 'en', 'all', null ] ) ) {
 				Fusion_Multilingual::set_active_language( $_get_lang );
 			}
 
-			$this->options = get_option( Avada::get_option_name(), array() );
+			$this->options = get_option( Avada::get_option_name(), [] );
 			$this->fields  = Avada_Options::get_option_fields();
 
-			add_action( 'admin_init', array( $this, 'migrate_page' ) );
+			add_action( 'admin_init', [ $this, 'migrate_page' ] );
 
 		}
 
@@ -242,7 +244,7 @@ class Avada_Migrate extends Avada_Upgrade {
 				.avada-setup {
 					padding: 3% 20%;
 					background-color: #f2f2f2;
-					font-family:'Roboto', sans-serif;
+					font-family: "Noto Sans", Roboto, "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
 					font-weight:300;
 					font-size: 1.1em;
 				}
@@ -266,7 +268,7 @@ class Avada_Migrate extends Avada_Upgrade {
 					display: inline-block;
 					margin-left: 20px;
 					padding: 5px 10px;
-					background-color: #a0ce4e;
+					background-color: #65bc7b;
 					-webkit-border-radius: 3px;
 					border-radius: 3px;
 					color: #fff;
@@ -280,7 +282,7 @@ class Avada_Migrate extends Avada_Upgrade {
 				.avada-welcome-msg {
 					padding: 25px 35px;
 					line-height: 1.6em;
-					background-color: #a0ce4e;
+					background-color: #65bc7b;
 					color: #fff;
 					font-style: italic;
 					text-align: center;
@@ -295,14 +297,14 @@ class Avada_Migrate extends Avada_Upgrade {
 				.avada-update-progress-bar {
 					height: 20px;
 					position: relative;
-					background: #F0F4C3;
+					background: rgba(101, 188, 123, 0.3);
 					margin: 35px 0;
 					padding: 1px;
 				}
 				.avada-update-progress-bar > span {
 					display: block;
 					height: 100%;
-					background-color: #8bc34a;
+					background-color: #65bc7b;
 					position: relative;
 					overflow: hidden;
 				}
@@ -328,7 +330,7 @@ class Avada_Migrate extends Avada_Upgrade {
 					font-size: 1.4em
 				}
 				.tasks-list li.done {
-					color: #a0ce4e;
+					color: #65bc7b;
 				}
 				.tasks-list li.doing {
 					color: #000;
@@ -337,7 +339,7 @@ class Avada_Migrate extends Avada_Upgrade {
 					display: inline-block;
 					margin: 2em 0 0.67em 0;
 					padding: 1em 2em;
-					background-color: #a0ce4e;
+					background-color: #65bc7b;
 					color: #fff;
 					text-decoration: none;
 					-webkit-border-radius: 3px;
@@ -351,7 +353,7 @@ class Avada_Migrate extends Avada_Upgrade {
 					background-color: #ef5350;
 				}
 				.avada-save-options:hover {
-					background-color: #96c346;
+					background-color: #5aa86c;
 				}
 				.avada-save-options.needs-update:hover {
 					background-color: #f44336;
@@ -394,10 +396,10 @@ class Avada_Migrate extends Avada_Upgrade {
 
 							if ( ! empty( $this->available_languages ) ) {
 								/* translators: Version number. */
-								printf( esc_html__( 'We have an amazing new update in store for you! Avada %s includes our completely new Theme Options Panel and the brand new Fusion Builder. To enjoy the full experience, two primary conversion steps need to be performed. First your Theme Options database entries need to be converted (sequentially for each language, if you have a multi-lingual site). In a second step your shortcodes will be converted for the new builder. Thank you for choosing Avada!', 'Avada' ), esc_attr( $version ) );
+								printf( esc_html__( 'We have an amazing new update in store for you! Avada %s includes our completely new Global Options Panel and the brand new Avada Builder. To enjoy the full experience, two primary conversion steps need to be performed. First your Global Options database entries need to be converted (sequentially for each language, if you have a multi-lingual site). In a second step your shortcodes will be converted for the new builder. Thank you for choosing Avada!', 'Avada' ), esc_attr( $version ) );
 							} else {
 								/* translators: Version number. */
-								printf( esc_html__( 'We have an amazing new update in store for you! Avada %s includes our completely new Theme Options Panel and the brand new Fusion Builder. To enjoy the full experience, two primary conversion steps need to be performed. First your Theme Options database entries need to be converted. In a second step your shortcodes will be converted for the new builder. Thank you for choosing Avada!', 'Avada' ), esc_attr( $version ) );
+								printf( esc_html__( 'We have an amazing new update in store for you! Avada %s includes our completely new Global Options Panel and the brand new Avada Builder. To enjoy the full experience, two primary conversion steps need to be performed. First your Global Options database entries need to be converted. In a second step your shortcodes will be converted for the new builder. Thank you for choosing Avada!', 'Avada' ), esc_attr( $version ) );
 							}
 							?>
 						</div>
@@ -448,7 +450,7 @@ class Avada_Migrate extends Avada_Upgrade {
 								</ul>
 							<?php else : ?>
 								<?php if ( empty( $this->available_languages ) || count( $this->available_languages ) == array_search( $this->active_language, $this->available_languages ) + 1 ) : ?>
-									<p><?php esc_html_e( 'Congratulations, Theme Options database enrties were successfully converted.', 'Avada' ); ?></p>
+									<p><?php esc_html_e( 'Congratulations, Global Options database enrties were successfully converted.', 'Avada' ); ?></p>
 									<p><?php esc_html_e( 'For best experience, please clear your browser cache once.', 'Avada' ); ?></p>
 									<p><?php esc_html_e( 'Dynamic-CSS caches have been auto reset.', 'Avada' ); ?></p>
 								<?php endif; ?>
@@ -465,7 +467,7 @@ class Avada_Migrate extends Avada_Upgrade {
 						<?php /* translators: (heart) icon. */ ?>
 						<div class="avada-footer"><a class="avada-themefusion-link" href="https://theme-fusion.com" target="_blank" rel="noopener noreferrer" title="ThemeFusion">ThemeFusion</a><span class="avada-separator">|</span><?php printf( esc_html__( 'Created with %s', 'Avada' ), '<span class="avada-heart"></span>' ); ?></div>
 					</div>
-					<?php echo $this->redirect_script(); // WPCS: XSS ok. ?>
+					<?php echo $this->redirect_script(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				</div>
 			</body>
 		</html>
@@ -477,7 +479,7 @@ class Avada_Migrate extends Avada_Upgrade {
 	 */
 	public function finished() {
 		// Reset the CSS.
-		update_option( 'fusion_dynamic_css_posts', array() );
+		update_option( 'fusion_dynamic_css_posts', [] );
 	}
 
 	/**
@@ -563,13 +565,13 @@ class Avada_Migrate extends Avada_Upgrade {
 	 * @access  public
 	 * @param  array $data The setting data.
 	 */
-	public static function generate_debug_log( $data = array() ) {
+	public static function generate_debug_log( $data = [] ) {
 		$debug_log       = '';
 		$debug_content   = '';
 		$debug_file_path = WP_CONTENT_DIR . '/avada-migration-debug.log';
 		if ( defined( 'AVADA_MIGRATION_DEBUG_LOG' ) && AVADA_MIGRATION_DEBUG_LOG ) {
 			if ( ! empty( $data ) ) {
-				$final_data = array();
+				$final_data = [];
 				foreach ( $data as $item ) {
 					$final_data[] = ( is_array( $item ) ) ? wp_json_encode( $item ) : $item;
 				}
@@ -584,7 +586,7 @@ class Avada_Migrate extends Avada_Upgrade {
 				$debug_content = file_get_contents( $debug_file_path );
 			}
 			$debug_content .= $debug_log;
-			file_put_contents( $debug_file_path, $debug_content );
+			file_put_contents( $debug_file_path, $debug_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		}
 	}
 }

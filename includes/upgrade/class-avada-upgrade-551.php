@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -37,7 +37,7 @@ class Avada_Upgrade_551 extends Avada_Upgrade_Abstract {
 	 * @access  private
 	 * @var  array
 	 */
-	private static $available_languages = array();
+	private static $available_languages = [];
 
 	/**
 	 * The actual migration process.
@@ -48,7 +48,7 @@ class Avada_Upgrade_551 extends Avada_Upgrade_Abstract {
 	 */
 	protected function migration_process() {
 		$available_languages       = Fusion_Multilingual::get_available_languages();
-		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : array( '' );
+		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : [ '' ];
 
 		$this->migrate_options();
 	}
@@ -61,7 +61,7 @@ class Avada_Upgrade_551 extends Avada_Upgrade_Abstract {
 	 */
 	protected function migrate_options() {
 
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 		$options = $this->correct_chart_default_value( $options );
 		$options = $this->page_title_bar_hover( $options );
 
@@ -75,7 +75,7 @@ class Avada_Upgrade_551 extends Avada_Upgrade_Abstract {
 			}
 
 			// Get language specific TOs.
-			$options = get_option( $this->option_name . '_' . $language, array() );
+			$options = get_option( $this->option_name . '_' . $language, [] );
 
 			$options = $this->correct_chart_default_value( $options );
 			$options = $this->page_title_bar_hover( $options );
@@ -89,8 +89,8 @@ class Avada_Upgrade_551 extends Avada_Upgrade_Abstract {
 	 *
 	 * @access private
 	 * @since 5.5.1
-	 * @param array $options Theme Options.
-	 * @return array The updated Theme Options array.
+	 * @param array $options Global Options.
+	 * @return array The updated Global Options array.
 	 */
 	private function correct_chart_default_value( $options ) {
 
@@ -106,8 +106,8 @@ class Avada_Upgrade_551 extends Avada_Upgrade_Abstract {
 	 *
 	 * @access private
 	 * @since 5.5.1
-	 * @param array $options Theme Options.
-	 * @return array The updated Theme Options array.
+	 * @param array $options Global Options.
+	 * @return array The updated Global Options array.
 	 */
 	private function page_title_bar_hover( $options ) {
 

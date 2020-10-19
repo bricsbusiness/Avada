@@ -101,48 +101,49 @@
 					_wp_http_referer: $parent.find( '> [name=_wp_http_referer]:first' ).val(),
 					'opt_name': fusionredux.args.opt_name,
 					data: $data
-				},
-				error: function( response ) {
-					if ( !window.console ) console = {};
-					console.log = console.log || function( name, data ) {
-					};
-					console.log( fusionredux.ajax.console );
-					console.log( response.responseText );
-					jQuery( '.fusionredux-action_bar input' ).removeAttr( 'disabled' );
-					overlay.fadeOut( 'fast' );
-					jQuery( '.fusionredux-action_bar .spinner' ).removeClass( 'is-active' );
-					alert( fusionredux.ajax.alert );
-				},
-				success: function( response ) {
-					if ( response.action && response.action == "reload" ) {
-						location.reload( true );
-					} else if ( response.status == "success" ) {
-						jQuery( '.fusionredux-action_bar input' ).removeAttr( 'disabled' );
-						overlay.fadeOut( 'fast' );
-						jQuery( '.fusionredux-action_bar .spinner' ).removeClass( 'is-active' );
-						fusionredux.options = response.options;
-						//fusionredux.defaults = response.defaults;
-						fusionredux.errors = response.errors;
-						fusionredux.warnings = response.warnings;
-
-						$notification_bar.html( response.notification_bar ).slideDown( 'fast' );
-						if ( response.errors !== null || response.warnings !== null ) {
-							$.fusionredux.notices();
-						}
-						var $save_notice = $( document.getElementById( 'fusionredux_notification_bar' ) ).find( '.saved_notice' );
-						$save_notice.slideDown();
-						$save_notice.delay( 4000 ).slideUp();
-					} else {
-						jQuery( '.fusionredux-action_bar input' ).removeAttr( 'disabled' );
-						jQuery( '.fusionredux-action_bar .spinner' ).removeClass( 'is-active' );
-						overlay.fadeOut( 'fast' );
-						jQuery( '.wrap h2:first' ).parent().append( '<div class="error fusionredux_ajax_save_error" style="display:none;"><p>' + response.status + '</p></div>' );
-						jQuery( '.fusionredux_ajax_save_error' ).slideDown();
-						jQuery( "html, body" ).animate( {scrollTop: 0}, "slow" );
-					}
 				}
+			} 
+		)
+		.fail( function( response ) {
+			if ( !window.console ) console = {};
+			console.log = console.log || function( name, data ) {
+			};
+			console.log( fusionredux.ajax.console );
+			console.log( response.responseText );
+			jQuery( '.fusionredux-action_bar input' ).removeAttr( 'disabled' );
+			overlay.fadeOut( 'fast' );
+			jQuery( '.fusionredux-action_bar .spinner' ).removeClass( 'is-active' );
+			alert( fusionredux.ajax.alert );
+		} )
+		.done( function( response ) {
+			if ( response.action && response.action == "reload" ) {
+				location.reload( true );
+			} else if ( response.status == "success" ) {
+				jQuery( '.fusionredux-action_bar input' ).removeAttr( 'disabled' );
+				overlay.fadeOut( 'fast' );
+				jQuery( '.fusionredux-action_bar .spinner' ).removeClass( 'is-active' );
+				fusionredux.options = response.options;
+				//fusionredux.defaults = response.defaults;
+				fusionredux.errors = response.errors;
+				fusionredux.warnings = response.warnings;
+
+				$notification_bar.html( response.notification_bar ).slideDown( 'fast' );
+				if ( response.errors !== null || response.warnings !== null ) {
+					$.fusionredux.notices();
+				}
+				var $save_notice = $( document.getElementById( 'fusionredux_notification_bar' ) ).find( '.saved_notice' );
+				$save_notice.slideDown();
+				$save_notice.delay( 4000 ).slideUp();
+			} else {
+				jQuery( '.fusionredux-action_bar input' ).removeAttr( 'disabled' );
+				jQuery( '.fusionredux-action_bar .spinner' ).removeClass( 'is-active' );
+				overlay.fadeOut( 'fast' );
+				jQuery( '.wrap h2:first' ).parent().append( '<div class="error fusionredux_ajax_save_error" style="display:none;"><p>' + response.status + '</p></div>' );
+				jQuery( '.fusionredux_ajax_save_error' ).slideDown();
+				jQuery( "html, body" ).animate( {scrollTop: 0}, "slow" );
 			}
-		);
+		} );
+
 		return false;
 	};
 
@@ -920,7 +921,7 @@
 					return;
 				}
 
-				is_hidden = container.parents( 'tr:first' ).hasClass( '.hide' );
+				is_hidden = container.parents( 'tr:first' ).hasClass( 'hidden' );
 
 				if ( ! is_hidden ) {
 					show = $.fusionredux.check_parents_dependencies( id );
@@ -928,14 +929,27 @@
 
 				// Show/Hide option that is being processed.
 				if ( show === true ) {
-					$( '#' + fusionredux.args.opt_name + '-' + id ).parents( 'tr:first' ).fadeIn( 300, function() {
-						$( this ).removeClass( 'hide' );
-						//$.fusionredux.initFields();
-					});
+
+                    if ( 'info' === $( '#' + fusionredux.args.opt_name + '-' + id ).data( 'type' ) ) {
+                        $( '#' + fusionredux.args.opt_name.replace( 'fusion_options', 'info' ) + '-' + id ).fadeIn( 300, function() {
+                            $( this ).removeClass( 'hide' );
+                        });                        
+                    } else {
+                        $( '#' + fusionredux.args.opt_name + '-' + id ).parents( 'tr:first' ).fadeIn( 300, function() {
+                            $( this ).removeClass( 'hide' );
+                            //$.fusionredux.initFields();
+                        });
+                    }
 				} else if ( show === false ) {
-					$( '#' + fusionredux.args.opt_name + '-' + id ).parents( 'tr:first' ).fadeOut( 100, function() {
-						$( this ).addClass( 'hide' );
-					});
+                    if ( 'info' === $( '#' + fusionredux.args.opt_name + '-' + id ).data( 'type' ) ) {
+                        $( '#' + fusionredux.args.opt_name.replace( 'fusion_options', 'info' ) + '-' + id ).fadeOut( 300, function() {
+                            $( this ).addClass( 'hide' );
+                        });                        
+                    } else {                    
+                        $( '#' + fusionredux.args.opt_name + '-' + id ).parents( 'tr:first' ).fadeOut( 100, function() {
+                            $( this ).addClass( 'hide' );
+                        });
+                    }
 				}
 
 				// Check if option is a parent and process it's children
@@ -997,7 +1011,15 @@
 						} else if ( show === false ) {
 							tr.fadeOut( 100, function() {
 								$( this ).addClass( 'hide' );
-							});
+                            });
+                            
+                            if ( childFieldset.hasClass( 'fusionredux-container-info' ) ) {
+                                $( '#info-' + child ).fadeOut( 100 ).addClass( 'hide' );
+                            }
+
+                            if ( childFieldset.hasClass( 'fusionredux-container-divide' ) ) {
+                                $( '#divide-' + child ).fadeOut( 100 ).addClass( 'hide' );
+                            }                 
 						}
 						//todo: check this trigger
 						//current.find( 'select, radio, input[type=checkbox]' ).trigger( 'change' );
@@ -1089,7 +1111,7 @@
 					}
 
 					$.each( fusionredux.required_child[id], function( i, parentData ) {
-						if ( $( '#' + fusionredux.args.opt_name + '-' + parentData.parent ).parents( 'tr:first' ).hasClass( '.hide' ) ) {
+						if ( $( '#' + fusionredux.args.opt_name + '-' + parentData.parent ).parents( 'tr:first' ).is( '.hide, .hidden' ) ) {
 							show = false;
 							dependencyResults.push( 0 );
 
@@ -1417,7 +1439,7 @@
 	$.fusionredux.stickyInfo = function() {
 		var stickyWidth = $( '.fusionredux-main' ).innerWidth() - 20;
 
-		if ( !$( '#info_bar' ).isOnScreen() && !$( '#fusionredux-footer-sticky' ).isOnScreen() ) {
+		if ( !$( '#info_bar' ).isOnScreen() && !$( '#fusionredux-footer-sticky' ).isOnScreen() && $( '#fusionredux-footer-sticky' ).offset().top > $( window ).scrollTop()  ) {
 			$( '#fusionredux-footer' ).css(
 				{
 					position: 'fixed',

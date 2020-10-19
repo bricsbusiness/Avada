@@ -12,16 +12,17 @@
 	$expanded = ( $this->parent->args['open_expanded'] ) ? ' fully-expanded' : '' . ( ! empty( $this->parent->args['class'] ) ? ' ' . esc_attr( $this->parent->args['class'] ) : '' );
 	$nonce    = wp_create_nonce( "fusionredux_ajax_nonce" . $this->parent->args['opt_name'] );
 ?>
+
 <div class="fusionredux-container<?php echo esc_attr( $expanded ); ?>">
 	<?php $action = ( $this->parent->args['database'] == "network" && $this->parent->args['network_admin'] && is_network_admin() ? './edit.php?action=fusionredux_' . $this->parent->args['opt_name'] : './options.php' ) ?>
-	<!-- Theme Fusion edit starts for #5556 -->
+	<!-- ThemeFusion edit starts for #5556 -->
 	<form method="post"
 		  action="<?php echo esc_attr($action); ?>"
 		  data-nonce="<?php echo esc_attr($nonce); ?>"
 		  enctype="multipart/form-data"
 			autocomplete="off"
 		  id="fusionredux-form-wrapper">
-	<!-- Theme Fusion edit ends for #5556 -->
+	<!-- ThemeFusion edit ends for #5556 -->
 		<?php // $this->parent->args['opt_name'] is sanitized in the Framework class, no need to re-sanitize it. ?>
 		<input type="hidden" id="fusionredux-compiler-hook"
 			name="<?php echo $this->parent->args['opt_name']; ?>[compiler]"

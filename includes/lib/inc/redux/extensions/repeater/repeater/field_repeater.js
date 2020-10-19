@@ -161,8 +161,7 @@
                 );
 
                 // Handler to remove the given repeater
-                el.find( '.fusionredux-repeaters-remove' ).live(
-                    'click', function() {
+                el.on( 'click', '.fusionredux-repeaters-remove', function() {
                         fusionredux_change( $( this ) );
                         var parent = $( this ).parents( '.fusionredux-container-repeater:first' );
                         var gid = parent.attr( 'data-id' );

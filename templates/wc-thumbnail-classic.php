@@ -4,24 +4,25 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.1.0
  */
 
-global $product, $woocommerce;
+global $product;
 
-$items_in_cart = array();
+$items_in_cart = [];
+$wc_cart_items = method_exists( WC()->cart, 'get_cart' ) ? WC()->cart->get_cart() : [];
 
-if ( $woocommerce->cart && $woocommerce->cart->get_cart() && is_array( $woocommerce->cart->get_cart() ) ) {
-	foreach ( $woocommerce->cart->get_cart() as $cart ) {
+if ( ! empty( $wc_cart_items ) ) {
+	foreach ( $wc_cart_items as $cart ) {
 		$items_in_cart[] = $cart['product_id'];
 	}
 }
 
-$id      = get_the_ID(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
-$in_cart = in_array( $id, $items_in_cart );
+$id      = get_the_ID(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+$in_cart = in_array( $id, $items_in_cart ); // phpcs:ignore WordPress.PHP.StrictInArray
 $size    = 'shop_catalog';
 
 $attachment_image = '';
@@ -35,9 +36,9 @@ if ( Avada()->settings->get( 'woocommerce_disable_crossfade_effect' ) ) {
 			$first_image_id,
 			$size,
 			false,
-			array(
+			[
 				'class' => 'hover-image',
-			)
+			]
 		);
 	}
 }
@@ -53,11 +54,11 @@ if ( $attachment_image ) {
 }
 ?>
 <div class="<?php echo esc_attr( $classes ); ?>">
-	<?php echo $attachment_image; // WPCS: XSS ok. ?>
-	<?php echo $thumb_image; // WPCS: XSS ok. ?>
+	<?php echo $attachment_image; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+	<?php echo $thumb_image; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	<?php if ( $in_cart ) : ?>
-		<div class="cart-loading"><i class="fusion-icon-check-square-o"></i></div>
+		<div class="cart-loading"><i class="fusion-icon-check-square-o" aria-hidden="true"></i></div>
 	<?php else : ?>
-		<div class="cart-loading"><i class="fusion-icon-spinner"></i></div>
+		<div class="cart-loading"><i class="fusion-icon-spinner" aria-hidden="true"></i></div>
 	<?php endif; ?>
 </div>

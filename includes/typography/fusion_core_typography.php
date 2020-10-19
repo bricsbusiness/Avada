@@ -1,10 +1,10 @@
 <?php
 /**
- * This file contains typography styles for Fusion Core plugin.
+ * This file contains typography styles for Avada Core plugin.
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.0.0

@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.0.0
@@ -65,17 +65,17 @@ class Avada_Remote_Installer {
 
 			$response = wp_remote_get(
 				$url,
-				array(
+				[
 					'user-agent' => 'avada-user-agent',
-				)
+				]
 			);
 			$body     = wp_remote_retrieve_body( $response );
 
 			// Check for errors.
-			$error_responses = array(
+			$error_responses = [
 				'Product not defined' => 'download-undefined',
 				'Invalid Token'       => 'invalid-token',
-			);
+			];
 			foreach ( $error_responses as $key => $value ) {
 				if ( false !== strpos( $body, $key ) ) {
 					return false;
@@ -84,14 +84,14 @@ class Avada_Remote_Installer {
 			$trimmed = trim( $body );
 			$parts   = explode( '|', $trimmed );
 
-			$saved_nonce = array();
+			$saved_nonce = [];
 
 			if ( 2 === count( $parts ) ) {
 
-				$saved_nonce = array(
+				$saved_nonce = [
 					esc_attr( $parts[0] ),
 					esc_attr( $parts[1] ),
-				);
+				];
 			} else {
 				return false;
 			}
@@ -128,16 +128,16 @@ class Avada_Remote_Installer {
 		// Check for token and then install if it's valid.
 		$nonces = $this->_get_nonce( $download, $token );
 
-		$registered = ( ! in_array( $download, array( 'Fusion Builder', 'Fusion Core' ), true ) ) ? Avada()->registration->is_registered() : true;
+		$registered = ( ! in_array( $download, [ 'Avada Builder', 'Avada Core' ], true ) ) ? Avada()->registration->is_registered() : true;
 
 		if ( false !== $nonces && $registered ) {
-			$api_args = array(
+			$api_args = [
 				'avada_action' => 'get_download',
 				'item_name'    => rawurlencode( $download ),
 				'nonce'        => isset( $nonces[0] ) ? $nonces[0] : '',
 				't'            => isset( $nonces[1] ) ? $nonces[1] : '',
 				'ver'          => Avada::get_theme_version(),
-			);
+			];
 
 			$download_src = add_query_arg( $api_args, $this->api_url );
 			set_transient( 'avada_remote_installer_package_' . $download, $download_src, 300 );

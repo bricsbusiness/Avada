@@ -6,11 +6,6 @@
  * @since 1.8.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * A collection of sanitization methods.
  */
@@ -22,7 +17,7 @@ class Fusion_Font_Awesome {
 	 * @access protected
 	 * @var string
 	 */
-	public static $fa_version = '5.8.1';
+	public static $fa_version = '5.15.0';
 
 	/**
 	 * Font Awesome URL.
@@ -39,7 +34,31 @@ class Fusion_Font_Awesome {
 	 * @return void
 	 */
 	public function __construct() {
-		add_filter( 'fusion_dynamic_css_final', array( $this, 'add_to_dynamic_css' ) );
+		add_filter( 'fusion_dynamic_css_final', [ $this, 'add_to_dynamic_css' ] );
+		add_action( 'wp_ajax_fusion_font_awesome', [ $this, 'front_editor_ajax_callbak' ] );
+	}
+
+	/**
+	 * AJAX callback, used for toggling Font Awesome options in Front End builder.
+	 */
+	public function front_editor_ajax_callbak() {
+		check_ajax_referer( 'fusion_load_nonce', 'fusion_load_nonce' );
+
+		$pro_status = (bool) ( isset( $_GET['pro_status'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['pro_status'] ) ) );
+		$response   = [];
+
+		if ( $pro_status ) {
+			$response['icons']     = include FUSION_LIBRARY_PATH . '/assets/fonts/fontawesome/icons_pro.php';
+			$response['css_url']   = 'https://pro.fontawesome.com/releases/v' . self::$fa_version . '/css/all.css';
+			$response['shims_url'] = 'https://pro.fontawesome.com/releases/v' . self::$fa_version . '/css/v4-shims.css';
+		} else {
+			$response['icons']     = include FUSION_LIBRARY_PATH . '/assets/fonts/fontawesome/icons_free.php';
+			$response['css_url']   = FUSION_LIBRARY_URL . '/assets/fonts/fontawesome/font-awesome.min.css';
+			$response['shims_url'] = FUSION_LIBRARY_URL . '/assets/fonts/fontawesome/v4-shims.min.css';
+		}
+
+		echo wp_json_encode( $response );
+		die();
 	}
 
 	/**
@@ -68,19 +87,20 @@ class Fusion_Font_Awesome {
 	public function get_css() {
 		global $fusion_settings;
 
-		$transient_name = 'fusion_fontawesome';
-		if ( '' !== Fusion_Multilingual::get_active_language() && 'all' !== Fusion_Multilingual::get_active_language() ) {
-			$transient_name .= '_' . Fusion_Multilingual::get_active_language();
+		$transient_name  = 'fusion_fontawesome';
+		$active_language = Fusion_Multilingual::get_active_language();
+		if ( '' !== $active_language && 'all' !== $active_language ) {
+			$transient_name .= '_' . $active_language;
 		}
 
 		$css = get_transient( $transient_name );
 
-		if ( ! $css ) {
+		if ( ! $css || ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) ) {
 			$subsets = $fusion_settings->get( 'status_fontawesome' );
 			$icons   = fusion_get_icons_array();
 
 			$css .= $this->get_extras();
-			$css .= ( 'local' === $fusion_settings->get( 'gfonts_load_method' ) && true === self::is_fa_pro_enabled() ) ? $this->get_local_subsets_font_face() : $this->get_subsets_font_face();
+			$css .= ( 'local' === $fusion_settings->get( 'gfonts_load_method' ) && true === self::is_fa_pro_enabled() && ! ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) ) ? $this->get_local_subsets_font_face() : $this->get_subsets_font_face();
 
 			foreach ( $icons as $icon ) {
 				foreach ( $icon[1] as $icon_subsets ) {
@@ -102,7 +122,9 @@ class Fusion_Font_Awesome {
 				$css = str_replace( 'Font Awesome 5 Free', 'Font Awesome 5 Pro', $css );
 			}
 
-			set_transient( $transient_name, $css );
+			if ( ! ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) ) {
+				set_transient( $transient_name, $css );
+			}
 		}
 
 		return $css;
@@ -174,26 +196,59 @@ class Fusion_Font_Awesome {
 	 * @return string
 	 */
 	protected function get_subsets_font_face() {
-		global $fusion_settings;
-
 		$css       = '';
-		$subsets   = $fusion_settings->get( 'status_fontawesome' );
-		$clean_url = str_replace( array( 'http://', 'https://' ), '//', self::get_base_css_url() );
+		$subsets   = fusion_library()->get_option( 'status_fontawesome' );
+		$clean_url = str_replace( [ 'http://', 'https://' ], '//', self::get_base_css_url() );
+
+		$font_face_display = fusion_library()->get_option( 'font_face_display' );
+		$font_face_display = ( 'swap-all' === $font_face_display ) ? 'swap' : 'block';
 
 		if ( is_array( $subsets ) && in_array( 'fab', $subsets, true ) ) {
-			$css .= '@font-face{font-family:"Font Awesome 5 Brands";font-style:normal;font-weight:normal;src:url(' . $clean_url . '/webfonts/fa-brands-400.eot);src:url(' . $clean_url . '/webfonts/fa-brands-400.eot?#iefix) format("embedded-opentype"),url(' . $clean_url . '/webfonts/fa-brands-400.woff2) format("woff2"),url(' . $clean_url . '/webfonts/fa-brands-400.woff) format("woff"),url(' . $clean_url . '/webfonts/fa-brands-400.ttf) format("truetype"),url(' . $clean_url . '/webfonts/fa-brands-400.svg#fontawesome) format("svg")}.fab{font-family:"Font Awesome 5 Brands"}';
+			$css .= '@font-face{';
+			$css .= 'font-family:"Font Awesome 5 Brands";';
+			$css .= 'font-style:normal;';
+			$css .= 'font-weight:normal;';
+			$css .= 'src:url(' . $clean_url . '/webfonts/fa-brands-400.eot);';
+			$css .= 'src:url(' . $clean_url . '/webfonts/fa-brands-400.eot?#iefix) format("embedded-opentype"),url(' . $clean_url . '/webfonts/fa-brands-400.woff2) format("woff2"),url(' . $clean_url . '/webfonts/fa-brands-400.woff) format("woff"),url(' . $clean_url . '/webfonts/fa-brands-400.ttf) format("truetype"),url(' . $clean_url . '/webfonts/fa-brands-400.svg#fontawesome) format("svg");';
+			$css .= 'font-display: ' . $font_face_display . ';';
+			$css .= '}';
+			$css .= '.fab{font-family:"Font Awesome 5 Brands"}';
 		}
 
 		if ( is_array( $subsets ) && in_array( 'far', $subsets, true ) ) {
-			$css .= '@font-face{font-family:"Font Awesome 5 Free";font-style:normal;font-weight:400;src:url(' . $clean_url . '/webfonts/fa-regular-400.eot);src:url(' . $clean_url . '/webfonts/fa-regular-400.eot?#iefix) format("embedded-opentype"),url(' . $clean_url . '/webfonts/fa-regular-400.woff2) format("woff2"),url(' . $clean_url . '/webfonts/fa-regular-400.woff) format("woff"),url(' . $clean_url . '/webfonts/fa-regular-400.ttf) format("truetype"),url(' . $clean_url . '/webfonts/fa-regular-400.svg#fontawesome) format("svg")}.far{font-family:"Font Awesome 5 Free";font-weight:400}';
+			$css .= '@font-face{';
+			$css .= 'font-family:"Font Awesome 5 Free";';
+			$css .= 'font-style:normal;';
+			$css .= 'font-weight:400;';
+			$css .= 'src:url(' . $clean_url . '/webfonts/fa-regular-400.eot);';
+			$css .= 'src:url(' . $clean_url . '/webfonts/fa-regular-400.eot?#iefix) format("embedded-opentype"),url(' . $clean_url . '/webfonts/fa-regular-400.woff2) format("woff2"),url(' . $clean_url . '/webfonts/fa-regular-400.woff) format("woff"),url(' . $clean_url . '/webfonts/fa-regular-400.ttf) format("truetype"),url(' . $clean_url . '/webfonts/fa-regular-400.svg#fontawesome) format("svg");';
+			$css .= 'font-display: ' . $font_face_display . ';';
+			$css .= '}';
+			$css .= '.far{font-family:"Font Awesome 5 Free";font-weight:400;}';
 		}
 
 		if ( is_array( $subsets ) && in_array( 'fas', $subsets, true ) ) {
-			$css .= '@font-face{font-family:"Font Awesome 5 Free";font-style:normal;font-weight:900;src:url(' . $clean_url . '/webfonts/fa-solid-900.eot);src:url(' . $clean_url . '/webfonts/fa-solid-900.eot?#iefix) format("embedded-opentype"),url(' . $clean_url . '/webfonts/fa-solid-900.woff2) format("woff2"),url(' . $clean_url . '/fa-solid-900.woff) format("woff"),url(' . $clean_url . '/webfonts/fa-solid-900.ttf) format("truetype"),url(' . $clean_url . '/webfonts/fa-solid-900.svg#fontawesome) format("svg")}.fa,.fas{font-family:"Font Awesome 5 Free";font-weight:900}';
+			$css .= '@font-face{';
+			$css .= 'font-family:"Font Awesome 5 Free";';
+			$css .= 'font-style:normal;';
+			$css .= 'font-weight:900;';
+			$css .= 'src:url(' . $clean_url . '/webfonts/fa-solid-900.eot);';
+			$css .= 'src:url(' . $clean_url . '/webfonts/fa-solid-900.eot?#iefix) format("embedded-opentype"),url(' . $clean_url . '/webfonts/fa-solid-900.woff2) format("woff2"),url(' . $clean_url . '/webfonts/fa-solid-900.woff) format("woff"),url(' . $clean_url . '/webfonts/fa-solid-900.ttf) format("truetype"),url(' . $clean_url . '/webfonts/fa-solid-900.svg#fontawesome) format("svg");';
+			$css .= 'font-display: ' . $font_face_display . ';';
+			$css .= '}';
+			$css .= '.fa,.fas{font-family:"Font Awesome 5 Free";font-weight:900}';
 		}
 
 		if ( true === self::is_fa_pro_enabled() && is_array( $subsets ) && in_array( 'fal', $subsets, true ) ) {
-			$css .= '@font-face{font-family:"Font Awesome 5 Pro";font-style:normal;font-weight:300;src:url(' . $clean_url . '/webfonts/fa-light-300.eot);src:url(' . $clean_url . '/webfonts/fa-light-300.eot?#iefix) format("embedded-opentype"),url(' . $clean_url . '/webfonts/fa-light-300.woff2) format("woff2"),url(' . $clean_url . '/webfonts/fa-light-300.woff) format("woff"),url(' . $clean_url . '/webfonts/fa-light-300.ttf) format("truetype"),url(' . $clean_url . '/webfonts/fa-light-300.svg#fontawesome) format("svg")}.fal{font-family:"Font Awesome 5 Pro";font-weight:300}';
+			$css .= '@font-face{';
+			$css .= 'font-family:"Font Awesome 5 Pro";';
+			$css .= 'font-style:normal;';
+			$css .= 'font-weight:300;';
+			$css .= 'src:url(' . $clean_url . '/webfonts/fa-light-300.eot);';
+			$css .= 'src:url(' . $clean_url . '/webfonts/fa-light-300.eot?#iefix) format("embedded-opentype"),url(' . $clean_url . '/webfonts/fa-light-300.woff2) format("woff2"),url(' . $clean_url . '/webfonts/fa-light-300.woff) format("woff"),url(' . $clean_url . '/webfonts/fa-light-300.ttf) format("truetype"),url(' . $clean_url . '/webfonts/fa-light-300.svg#fontawesome) format("svg");';
+			$css .= 'font-display: ' . $font_face_display . ';';
+			$css .= '}';
+			$css .= '.fal{font-family:"Font Awesome 5 Pro";font-weight:300}';
 		}
 
 		return $css;
@@ -242,7 +297,7 @@ class Fusion_Font_Awesome {
 
 		// If it failed, try file_get_contents().
 		if ( ! $file_contents ) {
-			$file_contents = @file_get_contents( FUSION_LIBRARY_PATH . '/assets/fonts/fontawesome/v4-shims.min.css' );
+			$file_contents = file_get_contents( FUSION_LIBRARY_PATH . '/assets/fonts/fontawesome/v4-shims.min.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		}
 
 		return $file_contents;

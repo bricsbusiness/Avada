@@ -36,7 +36,7 @@ $posts = tribe_get_list_widget_events();
 			<?php setup_postdata( $post ); ?>
 			<li class="tribe-events-list-widget-events <?php tribe_events_event_classes() ?>">
 				<?php if ( has_post_thumbnail() ) : ?>
-					<?php echo tribe_event_featured_image( get_the_ID(), 'recent-works-thumbnail', false ); // WPCS: XSS ok. ?>
+					<?php echo tribe_event_featured_image( get_the_ID(), 'recent-works-thumbnail', false ); ?>
 				<?php endif; ?>
 
 				<div class="fusion-tribe-events-list-content">
@@ -66,7 +66,7 @@ $posts = tribe_get_list_widget_events();
 	</p>
 
 <?php else : // No events were found. ?>
-	<p><?php printf( __( 'There are no upcoming %s at this time.', 'the-events-calendar' ), strtolower( $events_label_plural ) ); // WPCS: XSS ok. ?></p>
+	<p><?php printf( __( 'There are no upcoming %s at this time.', 'the-events-calendar' ), strtolower( $events_label_plural ) ); ?></p>
 <?php endif;
 
 /* Omit closing PHP tag to avoid "Headers already sent" issues. */

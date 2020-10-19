@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -38,7 +38,7 @@ class Avada_Upgrade_392 extends Avada_Upgrade_Abstract {
 	 */
 	protected function migration_process() {
 
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		// Increase the height of top menu dropdown for woo cart change #2006.
 		if ( ! isset( $options['contact_comment_position'] ) ) {

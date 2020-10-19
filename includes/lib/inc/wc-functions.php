@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.0.0
@@ -70,7 +70,7 @@ if ( ! function_exists( 'fusion_get_product' ) ) {
 	 * @param array $args        Previously used to pass arguments to the factory, e.g. to force a type.
 	 * @return WC_Product|null
 	 */
-	function fusion_get_product( $the_product = false, $args = array() ) {
+	function fusion_get_product( $the_product = false, $args = [] ) {
 		if ( function_exists( 'wc_get_product' ) ) {
 			return wc_get_product( $the_product, $args );
 		} elseif ( function_exists( 'get_product' ) ) {

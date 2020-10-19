@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -38,7 +38,7 @@ class Avada_Upgrade_580 extends Avada_Upgrade_Abstract {
 	 * @since 5.8
 	 * @var array
 	 */
-	private static $available_languages = array();
+	private static $available_languages = [];
 
 	/**
 	 * The actual migration process.
@@ -49,7 +49,7 @@ class Avada_Upgrade_580 extends Avada_Upgrade_Abstract {
 	 */
 	protected function migration_process() {
 		$available_languages       = Fusion_Multilingual::get_available_languages();
-		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : array( '' );
+		self::$available_languages = ( ! empty( $available_languages ) ) ? $available_languages : [ '' ];
 
 		$this->migrate_options();
 	}
@@ -63,7 +63,7 @@ class Avada_Upgrade_580 extends Avada_Upgrade_Abstract {
 	protected function migrate_options() {
 		$available_langs = self::$available_languages;
 
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 		$options = $this->migrate_fa_status( $options );
 		$options = $this->migrate_flyout_menu_padding( $options );
 
@@ -76,7 +76,7 @@ class Avada_Upgrade_580 extends Avada_Upgrade_Abstract {
 				continue;
 			}
 
-			$options = get_option( $this->option_name . '_' . $language, array() );
+			$options = get_option( $this->option_name . '_' . $language, [] );
 			$options = $this->migrate_fa_status( $options );
 			$options = $this->migrate_flyout_menu_padding( $options );
 
@@ -89,17 +89,17 @@ class Avada_Upgrade_580 extends Avada_Upgrade_Abstract {
 	 *
 	 * @access private
 	 * @since 5.8.0
-	 * @param array $options The Theme Options array.
-	 * @return array         The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array         The updated Global Options array.
 	 */
 	private function migrate_fa_status( $options ) {
 
 		if ( isset( $options['status_fontawesome'] ) ) {
 			if ( '1' === $options['status_fontawesome'] ) {
-				$options['status_fontawesome'] = array( 'fab', 'far', 'fas' );
+				$options['status_fontawesome']           = [ 'fab', 'far', 'fas' ];
 				$options['fontawesome_v4_compatibility'] = '1';
 			} else {
-				$options['status_fontawesome'] = array();
+				$options['status_fontawesome']           = [];
 				$options['fontawesome_v4_compatibility'] = '0';
 			}
 		}
@@ -112,17 +112,17 @@ class Avada_Upgrade_580 extends Avada_Upgrade_Abstract {
 	 *
 	 * @access private
 	 * @since 5.8.0
-	 * @param array $options The Theme Options array.
-	 * @return array         The updated Theme Options array.
+	 * @param array $options The Global Options array.
+	 * @return array         The updated Global Options array.
 	 */
 	private function migrate_flyout_menu_padding( $options ) {
-		$nav_font_size = Avada()->settings->get( 'nav_typography', 'font-size' );
+		$nav_font_size      = Avada()->settings->get( 'nav_typography', 'font-size' );
 		$nav_font_size_unit = Fusion_Sanitize::get_unit( $nav_font_size );
-		$nav_font_size = Fusion_Sanitize::number( $nav_font_size );
+		$nav_font_size      = Fusion_Sanitize::number( $nav_font_size );
 
-		$base_font_size = Avada()->settings->get( 'body_typography', 'font-size' );
+		$base_font_size      = Avada()->settings->get( 'body_typography', 'font-size' );
 		$base_font_size_unit = Fusion_Sanitize::get_unit( $base_font_size );
-		$base_font_size = Fusion_Sanitize::number( $base_font_size );
+		$base_font_size      = Fusion_Sanitize::number( $base_font_size );
 
 		// Browser default font size. This is the average between Safari, Chrome and FF.
 		$default_font_size = 15;

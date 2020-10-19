@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Importer
  * @since      5.2
@@ -148,7 +148,7 @@ class Avada_Demo_Import {
 	 * @since 5.2
 	 * @var array
 	 */
-	private $allowed_post_types = array();
+	private $allowed_post_types = [];
 
 	/**
 	 * An array of allowed taxonomies.
@@ -157,7 +157,7 @@ class Avada_Demo_Import {
 	 * @since 5.2
 	 * @var array
 	 */
-	private $allowed_taxonomies = array();
+	private $allowed_taxonomies = [];
 
 	/**
 	 * Whether we want to import everything or not.
@@ -169,6 +169,15 @@ class Avada_Demo_Import {
 	private $import_all;
 
 	/**
+	 * Import stages still left to process.
+	 *
+	 * @access private
+	 * @since 6.2
+	 * @var bool
+	 */
+	private $import_stages = [];
+
+	/**
 	 * The class constructor.
 	 *
 	 * @access public
@@ -177,7 +186,7 @@ class Avada_Demo_Import {
 	public function __construct() {
 
 		// Hook importer into admin init.
-		add_action( 'wp_ajax_fusion_import_demo_data', array( $this, 'import_demo_stage' ) );
+		add_action( 'wp_ajax_fusion_import_demo_data', [ $this, 'import_demo_stage' ] );
 	}
 
 	/**
@@ -192,9 +201,8 @@ class Avada_Demo_Import {
 
 		if ( current_user_can( 'manage_options' ) ) {
 
-			$import_stages = array();
 			if ( isset( $_POST['importStages'] ) ) {
-				$import_stages = wp_unslash( $_POST['importStages'] ); // WPCS: sanitization ok.
+				$this->import_stages = wp_unslash( $_POST['importStages'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			}
 
 			$this->demo_type = 'classic';
@@ -207,9 +215,9 @@ class Avada_Demo_Import {
 				$this->fetch_attachments = true;
 			}
 
-			$this->import_content_types = array();
+			$this->import_content_types = [];
 			if ( isset( $_POST['contentTypes'] ) && is_array( $_POST['contentTypes'] ) ) {
-				$this->import_content_types = wp_unslash( $_POST['contentTypes'] ); // WPCS: sanitization ok.
+				$this->import_content_types = wp_unslash( $_POST['contentTypes'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			}
 
 			$this->import_all = false;
@@ -219,11 +227,11 @@ class Avada_Demo_Import {
 
 			// Include the remote file getter.
 			if ( ! class_exists( 'Avada_Importer_Data' ) ) {
-				include_once wp_normalize_path( Avada::$template_dir_path . '/includes/importer/class-avada-importer-data.php' );
+				include_once Avada::$template_dir_path . '/includes/importer/class-avada-importer-data.php';
 			}
 
 			if ( ! class_exists( 'Avada_Demo_Content_Tracker' ) ) {
-				include_once wp_normalize_path( Avada::$template_dir_path . '/includes/importer/class-avada-demo-content-tracker.php' );
+				include_once Avada::$template_dir_path . '/includes/importer/class-avada-demo-content-tracker.php';
 			}
 
 			$this->importer_files  = new Avada_Importer_Data( $this->demo_type );
@@ -231,9 +239,9 @@ class Avada_Demo_Import {
 
 			$this->before_import_stage();
 
-			if ( ! empty( $import_stages[0] ) && method_exists( $this, 'import_' . $import_stages[0] ) ) {
+			if ( ! empty( $this->import_stages[0] ) && method_exists( $this, 'import_' . $this->import_stages[0] ) ) {
 
-				if ( 'download' !== $import_stages[0] ) {
+				if ( 'download' !== $this->import_stages[0] ) {
 					$this->theme_xml          = $this->importer_files->get_path( 'avada.xml' );
 					$this->theme_options_file = $this->importer_files->get_path( 'theme_options.json' );
 					$this->widgets_file       = $this->importer_files->get_path( 'widget_data.json' );
@@ -249,7 +257,7 @@ class Avada_Demo_Import {
 						$this->fs_exists = false;
 					}
 
-					if ( 'content' === $import_stages[0] ) {
+					if ( 'content' === $this->import_stages[0] ) {
 						$this->before_content_import();
 
 						foreach ( $this->import_content_types as $content_type ) {
@@ -258,45 +266,48 @@ class Avada_Demo_Import {
 						}
 					} else {
 						// Note import stage which is currently processed.
-						$this->content_tracker->update_import_stage_data( $import_stages[0] );
+						$this->content_tracker->update_import_stage_data( $this->import_stages[0] );
 					}
 				}
 
 				// Make import stage backup if needed.
-				if ( method_exists( $this->content_tracker, 'set_' . $import_stages[0] ) ) {
-					call_user_func( array( $this->content_tracker, 'set_' . $import_stages[0] ) );
+				if ( method_exists( $this->content_tracker, 'set_' . $this->import_stages[0] ) ) {
+					call_user_func( [ $this->content_tracker, 'set_' . $this->import_stages[0] ] );
 				}
 
-				call_user_func( array( $this, 'import_' . $import_stages[0] ) );
+				call_user_func( [ $this, 'import_' . $this->import_stages[0] ] );
 
 				// Menus are imported with the content.
-				if ( 'content' === $import_stages[0] ) {
+				if ( 'content' === $this->import_stages[0] ) {
 					$this->after_content_import();
 				}
-			} // End if().
+			}
 
 			// We've just processed last import stage.
-			if ( 1 === count( $import_stages ) ) {
+			if ( 1 === count( $this->import_stages ) ) {
 
-				// $this->content_tracker->set_general_data();
+				/**
+				 * WIP
+				$this->content_tracker->set_general_data();
+				*/
 				$this->after_import();
 
 				// Reset all caches, don't remove demo data.
-				avada_reset_all_caches(
-					array(
+				fusion_reset_all_caches(
+					[
 						'demo_data' => false,
-					)
+					]
 				);
 
 				echo 'imported';
 			} else {
-				echo 'import partially completed: ' . $import_stages[0]; // WPCS: XSS ok.
+				echo 'import partially completed: ' . $this->import_stages[0]; // phpcs:ignore WordPress.Security.EscapeOutput
 			}
 			// Save data after import, for example imported terms.
 			$this->content_tracker->save_demo_history();
 
 			exit;
-		} // End if().
+		}
 	}
 
 	/**
@@ -334,6 +345,38 @@ class Avada_Demo_Import {
 			$this->content_tracker->update_import_stage_data( 'all' );
 		}
 
+		// Map zip attachments to fusion_icons posts. Doing it here as it's probably shortest import stage.
+		if ( $this->import_all || in_array( 'fusion_icons', $this->import_content_types, true ) ) {
+			$args = [
+				'posts_per_page' => -1, // phpcs:ignore WPThemeReview.CoreFunctionality.PostsPerPage
+				'post_type'      => 'fusion_icons',
+				'meta_key'       => 'fusion_demo_import', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value'     => $this->demo_type, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			];
+
+			$icon_posts = get_posts( $args );
+
+			foreach ( $icon_posts as $icon_post ) {
+				$icon_set_meta = fusion_data()->post_meta( $icon_post->ID )->get( 'custom_icon_set' );
+
+				$attachment_args = [
+					'posts_per_page' => 1,
+					'post_type'      => 'attachment',
+					'meta_key'       => '_fusion_icon_set_id', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value'     => $icon_set_meta['icon_set_id'], // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				];
+
+				$attachment_posts = get_posts( $attachment_args );
+
+				if ( is_array( $attachment_posts ) && isset( $attachment_posts[0] ) && isset( $attachment_posts[0]->ID ) ) {
+					$icon_set_meta['attachment_id'] = $attachment_posts[0]->ID;
+					fusion_data()->post_meta( $icon_post->ID )->set( 'custom_icon_set', $icon_set_meta );
+
+					// (Re)generate icon files.
+					Fusion_Custom_Icon_Set::get_instance()->regenerate_icon_files( $icon_post->ID );
+				}
+			}
+		}
 	}
 
 	/**
@@ -361,10 +404,10 @@ class Avada_Demo_Import {
 	 */
 	private function before_content_import() {
 
-		add_filter( 'wxr_importer.pre_process.user', array( $this, 'skip_authors' ), 10, 2 );
-		add_action( 'wxr_importer.processed.post', array( $this, 'add_fusion_demo_import_meta' ), 10, 5 );
-		add_filter( 'import_post_meta_key', array( $this, 'skip_old_menu_meta' ), 10, 3 );
-		add_filter( 'wxr_importer.pre_process.post', array( $this, 'trim_post_content' ), 10, 4 );
+		add_filter( 'wxr_importer.pre_process.user', [ $this, 'skip_authors' ], 10, 2 );
+		add_action( 'wxr_importer.processed.post', [ $this, 'add_fusion_demo_import_meta' ], 10, 5 );
+		add_filter( 'import_post_meta_key', [ $this, 'skip_old_menu_meta' ], 10, 3 );
+		add_filter( 'wxr_importer.pre_process.post', [ $this, 'trim_post_content' ], 10, 4 );
 
 		if ( ! $this->import_all ) {
 
@@ -373,17 +416,25 @@ class Avada_Demo_Import {
 				foreach ( $this->import_content_types as $content_type ) {
 
 					if ( method_exists( $this, 'allow_import_' . $content_type ) ) {
-						call_user_func( array( $this, 'allow_import_' . $content_type ) );
+						call_user_func( [ $this, 'allow_import_' . $content_type ] );
 					}
 				}
 			}
 
-			add_filter( 'wxr_importer.pre_process.post', array( $this, 'skip_not_allowed_post_types' ), 10, 4 );
-			add_filter( 'wxr_importer.pre_process.term', array( $this, 'skip_not_allowed_taxonomies' ), 10, 2 );
+			add_filter( 'wxr_importer.pre_process.post', [ $this, 'skip_not_allowed_post_types' ], 10, 4 );
+			add_filter( 'wxr_importer.pre_process.term', [ $this, 'skip_not_allowed_taxonomies' ], 10, 2 );
 		} else {
 			// Slides are imported separately, not from avada.xml file.
-			add_filter( 'wxr_importer.pre_process.post', array( $this, 'skip_slide_post_type' ), 10, 4 );
-			add_filter( 'wxr_importer.pre_process.term', array( $this, 'skip_slide_taxonomy' ), 10, 2 );
+			add_filter( 'wxr_importer.pre_process.post', [ $this, 'skip_slide_post_type' ], 10, 4 );
+			add_filter( 'wxr_importer.pre_process.term', [ $this, 'skip_slide_taxonomy' ], 10, 2 );
+		}
+
+		if ( $this->import_all || in_array( 'avada_layout', $this->import_content_types, true ) ) {
+
+			// Make global layout backup, since they are part of 'content' stage need to be handled separately.
+			$this->content_tracker->set_avada_layout();
+			add_filter( 'wxr_importer.pre_process.post', [ $this, 'add_slashes_to_layout_content' ], 8, 4 );
+			add_filter( 'wxr_importer.pre_process.post', [ $this, 'import_global_avada_layout' ], 9, 4 );
 		}
 	}
 
@@ -395,17 +446,22 @@ class Avada_Demo_Import {
 	 */
 	private function after_content_import() {
 
-		remove_filter( 'wxr_importer.pre_process.user', array( $this, 'skip_authors' ), 10 );
-		remove_action( 'wxr_importer.processed.post', array( $this, 'add_fusion_demo_import_meta' ), 10 );
-		remove_filter( 'import_post_meta_key', array( $this, 'skip_old_menu_meta' ), 10 );
-		remove_filter( 'wxr_importer.pre_process.post', array( $this, 'trim_post_content' ), 10 );
+		remove_filter( 'wxr_importer.pre_process.user', [ $this, 'skip_authors' ], 10 );
+		remove_action( 'wxr_importer.processed.post', [ $this, 'add_fusion_demo_import_meta' ], 10 );
+		remove_filter( 'import_post_meta_key', [ $this, 'skip_old_menu_meta' ], 10 );
+		remove_filter( 'wxr_importer.pre_process.post', [ $this, 'trim_post_content' ], 10 );
 
 		if ( ! $this->import_all ) {
-			remove_filter( 'wxr_importer.pre_process.post', array( $this, 'skip_not_allowed_post_types' ), 10 );
-			remove_filter( 'wxr_importer.pre_process.term', array( $this, 'skip_not_allowed_taxonomies' ), 10 );
+			remove_filter( 'wxr_importer.pre_process.post', [ $this, 'skip_not_allowed_post_types' ], 10 );
+			remove_filter( 'wxr_importer.pre_process.term', [ $this, 'skip_not_allowed_taxonomies' ], 10 );
 		} else {
-			remove_filter( 'wxr_importer.pre_process.post', array( $this, 'skip_slide_post_type' ), 10 );
-			remove_filter( 'wxr_importer.pre_process.term', array( $this, 'skip_slide_taxonomy' ), 10 );
+			remove_filter( 'wxr_importer.pre_process.post', [ $this, 'skip_slide_post_type' ], 10 );
+			remove_filter( 'wxr_importer.pre_process.term', [ $this, 'skip_slide_taxonomy' ], 10 );
+		}
+
+		if ( $this->import_all || in_array( 'avada_layout', $this->import_content_types, true ) ) {
+			remove_filter( 'wxr_importer.pre_process.post', [ $this, 'add_slashes_to_layout_content' ], 8, 4 );
+			remove_filter( 'wxr_importer.pre_process.post', [ $this, 'import_global_avada_layout' ], 9, 4 );
 		}
 	}
 
@@ -446,8 +502,8 @@ class Avada_Demo_Import {
 	 */
 	public function allow_import_post() {
 
-		$this->allowed_post_types = array_merge( $this->allowed_post_types, array( 'post' ) );
-		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, array( 'category', 'post_tag' ) );
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'post' ] );
+		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, [ 'category', 'post_tag' ] );
 	}
 
 	/**
@@ -458,8 +514,8 @@ class Avada_Demo_Import {
 	 */
 	public function allow_import_page() {
 
-		$this->allowed_post_types = array_merge( $this->allowed_post_types, array( 'page', 'fusion_element', 'fusion_template', 'wpcf7_contact_form' ) );
-		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, array( 'element_category' ) );
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'page', 'fusion_element', 'fusion_template', 'wpcf7_contact_form' ] );
+		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, [ 'element_category' ] );
 	}
 
 	/**
@@ -470,8 +526,8 @@ class Avada_Demo_Import {
 	 */
 	public function allow_import_avada_portfolio() {
 
-		$this->allowed_post_types = array_merge( $this->allowed_post_types, array( 'avada_portfolio' ) );
-		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, array( 'portfolio_category', 'portfolio_skills', 'portfolio_tags' ) );
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'avada_portfolio' ] );
+		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, [ 'portfolio_category', 'portfolio_skills', 'portfolio_tags' ] );
 	}
 
 	/**
@@ -482,8 +538,42 @@ class Avada_Demo_Import {
 	 */
 	public function allow_import_avada_faq() {
 
-		$this->allowed_post_types = array_merge( $this->allowed_post_types, array( 'avada_faq' ) );
-		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, array( 'faq_category' ) );
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'avada_faq' ] );
+		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, [ 'faq_category' ] );
+	}
+
+	/**
+	 * Allow importing layouts.
+	 *
+	 * @access public
+	 * @since 6.2
+	 */
+	public function allow_import_avada_layout() {
+
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'fusion_tb_layout', 'fusion_tb_section' ] );
+		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, [ 'fusion_tb_category' ] );
+	}
+
+	/**
+	 * Allow importing custom icon sets.
+	 *
+	 * @access public
+	 * @since 6.2
+	 */
+	public function allow_import_fusion_icons() {
+
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'fusion_icons' ] );
+	}
+
+	/**
+	 * Allow importing fusion forms.
+	 *
+	 * @access public
+	 * @since 7.1
+	 */
+	public function allow_import_fusion_form() {
+
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'fusion_form' ] );
 	}
 
 	/**
@@ -494,8 +584,8 @@ class Avada_Demo_Import {
 	 */
 	public function allow_import_product() {
 
-		$this->allowed_post_types = array_merge( $this->allowed_post_types, array( 'product', 'shop_order', 'shop_coupon' ) );
-		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, array( 'product_cat', 'product_tag', 'product_visibility', 'product_type' ) );
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'product', 'shop_order', 'shop_coupon' ] );
+		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, [ 'product_cat', 'product_tag', 'product_visibility', 'product_type' ] );
 	}
 
 	/**
@@ -506,8 +596,8 @@ class Avada_Demo_Import {
 	 */
 	public function allow_import_event() {
 
-		$this->allowed_post_types = array_merge( $this->allowed_post_types, array( 'tribe_events', 'tribe_venue', 'tribe_organizer' ) );
-		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, array( 'tribe_events_cat' ) );
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'tribe_events', 'tribe_venue', 'tribe_organizer' ] );
+		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, [ 'tribe_events_cat' ] );
 	}
 
 	/**
@@ -518,8 +608,8 @@ class Avada_Demo_Import {
 	 */
 	public function allow_import_forum() {
 
-		$this->allowed_post_types = array_merge( $this->allowed_post_types, array( 'forum', 'topic', 'reply' ) );
-		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, array( 'topic-tag' ) );
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'forum', 'topic', 'reply' ] );
+		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, [ 'topic-tag' ] );
 	}
 
 	/**
@@ -530,7 +620,27 @@ class Avada_Demo_Import {
 	 */
 	public function allow_import_attachment() {
 
-		$this->allowed_post_types = array_merge( $this->allowed_post_types, array( 'attachment' ) );
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'attachment' ] );
+	}
+
+	/**
+	 * Imports global avada layout.
+	 * Inserts data to wp_options table and passes post to 'skip_not_allowed_post_types' (which will skip it).
+	 *
+	 * @access public
+	 * @since 6.2
+	 * @param array $data     The Post importer data.
+	 * @param array $meta     The Post meta.
+	 * @param array $comments The Post comments.
+	 * @param array $terms    The Post terms.
+	 * @return bool|array
+	 */
+	public function import_global_avada_layout( $data, $meta, $comments, $terms ) {
+		if ( isset( $data['post_type'] ) && 'fusion_tb_layout_global' === $data['post_type'] && isset( $data['post_content'] ) && '' !== $data['post_content'] ) {
+			update_option( 'fusion_tb_layout_default', trim( wp_unslash( $data['post_content'] ), '"' ) );
+		}
+
+		return $data;
 	}
 
 	/**
@@ -551,15 +661,14 @@ class Avada_Demo_Import {
 		}
 
 		if ( ! class_exists( 'WXR_Importer' ) ) { // If WP importer doesn't exist.
-			include wp_normalize_path( FUSION_LIBRARY_PATH . '/inc/importer/class-logger.php' );
-			include wp_normalize_path( FUSION_LIBRARY_PATH . '/inc/importer/class-logger-html.php' );
+			include FUSION_LIBRARY_PATH . '/inc/importer/class-logger.php';
+			include FUSION_LIBRARY_PATH . '/inc/importer/class-logger-html.php';
 
-			$wp_import = wp_normalize_path( FUSION_LIBRARY_PATH . '/inc/importer/class-wxr-importer.php' );
-			include $wp_import;
+			include FUSION_LIBRARY_PATH . '/inc/importer/class-wxr-importer.php';
 		}
 
 		if ( ! class_exists( 'Fusion_WXR_Importer' ) ) {
-			include wp_normalize_path( FUSION_LIBRARY_PATH . '/inc/importer/class-fusion-wxr-importer.php' );
+			include FUSION_LIBRARY_PATH . '/inc/importer/class-fusion-wxr-importer.php';
 		}
 
 		if ( class_exists( 'WP_Importer' ) && class_exists( 'WXR_Importer' ) && class_exists( 'Fusion_WXR_Importer' ) ) { // Check for main import class and wp import class.
@@ -569,11 +678,11 @@ class Avada_Demo_Import {
 			// It's important to disable 'prefill_existing_posts'.
 			// In case GUID of importing post matches GUID of an existing post it won't be imported.
 			$importer = new Fusion_WXR_Importer(
-				array(
+				[
 					'fetch_attachments'      => $this->fetch_attachments,
 					'prefill_existing_posts' => false,
 					'aggressive_url_search'  => true,
-				)
+				]
 			);
 			$importer->set_logger( $logger );
 
@@ -611,10 +720,55 @@ class Avada_Demo_Import {
 	 */
 	public function skip_not_allowed_post_types( $data, $meta, $comments, $terms ) {
 
-		if ( ! in_array( $data['post_type'], $this->allowed_post_types ) ) {
+		if ( ! in_array( $data['post_type'], $this->allowed_post_types ) && ! $this->is_icon_package( $data, $meta ) ) { // phpcs:ignore WordPress.PHP.StrictInArray
 			return false;
 		}
+
 		return $data;
+	}
+
+	/**
+	 * Adds extra slashes to fusion_tb_layout post's content.
+	 *
+	 * @access public
+	 * @since 6.2
+	 * @param array $data     The Post importer data.
+	 * @param array $meta     The Post meta.
+	 * @param array $comments The Post comments.
+	 * @param array $terms    The Post terms.
+	 * @return array
+	 */
+	public function add_slashes_to_layout_content( $data, $meta, $comments, $terms ) {
+
+		if ( isset( $data['post_type'] ) && 'fusion_tb_layout' === $data['post_type'] ) {
+			$data['post_content'] = wp_slash( $data['post_content'] );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Checks if current post is icon package and if it should be imported.
+	 *
+	 * @access public
+	 * @since 6.2
+	 * @param array $data The Post importer data.
+	 * @param array $meta The Post meta.
+	 * @return bool
+	 */
+	private function is_icon_package( $data, $meta ) {
+
+		if ( 'attachment' !== $data['post_type'] || ! in_array( 'fusion_icons', $this->allowed_post_types, true ) ) {
+			return false;
+		}
+
+		foreach ( $meta as $meta_field ) {
+			if ( '_fusion_icon_set_id' === $meta_field['key'] ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -644,7 +798,7 @@ class Avada_Demo_Import {
 	 */
 	public function skip_not_allowed_taxonomies( $data, $meta ) {
 
-		if ( ! in_array( $data['taxonomy'], $this->allowed_taxonomies ) ) {
+		if ( ! in_array( $data['taxonomy'], $this->allowed_taxonomies ) ) { // phpcs:ignore WordPress.PHP.StrictInArray
 			return false;
 		}
 		return $data;
@@ -699,7 +853,7 @@ class Avada_Demo_Import {
 	 */
 	public function skip_old_menu_meta( $meta_key, $post_id, $post ) {
 
-		$meta_keys = array(
+		$meta_keys = [
 			'_menu_item_fusion_megamenu_status',
 			'_menu_item_fusion_megamenu_width',
 			'_menu_item_fusion_megamenu_columns',
@@ -711,9 +865,9 @@ class Avada_Demo_Import {
 			'_menu_item_fusion_megamenu_thumbnail',
 			'_menu_item_fusion_menu_style',
 			'_menu_item_fusion_menu_icononly',
-		);
+		];
 
-		if ( in_array( $meta_key, $meta_keys ) ) {
+		if ( in_array( $meta_key, $meta_keys, true ) ) {
 			return false;
 		}
 
@@ -734,9 +888,7 @@ class Avada_Demo_Import {
 		$menus     = wp_get_nav_menus(); // Registered menus.
 
 		if ( $menus ) {
-			if ( 'classic' === $this->demo_type ) {
-				$opmenu = get_page_by_title( 'One Page Parallax' );
-			} elseif ( 'landing_product' === $this->demo_type ) {
+			if ( 'landing_product' === $this->demo_type ) {
 				$opmenu = get_page_by_title( 'Homepage' );
 			} elseif ( 'technology' === $this->demo_type ) {
 				$opmenu = get_page_by_title( 'Technology' );
@@ -746,87 +898,69 @@ class Avada_Demo_Import {
 				$opmenu = get_page_by_title( 'Home' );
 			}
 			foreach ( $menus as $menu ) { // Assign menus to theme locations.
-				if ( 'classic' === $this->demo_type ) {
-					if ( 'Classic Main' === $menu->name ) {
-						$locations['main_navigation'] = $menu->term_id;
-					} elseif ( 'Classic 404' === $menu->name ) {
-						$locations['404_pages'] = $menu->term_id;
-					} elseif ( 'Classic Top' === $menu->name ) {
-						$locations['top_navigation'] = $menu->term_id;
-					}
 
-					// Assign One Page Menu.
-					if ( isset( $opmenu ) && $opmenu->ID && 'Classic One Page' === $menu->name ) {
-						update_post_meta( $opmenu->ID, 'pyre_displayed_menu', $menu->term_id );
-					}
-				} elseif ( 'classic_shop' === $this->demo_type ) {
-					if ( 'Classic Shop Main Menu' === $menu->name ) {
-						$locations['main_navigation'] = $menu->term_id;
-					} elseif ( 'Classic Shop Top Secondary Menu' == $menu->name ) {
-						$locations['top_navigation'] = $menu->term_id;
-					}
-				} elseif ( 'landing_product' === $this->demo_type ) {
+				// Legacy Special Cases.
+				if ( 'landing_product' === $this->demo_type ) {
 					// Assign One Page Menu.
 					if ( isset( $opmenu ) && $opmenu->ID && 'Landing Product Landing Page Menu' === $menu->name ) {
-						update_post_meta( $opmenu->ID, 'pyre_displayed_menu', $menu->term_id );
-					}
-
-					if ( 'Landing Product Main Menu' === $menu->name ) {
-						$locations['main_navigation'] = $menu->term_id;
+						fusion_data()->post_meta( $opmenu->ID )->set( 'displayed_menu', $menu->term_id );
 					}
 				} elseif ( 'resume' === $this->demo_type ) {
 					// Assign One Page Menu.
 					if ( isset( $opmenu ) && $opmenu->ID && 'Resume Homepage Menu' === $menu->name ) {
-						update_post_meta( $opmenu->ID, 'pyre_displayed_menu', $menu->term_id );
-					}
-
-					if ( 'Resume Main Menu' === $menu->name ) {
-						$locations['main_navigation'] = $menu->term_id;
+						fusion_data()->post_meta( $opmenu->ID )->set( 'displayed_menu', $menu->term_id );
 					}
 				} elseif ( 'wedding' === $this->demo_type ) {
 					// Assign One Page Menu.
 					if ( isset( $opmenu ) && $opmenu->ID && 'Wedding Homepage Menu' === $menu->name ) {
-						update_post_meta( $opmenu->ID, 'pyre_displayed_menu', $menu->term_id );
-					}
-
-					if ( 'Wedding Main Menu' === $menu->name ) {
-						$locations['main_navigation'] = $menu->term_id;
+						fusion_data()->post_meta( $opmenu->ID )->set( 'displayed_menu', $menu->term_id );
 					}
 				} elseif ( 'technology' === $this->demo_type ) {
 					// Assign One Page Menu.
 					if ( isset( $opmenu ) && $opmenu->ID && 'Technology Front Page Menu' === $menu->name ) {
-						update_post_meta( $opmenu->ID, 'pyre_displayed_menu', $menu->term_id );
+						fusion_data()->post_meta( $opmenu->ID )->set( 'displayed_menu', $menu->term_id );
+					}
+				}
+
+				// General menu assignment.
+				if ( false !== strpos( $menu->name, 'Main Menu' ) ) {
+
+					// Main menu.
+					$locations['main_navigation'] = $menu->term_id;
+				} elseif ( false !== strpos( $menu->name, 'Top Secondary Menu' ) ) {
+
+					// Top Secondary Menu.
+					$locations['top_navigation'] = $menu->term_id;
+				} elseif ( false !== strpos( $menu->name, 'One Page Menu' ) ) {
+
+					// Custom One Page Menu.
+					if ( false !== strpos( $menu->name, 'Home' ) ) {
+
+						// When on homepage we need to leave the demo name in there.
+						$op_menu_name = str_replace( ' One Page Menu', '', $menu->name );
+					} else {
+
+						// Remove demo name and the suffix.
+						$demo_name    = ucwords( str_replace( '_', ' ', $this->demo_type ) ) . ' ';
+						$op_menu_name = str_replace( [ $demo_name, ' One Page Menu' ], '', $menu->name );
 					}
 
-					if ( 'Technology Main Menu' === $menu->name ) {
-						$locations['main_navigation'] = $menu->term_id;
+					// Get the page.
+					$op_menu = get_page_by_title( $op_menu_name );
+
+					// Assign One Page Menu.
+					if ( isset( $op_menu ) && $op_menu->ID ) {
+						fusion_data()->post_meta( $op_menu->ID )->set( 'displayed_menu', $menu->term_id );
 					}
-				} elseif ( 'university' === $this->demo_type ) {
-					if ( 'University Main Menu' === $menu->name ) {
-						$locations['main_navigation'] = $menu->term_id;
-					} elseif ( 'University Top Secondary Menu' == $menu->name ) {
-						$locations['top_navigation'] = $menu->term_id;
-					}
-				} elseif ( 'driving' === $this->demo_type ) {
-					if ( 'Driving Main Menu' === $menu->name ) {
-						$locations['main_navigation'] = $menu->term_id;
-					} elseif ( 'Driving Top Secondary Menu' === $menu->name ) {
-						$locations['top_navigation'] = $menu->term_id;
-					}
-				} else {
-					if ( ucwords( str_replace( '_', ' ', $this->demo_type ) ) . ' Main Menu' === $menu->name ) {
-						$locations['main_navigation'] = $menu->term_id;
-					}
-				} // End if().
-			} // End foreach().
-		} // End if().
+				}
+			}
+		}
 
 		set_theme_mod( 'nav_menu_locations', $locations ); // Set menus to locations.
-
 	}
 
 	/**
-	 * Imports Theme Options.
+	 * Imports Global Options.
 	 *
 	 * @access private
 	 * @since 5.2
@@ -854,14 +988,14 @@ class Avada_Demo_Import {
 			foreach ( $this->sidebars as $sidebar ) {
 				$sidebar_class = avada_name_to_class( $sidebar );
 				register_sidebar(
-					array(
+					[
 						'name'          => $sidebar,
 						'id'            => 'avada-custom-sidebar-' . strtolower( $sidebar_class ),
 						'before_widget' => '<div id="%1$s" class="widget %2$s">',
 						'after_widget'  => '</div>',
 						'before_title'  => '<div class="heading"><h4 class="widget-title">',
 						'after_title'   => '</h4></div>',
-					)
+					]
 				);
 			}
 		}
@@ -882,9 +1016,9 @@ class Avada_Demo_Import {
 	 * @since 5.2
 	 */
 	private function import_sliders() {
-		add_action( 'wxr_importer.processed.post', array( $this, 'add_fusion_demo_import_meta' ), 10, 5 );
+		add_action( 'wxr_importer.processed.post', [ $this, 'add_fusion_demo_import_meta' ], 10, 5 );
 		$this->import_fusion_sliders();
-		remove_action( 'wxr_importer.processed.post', array( $this, 'add_fusion_demo_import_meta' ), 10 );
+		remove_action( 'wxr_importer.processed.post', [ $this, 'add_fusion_demo_import_meta' ], 10 );
 
 		$this->import_layer_sliders();
 		$this->import_revolution_sliders();
@@ -899,12 +1033,20 @@ class Avada_Demo_Import {
 	private function import_layer_sliders() {
 		global $wpdb;
 
-		// Import Layerslider.
-		if ( defined( 'LS_PLUGIN_VERSION' ) && file_exists( WP_PLUGIN_DIR . '/LayerSlider/classes/class.ls.importutil.php' ) && false !== $this->importer_files->get_layerslider() ) {
-			// Get importUtil.
-			include WP_PLUGIN_DIR . '/LayerSlider/classes/class.ls.importutil.php';
+		$layersliders = $this->importer_files->get_layerslider();
 
-			foreach ( $this->importer_files->get_layerslider() as $layer_file ) {
+		// Import Layerslider.
+		if ( defined( 'LS_PLUGIN_VERSION' ) && false !== $layersliders ) {
+			// Get importUtil.
+			if ( version_compare( LS_PLUGIN_VERSION, '6.11.0', '>=' ) ) {
+				include WP_PLUGIN_DIR . '/LayerSlider/assets/classes/class.ls.importutil.php';
+			} elseif ( file_exists( WP_PLUGIN_DIR . '/LayerSlider/classes/class.ls.importutil.php' ) ) {
+				include WP_PLUGIN_DIR . '/LayerSlider/classes/class.ls.importutil.php';
+			} else {
+				return;
+			}
+
+			foreach ( $layersliders as $layer_file ) {
 				// Finally import rev slider data files.
 				$filepath = $this->importer_files->get_path( 'layersliders/' . $layer_file );
 				$import   = new LS_ImportUtil( $filepath );
@@ -912,7 +1054,7 @@ class Avada_Demo_Import {
 
 			// Get sliders.
 			$sliders = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}layerslider WHERE flag_hidden = '0' AND flag_deleted = '0' ORDER BY date_c ASC" );
-			$slides  = array();
+			$slides  = [];
 			if ( ! empty( $sliders ) ) {
 				foreach ( $sliders as $key => $item ) {
 					$slides[ $item->id ] = $item->name;
@@ -926,16 +1068,7 @@ class Avada_Demo_Import {
 					$slides_array[ $val ] = $key;
 				}
 			}
-
-			// Assign LayerSlider.
-			if ( 'classic' == $this->demo_type ) {
-				$lspage = get_page_by_title( 'Layer Slider' );
-				if ( isset( $lspage ) && $lspage->ID && $slides_array['Avada Full Width'] ) {
-					update_post_meta( $lspage->ID, 'pyre_slider', $slides_array['Avada Full Width'] );
-				}
-			}
-		} // End if().
-
+		}
 	}
 
 	/**
@@ -946,16 +1079,19 @@ class Avada_Demo_Import {
 	 */
 	private function import_revolution_sliders() {
 
-		// Import Revslider.
-		if ( class_exists( 'UniteFunctionsRev' ) && false != $this->importer_files->get_revslider() ) { // If revslider is activated.
-			add_action( 'wp_generate_attachment_metadata', array( $this, 'add_rev_slider_demo_import_meta' ), 10, 2 );
+		$revsliders = $this->importer_files->get_revslider();
 
-			$slider = new RevSlider();
-			foreach ( $this->importer_files->get_revslider() as $rev_file ) {
+		// Import Revslider.
+		if ( class_exists( 'RevSliderSliderImport' ) && false != $revsliders ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
+			// If revslider is activated.
+			add_action( 'wp_generate_attachment_metadata', [ $this, 'add_rev_slider_demo_import_meta' ], 10, 2 );
+
+			$slider = new RevSliderSliderImport();
+			foreach ( $revsliders as $rev_file ) {
 				// Finally import rev slider data files.
 				$filepath = $this->importer_files->get_path( 'revsliders/' . $rev_file );
 				ob_start();
-				$result = $slider->importSliderFromPost( true, false, $filepath );
+				$result = $slider->import_slider( true, $filepath );
 				ob_clean();
 				ob_end_clean();
 
@@ -964,7 +1100,7 @@ class Avada_Demo_Import {
 				}
 			}
 
-			remove_action( 'wp_generate_attachment_metadata', array( $this, 'add_rev_slider_demo_import_meta' ), 10 );
+			remove_action( 'wp_generate_attachment_metadata', [ $this, 'add_rev_slider_demo_import_meta' ], 10 );
 		}
 	}
 
@@ -989,15 +1125,14 @@ class Avada_Demo_Import {
 	 */
 	private function import_fusion_sliders() {
 
-		// Fusion Sliders Import.
+		// Avada Sliders Import.
 		if ( true === $this->fs_exists && class_exists( 'Fusion_Slider' ) && file_exists( $this->fs_url ) ) {
 
-			add_action( 'fusion_slider_import_image_attached', array( $this, 'add_fusion_slider_demo_import_meta' ), 10, 2 );
+			add_action( 'fusion_slider_import_image_attached', [ $this, 'add_fusion_slider_demo_import_meta' ], 10, 2 );
 			$fusion_slider = new Fusion_Slider();
 			$fusion_slider->import_sliders( $this->fs_url, $this->demo_type );
-			remove_action( 'fusion_slider_import_image_attached', array( $this, 'add_fusion_slider_demo_import_meta' ), 10 );
+			remove_action( 'fusion_slider_import_image_attached', [ $this, 'add_fusion_slider_demo_import_meta' ], 10 );
 		}
-
 	}
 
 	/**
@@ -1033,7 +1168,109 @@ class Avada_Demo_Import {
 		update_option( 'blogname', $site_title );
 
 		$this->content_tracker->set( 'general_data', 'imported' );
+	}
 
+	/**
+	 * Import Convert Plus plugin's modules.
+	 *
+	 * @access private
+	 * @since 6.2
+	 */
+	private function import_convertplug() {
+
+		// Plugin is not active or there are no modules to import.
+		if ( ! defined( 'CP_VERSION' ) || false === $this->importer_files->get_cp_modules() ) {
+			return;
+		}
+
+		// Wait for init or require.
+		if ( ! function_exists( 'smile_backend_create_folder' ) ) {
+			require_once CP_BASE_DIR . '/framework/functions/functions.admin.php';
+		}
+
+		$upload_dir = wp_upload_dir();
+
+		$files = $this->importer_files->get_cp_modules();
+
+		foreach ( $files as $file_basename ) {
+
+			$file_type = wp_check_filetype( $file_basename, null );
+			$file_path = $this->importer_files->get_path( 'convertplus/' . $file_basename );
+			$title     = pathinfo( $file_basename, PATHINFO_FILENAME );
+
+			$attachment_id = wp_insert_attachment(
+				[
+					'post_title'     => $title,
+					'post_content'   => '',
+					'post_status'    => 'inherit',
+					'post_mime_type' => $file_type['type'],
+				],
+				$file_path,
+				0
+			);
+
+			// Set module name.
+			$module_name = 'modal';
+			if ( false !== strpos( $file_basename, 'info_bar' ) ) {
+				$module_name = 'info_bar';
+			} elseif ( false !== strpos( $file_basename, 'slide_in' ) ) {
+				$module_name = 'slide_in';
+			}
+
+			$data['module'] = $module_name;
+			$data['file']   = [
+				'id'       => $attachment_id,
+				'filename' => $file_basename,
+				'title'    => $title,
+			];
+
+			// We're all set.
+			if ( function_exists( 'fusion_cp_import_' . $module_name ) ) {
+
+				// Add post meta to imported images.
+				add_action( 'add_attachment', [ $this, 'cp_add_postmeta' ] );
+
+				// Call CP's import function.
+				call_user_func( 'fusion_cp_import_' . $module_name, $data );
+
+				// Post import work.
+				$this->add_cp_to_tracker( $module_name, $attachment_id );
+			}
+		}
+	}
+
+	/**
+	 * Add CP modules' ID to our tracker.
+	 *
+	 * @since 6.2
+	 * @param string $module_name   Name of the module.
+	 * @param int    $attachment_id ID of zip archive.
+	 * @return void
+	 */
+	public function add_cp_to_tracker( $module_name, $attachment_id ) {
+		global $wpdb;
+		$option_name = 'smile_' . $module_name . '_styles';
+		$modules     = get_option( $option_name, [] );
+
+		// Latest module is last.
+		$module = end( $modules );
+
+		if ( isset( $module['style_id'] ) ) {
+			$this->content_tracker->add_convertplug_to_stack( [ $module['style_id'], $module_name ] );
+		}
+
+		// Remove zip from Media Library (we want to keep the file).
+		$wpdb->query( $wpdb->prepare( "DELETE $wpdb->posts, $wpdb->postmeta FROM $wpdb->posts INNER JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id WHERE $wpdb->posts.ID = %d", $attachment_id ) );
+	}
+
+	/**
+	 * Add post meta to any attachment added during CP import.
+	 *
+	 * @since 6.2
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function cp_add_postmeta( $attachment_id ) {
+		update_post_meta( $attachment_id, 'fusion_demo_import', $this->demo_type );
 	}
 }
 

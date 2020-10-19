@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      4.0.0
@@ -23,119 +23,192 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function avada_options_section_background( $sections ) {
 
-	$settings = get_option( Avada::get_option_name() );
-
-	$sections['background'] = array(
+	$sections['background'] = [
 		'label'    => esc_html__( 'Background', 'Avada' ),
 		'id'       => 'heading_background',
 		'priority' => 11,
 		'icon'     => 'el-icon-photo',
-		'fields'   => array(
-			'page_bg_subsection'         => array(
+		'alt_icon' => 'fusiona-image',
+		'fields'   => [
+			'page_bg_subsection'         => [
 				'label'       => esc_html__( 'Page Background', 'Avada' ),
 				'description' => '',
 				'id'          => 'page_bg_subsection',
 				'icon'        => true,
 				'type'        => 'sub-section',
-				'fields'      => array(
-					'bg_image'          => array(
+				'fields'      => [
+					'bg_image'          => [
 						'label'       => esc_html__( 'Background Image For Page', 'Avada' ),
 						'description' => esc_html__( 'Select an image to use for a full page background.', 'Avada' ),
 						'id'          => 'bg_image',
 						'default'     => '',
 						'mod'         => '',
 						'type'        => 'media',
-					),
-					'bg_full'           => array(
+						'css_vars'    => [
+							[
+								'name'     => '--bg_image',
+								'choice'   => 'url',
+								'callback' => [ 'fallback_to_value', [ 'url("$")', 'none' ] ],
+							],
+						],
+						'output'      => [
+							[
+								'element'           => 'helperElement',
+								'property'          => 'dummy',
+								'callback'          => [
+									'toggle_class',
+									[
+										'condition' => [ '', 'has-image' ],
+										'element'   => 'html',
+										'className' => 'avada-html-has-bg-image',
+									],
+								],
+								'sanitize_callback' => '__return_empty_string',
+							],
+						],
+					],
+					'bg_full'           => [
 						'label'       => esc_html__( '100% Background Image', 'Avada' ),
 						'description' => esc_html__( 'Turn on to have the page background image display at 100% in width and height according to the window size.', 'Avada' ),
 						'id'          => 'bg_full',
 						'default'     => '0',
 						'type'        => 'switch',
-						'required'    => array(
-							array(
+						'required'    => [
+							[
 								'setting'  => 'bg_image',
 								'operator' => '!=',
 								'value'    => '',
-							),
-							array(
+							],
+							[
 								'setting'  => 'bg_image',
 								'operator' => '!=',
-								'value'    => array(
+								'value'    => [
 									'url' => '',
-								),
-							),
-							array(
+								],
+							],
+							[
 								'setting'  => 'bg_image',
 								'operator' => '!=',
-								'value'    => array(
+								'value'    => [
 									'url'       => '',
 									'id'        => '',
 									'height'    => '',
 									'width'     => '',
 									'thumbnail' => '',
-								),
-							),
-						),
-					),
-					'bg_repeat'         => array(
+								],
+							],
+						],
+						'output'      => [
+							[
+								'element'           => 'helperElement',
+								'property'          => 'dummy',
+								'callback'          => [
+									'toggle_class',
+									[
+										'condition' => [ '', 'true' ],
+										'element'   => 'body',
+										'className' => 'avada-has-bg-image-full',
+									],
+								],
+								'sanitize_callback' => '__return_empty_string',
+							],
+						],
+					],
+					'bg_repeat'         => [
 						'label'       => esc_html__( 'Background Repeat', 'Avada' ),
 						'description' => esc_html__( 'Controls how the background image repeats.', 'Avada' ),
 						'id'          => 'bg_repeat',
 						'default'     => 'no-repeat',
 						'type'        => 'select',
-						'choices'     => array(
+						'choices'     => [
 							'repeat'    => esc_html__( 'Repeat All', 'Avada' ),
 							'repeat-x'  => esc_html__( 'Repeat Horizontally', 'Avada' ),
 							'repeat-y'  => esc_html__( 'Repeat Vertically', 'Avada' ),
 							'no-repeat' => esc_html__( 'No Repeat', 'Avada' ),
-						),
-						'required'    => array(
-							array(
+						],
+						'required'    => [
+							[
 								'setting'  => 'bg_image',
 								'operator' => '!=',
 								'value'    => '',
-							),
-							array(
+							],
+							[
 								'setting'  => 'bg_image',
 								'operator' => '!=',
-								'value'    => array(
+								'value'    => [
 									'url' => '',
-								),
-							),
-							array(
+								],
+							],
+							[
 								'setting'  => 'bg_image',
 								'operator' => '!=',
-								'value'    => array(
+								'value'    => [
 									'url'       => '',
 									'id'        => '',
 									'height'    => '',
 									'width'     => '',
 									'thumbnail' => '',
-								),
-							),
-						),
-					),
-					'bg_color'          => array(
+								],
+							],
+						],
+						'css_vars'    => [
+							[
+								'name' => '--bg_repeat',
+							],
+						],
+					],
+					'bg_color'          => [
 						'label'       => esc_html__( 'Background Color For Page', 'Avada' ),
 						'description' => esc_html__( 'Controls the background color for the page. When the color value is set to anything below 100% opacity, the color will overlay the background image if one is uploaded.', 'Avada' ),
 						'id'          => 'bg_color',
-						'default'     => '#d7d6d6',
+						'default'     => '#e2e2e2',
 						'type'        => 'color-alpha',
-					),
-					'bg_pattern_option' => array(
+						'css_vars'    => [
+							[
+								'name'     => '--bg_color',
+								'callback' => [ 'sanitize_color' ],
+							],
+							[
+								'name'     => '--bg-color-overlay',
+								'callback' => [
+									'return_color_if_opaque',
+									[
+										'transparent' => 'overlay',
+										'opaque'      => 'normal',
+									],
+								],
+							],
+						],
+					],
+					'bg_pattern_option' => [
 						'label'       => esc_html__( 'Background Pattern', 'Avada' ),
 						'description' => esc_html__( 'Turn on to display a pattern in the page background.', 'Avada' ),
 						'id'          => 'bg_pattern_option',
 						'default'     => '0',
 						'type'        => 'switch',
-					),
-					'bg_pattern'        => array(
+						'output'      => [
+							[
+								'element'           => 'helperElement',
+								'property'          => 'dummy',
+								'callback'          => [
+									'toggle_class',
+									[
+										'condition' => [ '', 'true' ],
+										'element'   => 'body,html',
+										'className' => 'avada-has-page-background-pattern',
+									],
+
+								],
+								'sanitize_callback' => '__return_empty_string',
+							],
+						],
+					],
+					'bg_pattern'        => [
 						'label'    => esc_html__( 'Select a Background Pattern', 'Avada' ),
 						'id'       => 'bg_pattern',
 						'default'  => 'pattern1',
 						'type'     => 'radio-image',
-						'choices'  => array(
+						'choices'  => [
 							'pattern1'  => Avada::$template_dir_url . '/assets/images/patterns/pattern1.png',
 							'pattern2'  => Avada::$template_dir_url . '/assets/images/patterns/pattern2.png',
 							'pattern3'  => Avada::$template_dir_url . '/assets/images/patterns/pattern3.png',
@@ -158,113 +231,167 @@ function avada_options_section_background( $sections ) {
 							'pattern20' => Avada::$template_dir_url . '/assets/images/patterns/pattern20.png',
 							'pattern21' => Avada::$template_dir_url . '/assets/images/patterns/pattern21.png',
 							'pattern22' => Avada::$template_dir_url . '/assets/images/patterns/pattern22.png',
-						),
-						'required' => array(
-							array(
+						],
+						'required' => [
+							[
 								'setting'  => 'bg_pattern_option',
 								'operator' => '==',
 								'value'    => '1',
-							),
-						),
-					),
-				),
-			),
-			'main_content_bg_subsection' => array(
+							],
+						],
+						'css_vars' => [
+							[
+								'name'     => '--bg_pattern',
+								'callback' => [ 'fallback_to_value', [ 'url("' . Avada::$template_dir_url . '/assets/images/patterns/$.png")', '' ] ],
+							],
+						],
+					],
+				],
+			],
+			'main_content_bg_subsection' => [
 				'label'       => esc_html__( 'Main Content Background', 'Avada' ),
 				'description' => '',
 				'id'          => 'main_content_bg_subsection',
 				'icon'        => true,
 				'type'        => 'sub-section',
-				'fields'      => array(
-					'content_bg_color'  => array(
+				'fields'      => [
+					'content_bg_color'  => [
 						'label'       => esc_html__( 'Main Content Background Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the background color of the main content area.', 'Avada' ),
 						'id'          => 'content_bg_color',
 						'default'     => '#ffffff',
 						'type'        => 'color-alpha',
-					),
-					'content_bg_image'  => array(
+						'css_vars'    => [
+							[
+								'name'     => '--content_bg_color',
+								'callback' => [ 'sanitize_color' ],
+							],
+						],
+						'output'      => [
+							[
+								'element'           => 'helperElement',
+								'property'          => 'dummy',
+								'callback'          => [
+									'toggle_class',
+									[
+										'condition' => [ '', 'not-opaque' ],
+										'element'   => 'html',
+										'className' => 'avada-content-bg-not-opaque',
+									],
+								],
+								'sanitize_callback' => '__return_empty_string',
+							],
+						],
+					],
+					'content_bg_image'  => [
 						'label'       => esc_html__( 'Background Image For Main Content Area', 'Avada' ),
 						'description' => esc_html__( 'Select an image to use for the main content area background.', 'Avada' ),
 						'id'          => 'content_bg_image',
 						'default'     => '',
 						'mod'         => '',
 						'type'        => 'media',
-					),
-					'content_bg_full'   => array(
+						'css_vars'    => [
+							[
+								'name'     => '--content_bg_image',
+								'choice'   => 'url',
+								'callback' => [ 'fallback_to_value', [ 'url("$")', 'none' ] ],
+							],
+						],
+					],
+					'content_bg_full'   => [
 						'label'       => esc_html__( '100% Background Image', 'Avada' ),
 						'description' => esc_html__( 'Turn on to have the main content background image display at 100% in width and height according to the window size.', 'Avada' ),
 						'id'          => 'content_bg_full',
 						'default'     => '0',
 						'type'        => 'switch',
-						'required'    => array(
-							array(
+						'required'    => [
+							[
 								'setting'  => 'content_bg_image',
 								'operator' => '!=',
 								'value'    => '',
-							),
-							array(
+							],
+							[
 								'setting'  => 'content_bg_image',
 								'operator' => '!=',
-								'value'    => array(
+								'value'    => [
 									'url' => '',
-								),
-							),
-							array(
+								],
+							],
+							[
 								'setting'  => 'content_bg_image',
 								'operator' => '!=',
-								'value'    => array(
+								'value'    => [
 									'url'       => '',
 									'id'        => '',
 									'height'    => '',
 									'width'     => '',
 									'thumbnail' => '',
-								),
-							),
-						),
-					),
-					'content_bg_repeat' => array(
+								],
+							],
+						],
+						'output'      => [
+							[
+								'element'           => 'helperElement',
+								'property'          => 'dummy',
+								'callback'          => [
+									'toggle_class',
+									[
+										'condition' => [ '', 'true' ],
+										'element'   => '#main',
+										'className' => 'full-bg',
+									],
+								],
+								'sanitize_callback' => '__return_empty_string',
+							],
+						],
+					],
+					'content_bg_repeat' => [
 						'label'       => esc_html__( 'Background Repeat', 'Avada' ),
 						'description' => esc_html__( 'Controls how the background image repeats.', 'Avada' ),
 						'id'          => 'content_bg_repeat',
 						'default'     => 'no-repeat',
 						'type'        => 'select',
-						'choices'     => array(
+						'choices'     => [
 							'repeat'    => esc_html__( 'Repeat All', 'Avada' ),
 							'repeat-x'  => esc_html__( 'Repeat Horizontally', 'Avada' ),
 							'repeat-y'  => esc_html__( 'Repeat Vertically', 'Avada' ),
 							'no-repeat' => esc_html__( 'No Repeat', 'Avada' ),
-						),
-						'required'    => array(
-							array(
+						],
+						'required'    => [
+							[
 								'setting'  => 'content_bg_image',
 								'operator' => '!=',
 								'value'    => '',
-							),
-							array(
+							],
+							[
 								'setting'  => 'content_bg_image',
 								'operator' => '!=',
-								'value'    => array(
+								'value'    => [
 									'url' => '',
-								),
-							),
-							array(
+								],
+							],
+							[
 								'setting'  => 'content_bg_image',
 								'operator' => '!=',
-								'value'    => array(
+								'value'    => [
 									'url'       => '',
 									'id'        => '',
 									'height'    => '',
 									'width'     => '',
 									'thumbnail' => '',
-								),
-							),
-						),
-					),
-				),
-			),
-		),
-	);
+								],
+							],
+						],
+						'css_vars'    => [
+							[
+								'name' => '--content_bg_repeat',
+							],
+						],
+					],
+				],
+			],
+		],
+	];
 
 	return $sections;
 

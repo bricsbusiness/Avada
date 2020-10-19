@@ -6,11 +6,6 @@
  * @subpackage Fusion-Patcher
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Applies patches.
  *
@@ -85,7 +80,7 @@ class Fusion_Patcher_Apply_Patch {
 		if ( false !== $setting && ! empty( $setting ) ) {
 
 			// Decode and prepare tha patch.
-			$setting = (array) json_decode( base64_decode( $setting ) );
+			$setting = (array) json_decode( fusion_decode_input( $setting ) );
 
 			// Set the $setting property of the class to the contents of our patch.
 			if ( is_array( $setting ) && ! empty( $setting ) ) {
@@ -147,44 +142,44 @@ class Fusion_Patcher_Apply_Patch {
 	public function update_applied_patches( $key ) {
 
 		// Get an array of existing patches.
-		$applied_patches = get_site_option( 'fusion_applied_patches', array() );
+		$applied_patches = get_site_option( 'fusion_applied_patches', [] );
 
 		// Get an array of patches that failed to be applied.
-		$failed_patches = get_site_option( 'fusion_failed_patches', array() );
+		$failed_patches = get_site_option( 'fusion_failed_patches', [] );
 
 		// Add the patch key to the array and save.
 		// Save on a different setting depending on whether the patch failed to be applied or not.
 		if ( false === $this->status ) {
 			// Update the failed patches setting.
-			if ( ! in_array( $key, $failed_patches ) ) {
+			if ( ! in_array( $key, $failed_patches ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 				$failed_patches[] = $key;
 				$failed_patches   = array_unique( $failed_patches );
 				update_site_option( 'fusion_failed_patches', $failed_patches );
 			}
 			// Update the applied patches setting.
-			if ( in_array( $key, $applied_patches ) ) {
-				$applied_key = array_search( $key, $applied_patches );
+			if ( in_array( $key, $applied_patches ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+				$applied_key = array_search( $key, $applied_patches ); // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 				unset( $applied_patches[ $applied_key ] );
 				update_site_option( 'fusion_applied_patches', $applied_patches );
 			}
 			return;
 		}
 		// If we got this far then the patch has been applied.
-		if ( ! in_array( $key, $applied_patches ) ) {
+		if ( ! in_array( $key, $applied_patches ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 			$applied_patches[] = $key;
 			$applied_patches   = array_unique( $applied_patches );
 			update_site_option( 'fusion_applied_patches', $applied_patches );
 
 			// If the current patch is in the array of failed patches, remove it.
-			if ( in_array( $key, $failed_patches ) ) {
-				$failed_key = array_search( $key, $failed_patches );
+			if ( in_array( $key, $failed_patches ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+				$failed_key = array_search( $key, $failed_patches ); // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 				unset( $failed_patches[ $failed_key ] );
 				update_site_option( 'fusion_failed_patches', $failed_patches );
 			}
 		}
 		// Remove messages if they exist.
 		$messages_option = get_site_option( Fusion_Patcher_Admin_Notices::$option_name );
-		$patches = Fusion_Patcher_Client::get_patches();
+		$patches         = Fusion_Patcher_Client::get_patches();
 		if ( isset( $patches[ $key ] ) ) {
 			foreach ( $patches[ $key ]['patch'] as $patch ) {
 				$message_id = 'write-permissions-' . $patch['context'];

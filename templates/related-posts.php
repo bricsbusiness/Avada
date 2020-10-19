@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -56,7 +56,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php $carousel_item_css = ( count( $related_posts->posts ) < Avada()->settings->get( 'related_posts_columns' ) ) ? ' style="max-width: 300px;"' : ''; ?>
 	<?php $related_posts_swipe_items = Avada()->settings->get( 'related_posts_swipe_items' ); ?>
-	<?php $related_posts_swipe_items = ( 0 == $related_posts_swipe_items ) ? '' : $related_posts_swipe_items; ?>
+	<?php $related_posts_swipe_items = ( 0 == $related_posts_swipe_items ) ? '' : $related_posts_swipe_items; // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison ?>
 	<div class="fusion-carousel<?php echo esc_attr( $additional_carousel_class ); ?>" data-imagesize="<?php echo esc_attr( $data_image_size ); ?>" data-metacontent="<?php echo esc_attr( $data_meta_content ); ?>" data-autoplay="<?php echo esc_attr( $data_autoplay ); ?>" data-touchscroll="<?php echo esc_attr( $data_swipe ); ?>" data-columns="<?php echo esc_attr( Avada()->settings->get( 'related_posts_columns' ) ); ?>" data-itemmargin="<?php echo intval( Avada()->settings->get( 'related_posts_column_spacing' ) ) . 'px'; ?>" data-itemwidth="180" data-touchscroll="yes" data-scrollitems="<?php echo esc_attr( $related_posts_swipe_items ); ?>">
 		<div class="fusion-carousel-positioner">
 			<ul class="fusion-carousel-holder">
@@ -67,8 +67,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				?>
 				<?php while ( $related_posts->have_posts() ) : ?>
 					<?php $related_posts->the_post(); ?>
-					<?php $post_id = get_the_ID(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited ?>
-					<li class="fusion-carousel-item"<?php echo $carousel_item_css; // WPCS: XSS ok. ?>>
+					<?php $post_id = get_the_ID(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride ?>
+					<li class="fusion-carousel-item"<?php echo $carousel_item_css; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 						<div class="fusion-carousel-item-wrapper">
 							<?php
 							if ( 'title_on_rollover' === Avada()->settings->get( 'related_posts_layout' ) ) {
@@ -78,14 +78,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 							}
 							if ( 'auto' === $data_image_size ) {
 								Avada()->images->set_grid_image_meta(
-									array(
+									[
 										'layout'  => 'related-posts',
 										'columns' => Avada()->settings->get( 'related_posts_columns' ),
-									)
+									]
 								);
 							}
-							echo fusion_render_first_featured_image_markup( $post_id, $featured_image_size, get_permalink( $post_id ), true, false, false, 'disable', $display_post_title, 'related' ); // WPCS: XSS ok.
-							Avada()->images->set_grid_image_meta( array() );
+							echo fusion_render_first_featured_image_markup( $post_id, $featured_image_size, get_permalink( $post_id ), true, false, false, 'disable', $display_post_title, 'related' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							Avada()->images->set_grid_image_meta( [] );
 							?>
 							<?php if ( 'title_below_image' === Avada()->settings->get( 'related_posts_layout' ) ) : // Title on rollover layout. ?>
 								<?php
@@ -98,7 +98,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 								</h4>
 
 								<div class="fusion-carousel-meta">
-									<span class="fusion-date"><?php echo esc_attr( get_the_time( Avada()->settings->get( 'date_format' ), $post_id ) ); ?></span>
+									<?php
+									$date_format = Avada()->settings->get( 'date_format' );
+									$date_format = $date_format ? $date_format : get_option( 'date_format' );
+									?>
+
+									<span class="fusion-date"><?php echo esc_attr( get_the_time( $date_format, $post_id ) ); ?></span>
 
 									<?php if ( comments_open( $post_id ) ) : ?>
 										<span class="fusion-inline-sep">|</span>
@@ -128,5 +133,3 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php
 wp_reset_postdata();
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */

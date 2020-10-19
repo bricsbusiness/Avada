@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -15,5 +15,3 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 $header_type = Avada()->settings->get( 'header_layout' );
 get_template_part( 'templates/header-' . $header_type );
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */

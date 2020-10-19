@@ -3,7 +3,7 @@
  * Override core-WooCommerce functions.
  *
  * @author     ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */

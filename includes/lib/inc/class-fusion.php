@@ -6,11 +6,6 @@
  * @since 1.0.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * The main Fusion library object.
  */
@@ -36,9 +31,11 @@ class Fusion {
 	/**
 	 * An instance of the Fusion_Images class.
 	 *
+	 * IMPORTANT NOTE: Use the get_images_obj() method to get this.
+	 *
 	 * @access public
 	 * @since 1.0.0
-	 * @var object Fusion_Images
+	 * @var Fusion_Images
 	 */
 	public $images;
 
@@ -47,7 +44,7 @@ class Fusion {
 	 *
 	 * @access public
 	 * @since 1.0.0
-	 * @var object Fusion_Multilingual
+	 * @var Fusion_Multilingual
 	 */
 	public $multilingual;
 
@@ -56,16 +53,25 @@ class Fusion {
 	 *
 	 * @access public
 	 * @since 1.0.0
-	 * @var object Fusion_Scripts
+	 * @var Fusion_Scripts
 	 */
 	public $scripts;
+
+	/**
+	 * An instance of the Fusion_Panel class.
+	 *
+	 * @access public
+	 * @since 1.0.0
+	 * @var Fusion_Scripts
+	 */
+	public $panel;
 
 	/**
 	 * An instance of the Fusion_Dynamic_JS class.
 	 *
 	 * @access public
 	 * @since 1.0.0
-	 * @var object Fusion_Dynamic_JS
+	 * @var Fusion_Dynamic_JS
 	 */
 	public $dynamic_js;
 
@@ -74,24 +80,45 @@ class Fusion {
 	 *
 	 * @access public
 	 * @since 1.0.0
-	 * @var object Fusion_Font_Awesome
+	 * @var Fusion_Font_Awesome
 	 */
 	public $fa;
+
+	/**
+	 * Fusion_Social_Sharing.
+	 *
+	 * @access public
+	 * @since 1.9.2
+	 * @var object
+	 */
+	public $social_sharing;
+
+	/**
+	 * An instance of the Fusion_Media_Query_Scripts class.
+	 *
+	 * @access public
+	 * @since 1.0.0
+	 * @var Fusion_Media_Query_Scripts
+	 */
+	public $mq_scripts;
 
 	/**
 	 * The class constructor
 	 */
 	private function __construct() {
-		add_action( 'wp', array( $this, 'set_page_id' ) );
+		add_action( 'wp', [ $this, 'set_page_id' ] );
+		add_action( 'plugins_loaded', [ $this, 'multilingual_data' ] );
 
-		if ( ! defined( 'AVADA_VERSION' ) ) {
-			$this->images       = new Fusion_Images();
+		if ( ! defined( 'AVADA_VERSION' ) && ! FUSION_LIBRARY_DEV_MODE ) {
+			$this->images = new Fusion_Images();
 		}
-		$this->sanitize     = new Fusion_Sanitize();
-		$this->multilingual = new Fusion_Multilingual();
-		$this->scripts      = new Fusion_Scripts();
-		$this->dynamic_js   = new Fusion_Dynamic_JS();
-		$this->fa           = new Fusion_Font_Awesome();
+
+		$this->sanitize       = new Fusion_Sanitize();
+		$this->scripts        = new Fusion_Scripts();
+		$this->dynamic_js     = new Fusion_Dynamic_JS();
+		$this->mq_scripts     = new Fusion_Media_Query_Scripts();
+		$this->fa             = new Fusion_Font_Awesome();
+		$this->social_sharing = new Fusion_Social_Sharing();
 
 		if ( $this->supported_plugins_changed() && class_exists( 'Fusion_Cache' ) ) {
 			$fusion_cache = new Fusion_Cache();
@@ -102,7 +129,14 @@ class Fusion {
 			new Fusion_Privacy();
 		}
 
-		add_action( 'admin_body_class', array( $this, 'admin_body_class' ) );
+		add_action( 'admin_body_class', [ $this, 'admin_body_class' ] );
+
+		add_action( 'wp_head', [ $this, 'add_analytics_code' ], 10000 );
+
+
+		// Add needed action and filter to make sure queries with offset have correct pagination.
+		add_action( 'pre_get_posts', [ $this, 'query_offset' ], 1 );
+		add_filter( 'found_posts', [ $this, 'adjust_offset_pagination' ], 1, 2 );
 	}
 
 	/**
@@ -126,7 +160,7 @@ class Fusion {
 		if ( ! self::$c_page_id ) {
 			$this->set_page_id();
 		}
-		return self::$c_page_id;
+		return apply_filters( 'fusion-page-id', self::$c_page_id ); // phpcs:ignore WordPress.NamingConventions.ValidHookName
 	}
 
 	/**
@@ -146,16 +180,24 @@ class Fusion {
 	 * @return bool|int
 	 */
 	private static function c_page_id() {
-
+		global $wp_query;
 		if ( get_option( 'show_on_front' ) && get_option( 'page_for_posts' ) && is_home() ) {
 			return get_option( 'page_for_posts' );
 		}
 
+		if ( ! $wp_query ) {
+			return false;
+		}
+
 		$c_page_id = get_queried_object_id();
+		if ( ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) || ( function_exists( 'fusion_is_builder_frame' ) && fusion_is_builder_frame() ) ) {
+			$page_id   = isset( $_POST['post_id'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['post_id'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
+			$c_page_id = $page_id ? $page_id : $c_page_id;
+		}
 
 		// The WooCommerce shop page.
 		if ( ! is_admin() && class_exists( 'WooCommerce' ) && is_shop() ) {
-			return get_option( 'woocommerce_shop_page_id' );
+			return (int) get_option( 'woocommerce_shop_page_id' );
 		}
 		// The WooCommerce product_cat taxonomy page.
 		if ( ! is_admin() && class_exists( 'WooCommerce' ) && ( ! is_shop() && ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) ) ) {
@@ -201,19 +243,19 @@ class Fusion {
 	 * @return bool True if changed, false if unchanged.
 	 */
 	protected function supported_plugins_changed() {
-		$classes_to_check = array(
+		$classes_to_check   = [
 			'WPCF7',
 			'bbPress',
 			'WooCommerce',
 			'Tribe__Events__Main',
-		);
-		$constants_to_check = array(
+		];
+		$constants_to_check = [
 			'LS_PLUGIN_VERSION',
 			'RS_PLUGIN_PATH',
-		);
+		];
 
-		$supported_saved    = get_option( 'fusion_supported_plugins_active', array() );
-		$supported_detected = array();
+		$supported_saved    = get_option( 'fusion_supported_plugins_active', [] );
+		$supported_detected = [];
 		foreach ( $classes_to_check as $class ) {
 			if ( class_exists( $class ) ) {
 				$supported_detected[] = $class;
@@ -245,5 +287,91 @@ class Fusion {
 			$classes .= ' fusion-colorpicker-legacy ';
 		}
 		return $classes;
+	}
+
+	/**
+	 * Adds analytics code.
+	 *
+	 * @access public
+	 * @since 1.9.2
+	 * @return void
+	 */
+	public function add_analytics_code() {
+		/**
+		 * The setting below is not sanitized. In order to be able to take advantage of this,
+		 * a user would have to gain access to the database or the filesystem to add a new filter,
+		 * in which case this is the least of your worries.
+		 */
+		echo apply_filters( 'fusion_google_analytics', $this->get_option( 'google_analytics' ) ); // phpcs:ignore WordPress.Security.EscapeOutput
+	}
+
+	/**
+	 * Add Multilingual Data.
+	 *
+	 * @access public
+	 * @since 2.0
+	 * @return void
+	 */
+	public function multilingual_data() {
+		$this->multilingual = new Fusion_Multilingual();
+	}
+
+	/**
+	 * Gets the Fusion_Images object.
+	 *
+	 * NOTE: Do not remove, needed for users updating from 6.1.2.
+	 *
+	 * @since 2.2.0
+	 * @return Fusion_Images
+	 */
+	public function get_images_obj() {
+		if ( ! $this->images ) {
+			$this->images = new Fusion_Images();
+		}
+		return $this->images;
+	}
+
+	/**
+	 * Adds offset to the query.
+	 *
+	 * @since 2.2
+	 * @param object $query The query.
+	 */
+	public function query_offset( $query ) {
+		// Check if we are in a blog shortcode query and if offset is set.
+		if ( is_admin() || ( is_object( $query ) && ( $query->is_main_query() || is_array( $query->query ) && ! isset( $query->query['blog_sc_query'] ) && ! isset( $query->query['portfolio_sc_query'] ) ) ) || ! isset( $query->query['offset'] ) ) {
+			return;
+		}
+
+		// The query is paged.
+		if ( $query->is_paged ) {
+			// Manually determine page query offset (offset + ( current page - 1 ) x posts per page ).
+			$page_offset = (int) $query->query['offset'] + ( ( $query->query_vars['paged'] - 1 ) * $query->query['posts_per_page'] );
+
+			// Apply adjusted page offset.
+			$query->set( 'offset', $page_offset );
+
+			// This is the first page, so we can just use the offset.
+		} else {
+			$query->set( 'offset', $query->query['offset'] );
+		}
+	}
+
+
+	/**
+	 * Adds an offset to the pagination.
+	 *
+	 * @since 2.2
+	 * @param int    $found_posts How many posts we found.
+	 * @param object $query       The query.
+	 * @return int
+	 */
+	public function adjust_offset_pagination( $found_posts, $query ) {
+		// Modification only in a blog shortcode query with set offset.
+		if ( ( isset( $query->query['blog_sc_query'] ) || isset( $query->query['portfolio_sc_query'] ) ) && isset( $query->query['offset'] ) && '' !== $query->query['offset'] ) {
+			// Reduce found_posts count by the offset.
+			return $found_posts - $query->query['offset'];
+		}
+		return $found_posts;
 	}
 }

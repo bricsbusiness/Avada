@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 #tribe-events-content-wrapper #tribe_events_filters_wrapper {
   height: auto;
 }
@@ -83,4 +84,22 @@
 #tribe-events-footer:before,
 #tribe-events-header:before {
   background-color: transparent !important;
+}
+.tribe_events .tribe-tickets-rsvp {
+  padding: 16px 16px 20px;
+}
+.tribe_events .tribe-tickets-rsvp .tribe-events-tickets-rsvp tr td {
+  padding: 15px 0;
+}
+.tribe_events .tribe-tickets-rsvp .tribe-events-tickets-rsvp tr td.tickets_name {
+  padding-bottom: 0;
+}
+.tribe_events .tribe-tickets-rsvp .tribe-events-tickets-rsvp tr td.tickets_description {
+  padding-top: 0;
+}
+.tribe_events .tribe-tickets-rsvp .tribe-events-tickets-rsvp .tribe-tickets-table {
+  padding: 25px 15px;
+}
+.tribe_events .tribe-tickets-rsvp .tribe-events-tickets-rsvp .tribe-tickets-table tr td:first-child {
+  max-width: 15%;
 }

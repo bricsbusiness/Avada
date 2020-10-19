@@ -100,7 +100,7 @@
 				echo '</div>';
 
 				if ( $this->parent->args['dev_mode'] == true ) {
-					if ( current_user_can( 'administrator' ) ) {
+					if ( current_user_can( 'manage_options' ) ) {
 						global $wpdb;
 						echo "<br /><pre>";
 						print_r( $wpdb->queries );

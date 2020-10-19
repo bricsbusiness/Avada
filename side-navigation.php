@@ -19,15 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php the_post(); ?>
 		<?php $page_id = get_the_ID(); ?>
 		<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-			<?php echo fusion_render_rich_snippets_for_pages(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			<?php avada_featured_images_for_pages(); ?>
+			<?php echo fusion_render_rich_snippets_for_pages(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<?php avada_singular_featured_image(); ?>
 			<div class="post-content">
 				<?php the_content(); ?>
 				<?php fusion_link_pages(); ?>
 			</div>
 			<?php if ( ! post_password_required( $post->ID ) ) : ?>
 				<?php if ( Avada()->settings->get( 'comments_pages' ) ) : ?>
-					<?php wp_reset_postdata(); ?>
 					<?php comments_template(); ?>
 				<?php endif; ?>
 			<?php endif; ?>
@@ -35,8 +34,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php endwhile; ?>
 </section>
 <?php do_action( 'avada_after_content' ); ?>
-<?php wp_reset_postdata(); ?>
-<?php
-get_footer();
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */
+<?php get_footer(); ?>

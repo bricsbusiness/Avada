@@ -27,7 +27,7 @@ $heading = esc_html( apply_filters( 'woocommerce_product_additional_information_
 ?>
 
 <?php if ( $heading ): ?>
-	<h3><?php echo $heading; ?></h3>
+	<h3 class="fusion-woocommerce-tab-title"><?php echo $heading; ?></h3>
 <?php endif; ?>
 
 <?php do_action( 'woocommerce_product_additional_information', $product );

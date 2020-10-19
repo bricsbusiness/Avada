@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      1.0.0
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $wp_query;
 
 // Set the correct post container layout classes.
-$blog_layout     = avada_get_blog_layout();
+$blog_layout = avada_get_blog_layout();
 if ( is_search() ) {
 	$display_featured_images = Avada()->settings->get( 'search_featured_images' );
 	$grid_columns            = (int) Avada()->settings->get( 'search_grid_columns' );
@@ -28,9 +28,9 @@ if ( is_search() ) {
 	$is_there_meta_below     = ! empty( $search_meta ) && ( isset( $search_meta['comments'] ) || isset( $search_meta['read_more'] ) );
 	$display_comments        = isset( $search_meta['comments'] );
 	$display_read_more       = isset( $search_meta['read_more'] );
-	$pagination_type         = Avada()->settings->get( 'search_pagination_type' );
+	$pagination_type         = fusion_get_option( 'search_pagination_type' );
 	$number_of_pages         = ceil( $wp_query->found_posts / Avada()->settings->get( 'search_results_per_page' ) );
-	$is_there_content        = 'full_content' === Avada()->settings->get( 'search_content_length' ) || ( 'excerpt' === Avada()->settings->get( 'search_content_length' ) && 0 < Avada()->settings->get( 'search_excerpt_length' ) );
+	$is_there_content        = 'full_content' === fusion_get_option( 'search_content_length' ) || ( 'excerpt' === fusion_get_option( 'search_content_length' ) && 0 < fusion_get_option( 'search_excerpt_length' ) );
 } else {
 	$display_featured_images = Avada()->settings->get( 'featured_images' );
 	$grid_columns            = (int) Avada()->settings->get( 'blog_archive_grid_columns' );
@@ -39,16 +39,16 @@ if ( is_search() ) {
 	$is_there_meta_below     = Avada()->settings->get( 'post_meta' ) && ( Avada()->settings->get( 'post_meta_comments' ) || Avada()->settings->get( 'post_meta_read' ) );
 	$display_comments        = Avada()->settings->get( 'post_meta_comments' );
 	$display_read_more       = Avada()->settings->get( 'post_meta_read' );
-	$pagination_type         = Avada()->settings->get( 'blog_pagination_type' );
+	$pagination_type         = fusion_get_option( 'blog_pagination_type' );
 	$number_of_pages         = $wp_query->max_num_pages;
-	$is_there_content        = 'Full Content' === Avada()->settings->get( 'content_length' ) || ( 'Excerpt' === Avada()->settings->get( 'content_length' ) && 0 < Avada()->settings->get( 'excerpt_length_blog' ) );
+	$is_there_content        = 'full_content' === fusion_get_option( 'content_length' ) || ( 'excerpt' === fusion_get_option( 'content_length' ) && 0 < fusion_get_option( 'excerpt_length_blog' ) );
 }
 
-$post_class      = 'fusion-post-' . $blog_layout;
-$lazy_load       = Avada()->settings->get( 'lazy_load' );
+$post_class = 'fusion-post-' . $blog_layout;
+$lazy_load  = 'avada' === Avada()->settings->get( 'lazy_load' ) ? true : false;
 
 // Used for grid and timeline layouts.
-$is_there_meta   = $is_there_meta_above || $is_there_meta_below;
+$is_there_meta = $is_there_meta_above || $is_there_meta_below;
 
 
 // Masonry needs additional grid class.
@@ -78,7 +78,7 @@ if ( Avada()->settings->get( 'blog_equal_heights' ) && 'grid' === $blog_layout &
 }
 
 // Set class for scrolling type.
-if ( 'Infinite Scroll' === $pagination_type ) {
+if ( 'infinite_scroll' === $pagination_type ) {
 	$container_class .= 'fusion-posts-container-infinite ';
 	$wrapper_class   .= 'fusion-blog-infinite ';
 } elseif ( 'load_more_button' === $pagination_type ) {
@@ -105,7 +105,7 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 	<div class="<?php echo esc_attr( $container_class ); ?>" data-pages="<?php echo (int) $number_of_pages; ?>">
 		<?php if ( 'timeline' === $blog_layout ) : ?>
 			<?php // Add the timeline icon. ?>
-			<div class="fusion-timeline-icon"><i class="fusion-icon-bubbles"></i></div>
+			<div class="fusion-timeline-icon"><i class="fusion-icon-bubbles" aria-hidden="true"></i></div>
 			<div class="fusion-blog-layout-timeline fusion-clearfix">
 
 			<?php
@@ -145,7 +145,7 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 				}
 
 				// Set the timeline month label.
-				if ( $prev_post_month != $post_month || $prev_post_year != $post_year ) {
+				if ( $prev_post_month != $post_month || $prev_post_year != $post_year ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
 
 					if ( $post_count > 1 ) {
 						echo '</div>';
@@ -157,7 +157,7 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 
 			// Set the has-post-thumbnail if a video is used. This is needed if no featured image is present.
 			$thumb_class = '';
-			if ( get_post_meta( get_the_ID(), 'pyre_video', true ) ) {
+			if ( fusion_get_page_option( 'video', get_the_ID() ) ) {
 				$thumb_class = ' has-post-thumbnail';
 			}
 
@@ -165,7 +165,7 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 			$element_orientation_class = '';
 			if ( 'masonry' === $blog_layout ) {
 				$responsive_images_columns = $grid_columns;
-				$masonry_attributes        = array();
+				$masonry_attributes        = [];
 				$element_base_padding      = 0.8;
 
 				// Set image or placeholder and correct corresponding styling.
@@ -173,7 +173,7 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 					$post_thumbnail_attachment = wp_get_attachment_image_src( get_post_thumbnail_id(), 'full' );
 					$masonry_attribute_style   = $lazy_load ? '' : 'background-image:url(' . $post_thumbnail_attachment[0] . ');';
 				} else {
-					$post_thumbnail_attachment = array();
+					$post_thumbnail_attachment = [];
 					$masonry_attribute_style   = 'background-color:#f6f6f6;';
 				}
 
@@ -188,9 +188,7 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 
 				$masonry_column_spacing = ( $grid_columns_spacing ) . 'px';
 
-				if ( class_exists( 'Fusion_Sanitize' ) && class_exists( 'Fusion_Color' ) &&
-					'transparent' !== Fusion_Sanitize::color( Avada()->settings->get( 'timeline_color' ) ) &&
-					'0' != Fusion_Color::new_color( Avada()->settings->get( 'timeline_color' ) )->alpha ) {
+				if ( class_exists( 'Fusion_Sanitize' ) && class_exists( 'Fusion_Color' ) && ! fusion_is_color_transparent( Avada()->settings->get( 'timeline_color' ) ) ) {
 
 					$masonry_column_offset = ' - ' . ( $grid_columns_spacing / 2 ) . 'px';
 					if ( false !== strpos( $element_orientation_class, 'fusion-element-portrait' ) ) {
@@ -204,7 +202,7 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 				}
 
 				// Check if a featured image is set and also that not a video with no featured image.
-				$post_video = get_post_meta( get_the_ID(), 'pyre_video', true );
+				$post_video = fusion_get_page_option( 'video', get_the_ID() );
 				if ( ! empty( $post_thumbnail_attachment ) || ! $post_video ) {
 
 					// Calculate the correct size of the image wrapper container, based on orientation and column spacing.
@@ -217,40 +215,40 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 				}
 
 				// Set the masonry attributes to use them in the first featured image function.
-				$masonry_attributes = array(
+				$masonry_attributes = [
 					'class' => 'fusion-masonry-element-container',
 					'style' => $masonry_attribute_style,
-				);
+				];
 
 				if ( $lazy_load && isset( $post_thumbnail_attachment[0] ) ) {
 					$masonry_attributes['data-bg'] = $post_thumbnail_attachment[0];
-					$masonry_attributes['class'] .= ' lazyload';
+					$masonry_attributes['class']  .= ' lazyload';
 				}
 
 				// Get the post image.
 				Avada()->images->set_grid_image_meta(
-					array(
+					[
 						'layout'       => 'portfolio_full',
 						'columns'      => $responsive_images_columns,
 						'gutter_width' => $grid_columns_spacing,
-					)
+					]
 				);
 
 				$permalink = get_permalink( $post->ID );
 
 				$image = fusion_render_first_featured_image_markup( $post->ID, 'full', $permalink, false, false, false, 'default', 'default', '', '', 'yes', false, $masonry_attributes );
 
-				Avada()->images->set_grid_image_meta( array() );
-			} // End if().
+				Avada()->images->set_grid_image_meta( [] );
+			}
 
-			$post_classes = array(
+			$post_classes = [
 				$post_class,
 				$alignment_class,
 				$thumb_class,
 				$element_orientation_class,
 				'post',
 				'fusion-clearfix',
-			);
+			];
 			?>
 			<article id="post-<?php the_ID(); ?>" <?php post_class( $post_classes ); ?>>
 				<?php if ( 'grid' === $blog_layout || 'masonry' === $blog_layout ) : ?>
@@ -284,7 +282,7 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 				<?php if ( $display_featured_images && 'large-alternate' !== $blog_layout ) : ?>
 					<?php
 					if ( 'masonry' === $blog_layout ) {
-						echo $image; // WPCS: XSS ok.
+						echo $image; // phpcs:ignore WordPress.Security.EscapeOutput
 					} else {
 						// Get featured images for all but large-alternate layout.
 						get_template_part( 'new-slideshow' );
@@ -304,11 +302,11 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 				<?php endif; ?>
 
 				<div class="fusion-post-content post-content">
-					<?php echo avada_render_post_title( $post->ID ); // WPCS: XSS ok. ?>
+					<?php echo avada_render_post_title( $post->ID ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 
 					<?php // Render post meta for grid and timeline layouts. ?>
 					<?php if ( 'grid' === $blog_layout || 'masonry' === $blog_layout || 'timeline' === $blog_layout ) : ?>
-						<?php echo fusion_render_post_metadata( 'grid_timeline' ); // WPCS: XSS ok. ?>
+						<?php echo fusion_render_post_metadata( 'grid_timeline' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 
 						<?php // See 7199. ?>
 						<?php if ( 'masonry' !== $blog_layout && ( $is_there_meta_above && ( $is_there_content || $is_there_meta_below ) || ( ! $is_there_meta_above && $is_there_meta_below ) ) ) : ?>
@@ -325,7 +323,7 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 
 					<?php elseif ( 'large-alternate' === $blog_layout || 'medium-alternate' === $blog_layout ) : ?>
 						<?php // Render post meta for alternate layouts. ?>
-						<?php echo fusion_render_post_metadata( 'alternate' ); // WPCS: XSS ok. ?>
+						<?php echo fusion_render_post_metadata( 'alternate' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					<?php endif; ?>
 
 					<div class="fusion-post-content-container">
@@ -352,11 +350,11 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 							<div class="fusion-meta-info">
 								<?php if ( $display_read_more ) : ?>
 									<?php
-										$link_target = ( 'yes' === fusion_get_page_option( 'link_icon_target', $post->ID ) || 'yes' === fusion_get_page_option( 'post_links_target', $post->ID ) ) ? ' target="_blank" rel="noopener noreferrer"' : '';
+										$link_target        = ( 'yes' === fusion_get_page_option( 'link_icon_target', $post->ID ) || 'yes' === fusion_get_page_option( 'post_links_target', $post->ID ) ) ? ' target="_blank" rel="noopener noreferrer"' : '';
 										$readmore_alignment = ! $display_comments && '' !== $content_align ? 'fusion-align' . $content_align : 'fusion-alignleft';
 									?>
 									<div class="<?php echo esc_attr( $readmore_alignment ); ?>">
-										<a href="<?php echo esc_url_raw( get_permalink() ); ?>" class="fusion-read-more"<?php echo $link_target; // WPCS: XSS ok. ?>>
+										<a href="<?php echo esc_url_raw( get_permalink() ); ?>" class="fusion-read-more"<?php echo $link_target; // phpcs:ignore WordPress.Security.EscapeOutput ?> aria-label="<?php esc_attr_e( 'More on', 'Avada' ); ?> <?php the_title_attribute(); ?>">>
 											<?php echo esc_textarea( apply_filters( 'avada_blog_read_more_link', esc_attr__( 'Read More', 'Avada' ) ) ); ?>
 										</a>
 									</div>
@@ -367,9 +365,9 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 									<?php $comment_alignment = ! $display_read_more && '' !== $content_align ? 'fusion-align' . $content_align : 'fusion-alignright'; ?>
 									<div class="<?php echo esc_attr( $comment_alignment ); ?>">
 										<?php if ( ! post_password_required( $post->ID ) ) : ?>
-											<?php comments_popup_link( '<i class="fusion-icon-bubbles"></i>&nbsp;0', '<i class="fusion-icon-bubbles"></i>&nbsp;1', '<i class="fusion-icon-bubbles"></i>&nbsp;%' ); ?>
+											<?php comments_popup_link( '<i class="fusion-icon-bubbles" aria-hidden="true"></i>&nbsp;0', '<i class="fusion-icon-bubbles" aria-hidden="true"></i>&nbsp;1', '<i class="fusion-icon-bubbles" aria-hidden="true"></i>&nbsp;%' ); ?>
 										<?php else : ?>
-											<i class="fusion-icon-bubbles"></i>&nbsp;<?php esc_attr_e( 'Protected', 'Avada' ); ?>
+											<i class="fusion-icon-bubbles" aria-hidden="true"></i>&nbsp;<?php esc_attr_e( 'Protected', 'Avada' ); ?>
 										<?php endif; ?>
 									</div>
 								<?php endif; ?>
@@ -379,14 +377,14 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 						<div class="fusion-meta-info">
 							<?php // Render all meta data for medium and large layouts. ?>
 							<?php if ( 'large' === $blog_layout || 'medium' === $blog_layout ) : ?>
-								<?php echo fusion_render_post_metadata( 'standard' ); // WPCS: XSS ok. ?>
+								<?php echo fusion_render_post_metadata( 'standard' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 							<?php endif; ?>
 
 							<?php // Render read more for medium/large and medium/large alternate layouts. ?>
 							<?php if ( $display_read_more ) : ?>
 								<?php $link_target = ( 'yes' === fusion_get_page_option( 'link_icon_target', $post->ID ) || 'yes' === fusion_get_page_option( 'post_links_target', $post->ID ) ) ? ' target="_blank" rel="noopener noreferrer"' : ''; ?>
 								<div class="fusion-alignright">
-									<a href="<?php echo esc_url_raw( get_permalink() ); ?>" class="fusion-read-more"<?php echo $link_target; // WPCS: XSS ok. ?>>
+									<a href="<?php echo esc_url_raw( get_permalink() ); ?>" class="fusion-read-more"<?php echo $link_target; // phpcs:ignore WordPress.Security.EscapeOutput ?> aria-label="<?php esc_attr_e( 'More on', 'Avada' ); ?> <?php the_title_attribute(); ?>">
 										<?php echo esc_textarea( apply_filters( 'avada_read_more_name', esc_attr__( 'Read More', 'Avada' ) ) ); ?>
 									</a>
 								</div>
@@ -394,7 +392,7 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 						</div>
 					<?php endif; ?>
 				<?php elseif ( ! Avada()->settings->get( 'post_meta' ) ) : ?>
-					<?php echo fusion_render_rich_snippets_for_pages(); // WPCS: XSS ok. ?>
+					<?php echo fusion_render_rich_snippets_for_pages(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				<?php endif; ?>
 
 				<?php if ( 'grid' === $blog_layout || 'masonry' === $blog_layout || 'timeline' === $blog_layout ) : ?>
@@ -437,8 +435,5 @@ if ( $content_align && ( 'grid' === $blog_layout || 'masonry' === $blog_layout |
 	</div>
 	<?php endif; ?>
 <?php // Get the pagination. ?>
-<?php echo fusion_pagination( '', Avada()->settings->get( 'pagination_range' ) ); // WPCS: XSS ok. ?>
+<?php echo fusion_pagination( '', Avada()->settings->get( 'pagination_range' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 </div>
-<?php
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */

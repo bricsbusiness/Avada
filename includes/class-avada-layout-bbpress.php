@@ -5,10 +5,12 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      3.8.6
+ *
+ * phpcs:ignoreFile PEAR.NamingConventions.ValidClassName
  */
 
 // Do not allow directly accessing this file.
@@ -33,30 +35,30 @@ class Avada_Layout_bbPress extends Avada_Layout {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'bbp_template_before_single_forum', array( $this, 'add_search_form' ) );
-		add_action( 'bbp_template_before_single_topic', array( $this, 'add_search_form' ) );
+		add_action( 'bbp_template_before_single_forum', [ $this, 'add_search_form' ] );
+		add_action( 'bbp_template_before_single_topic', [ $this, 'add_search_form' ] );
 
-		add_action( 'bbp_theme_after_topic_author_details', array( $this, 'add_author_post_date_count_ip' ) );
-		add_action( 'bbp_theme_before_topic_content', array( $this, 'add_topic_reply_arrow' ) );
+		add_action( 'bbp_theme_after_topic_author_details', [ $this, 'add_author_post_date_count_ip' ] );
+		add_action( 'bbp_theme_before_topic_content', [ $this, 'add_topic_reply_arrow' ] );
 
-		add_action( 'bbp_template_before_replies_loop', array( $this, 'add_bbp_header' ) );
-		add_action( 'bbp_theme_before_reply_content', array( $this, 'add_topic_reply_arrow' ) );
-		add_action( 'bbp_theme_after_reply_author_details', array( $this, 'add_author_post_date_count_ip' ) );
+		add_action( 'bbp_template_before_replies_loop', [ $this, 'add_bbp_header' ] );
+		add_action( 'bbp_theme_before_reply_content', [ $this, 'add_topic_reply_arrow' ] );
+		add_action( 'bbp_theme_after_reply_author_details', [ $this, 'add_author_post_date_count_ip' ] );
 
-		add_action( 'bbp_template_before_user_details', array( $this, 'add_search_form' ) );
-		add_action( 'bbp_template_before_search', array( $this, 'add_search_page_search_form' ) );
+		add_action( 'bbp_template_before_user_details', [ $this, 'add_search_form' ] );
+		add_action( 'bbp_template_before_search', [ $this, 'add_search_page_search_form' ] );
 
-		add_action( 'bbp_template_before_pagination_loop', array( $this, 'open_pagination_wrapper' ) );
-		add_action( 'bbp_template_after_pagination_loop', array( $this, 'close_pagination_wrapper' ) );
+		add_action( 'bbp_template_before_pagination_loop', [ $this, 'open_pagination_wrapper' ] );
+		add_action( 'bbp_template_after_pagination_loop', [ $this, 'close_pagination_wrapper' ] );
 
-		add_filter( 'bbp_get_forum_subscribe_link', array( $this, 'remove_single_description' ) );
-		add_filter( 'bbp_get_single_forum_description', array( $this, 'remove_single_description' ) );
-		add_filter( 'bbp_get_single_topic_description', array( $this, 'remove_single_description' ) );
-		add_filter( 'bbp_get_forum_pagination_links', array( $this, 'get_forum_pagination_links' ), 1 );
-		add_filter( 'bbp_get_topic_pagination_links', array( $this, 'get_topic_pagination_links' ), 1 );
-		add_filter( 'bbp_get_search_pagination_links', array( $this, 'get_search_pagination_links' ), 1 );
-		add_filter( 'bbp_get_topic_admin_links', array( $this, 'remove_empty_admin_links_sep' ), 10, 3 );
-		add_filter( 'bbp_get_reply_admin_links', array( $this, 'remove_empty_admin_links_sep' ), 10, 3 );
+		add_filter( 'bbp_get_forum_subscribe_link', [ $this, 'remove_single_description' ] );
+		add_filter( 'bbp_get_single_forum_description', [ $this, 'remove_single_description' ] );
+		add_filter( 'bbp_get_single_topic_description', [ $this, 'remove_single_description' ] );
+		add_filter( 'bbp_get_forum_pagination_links', [ $this, 'get_forum_pagination_links' ], 1 );
+		add_filter( 'bbp_get_topic_pagination_links', [ $this, 'get_topic_pagination_links' ], 1 );
+		add_filter( 'bbp_get_search_pagination_links', [ $this, 'get_search_pagination_links' ], 1 );
+		add_filter( 'bbp_get_topic_admin_links', [ $this, 'remove_empty_admin_links_sep' ], 10, 3 );
+		add_filter( 'bbp_get_reply_admin_links', [ $this, 'remove_empty_admin_links_sep' ], 10, 3 );
 	}
 
 	/**
@@ -110,7 +112,7 @@ class Avada_Layout_bbPress extends Avada_Layout {
 
 			<?php do_action( 'bbp_theme_after_topic_author_admin_details' ); ?>
 
-		<?php
+			<?php
 		endif;
 	}
 
@@ -137,13 +139,13 @@ class Avada_Layout_bbPress extends Avada_Layout {
 			<p><?php esc_attr_e( 'If you didn\'t find what you were looking for, try a new search!', 'Avada' ); ?></p>
 			<form role="search" method="get" class="searchform bbp-search-form fusion-search-form" action="<?php bbp_search_url(); ?>">
 				<div class="fusion-search-form-content">
-					<label class="screen-reader-text hidden" for="bbp_search"><?php _e( 'Search for:', 'bbpress' ); ?></label>
+					<label class="screen-reader-text hidden" for="bbp_search"><?php esc_html_e( 'Search for:', 'bbpress' ); ?></label>
 					<input id ="bbp_search" type="hidden" name="action" value="bbp-search-request" />
 					<div class="fusion-search-field search-field">
-						<input tabindex="<?php bbp_tab_index(); ?>" type="text" value="<?php echo esc_attr( bbp_get_search_terms() ); ?>" placeholder="<?php _e( 'Search the Forum...', 'Avada' ); ?>" name="bbp_search" id="bbp_search" />
+						<input tabindex="<?php bbp_tab_index(); ?>" type="text" value="<?php echo esc_attr( bbp_get_search_terms() ); ?>" placeholder="<?php esc_html_e( 'Search the Forum...', 'Avada' ); ?>" name="bbp_search" id="bbp_search" />
 					</div>
 					<div class="fusion-search-button search-button">
-						<input tabindex="<?php bbp_tab_index(); ?>" class="fusion-search-submit fusion-button button submit" type="submit" id="bbp_search_submit" value="&#xf002;" />
+						<input tabindex="<?php bbp_tab_index(); ?>" class="fusion-search-submit fusion-button button submit" type="submit" id="bbp_search_submit" aria-label="<?php esc_html_e( 'Search', 'Avada' ); ?>" value="&#xf002;" />
 					</div>
 				</div>
 			</form>
@@ -156,7 +158,7 @@ class Avada_Layout_bbPress extends Avada_Layout {
 	 */
 	public function open_pagination_wrapper() {
 		?>
-		<?php if ( 0 == $this->pagination_counter ) : ?>
+		<?php if ( 0 == $this->pagination_counter ) : // phpcs:ignore WordPress.PHP.StrictComparisons ?>
 			<div class="top-pagination">
 		<?php endif; ?>
 		<?php
@@ -168,12 +170,12 @@ class Avada_Layout_bbPress extends Avada_Layout {
 	 */
 	public function close_pagination_wrapper() {
 		?>
-		<?php if ( 0 == $this->pagination_counter ) : ?>
+		<?php if ( 0 == $this->pagination_counter ) : // phpcs:ignore WordPress.PHP.StrictComparisons ?>
 			</div>
 			<div class="fusion-clearfix"></div>
 
 			<?php if ( bbp_is_single_forum() ) : ?>
-				<?php remove_filter( 'bbp_get_forum_subscribe_link', array( $this, 'remove_single_description' ) ); ?>
+				<?php remove_filter( 'bbp_get_forum_subscribe_link', [ $this, 'remove_single_description' ] ); ?>
 
 				<div class="bbp-header fusion-bbp-header">
 

@@ -305,22 +305,22 @@
 			<h2 class="nav-tab-wrapper">
 				<a class="nav-tab <?php echo $selected == 'fusionredux-about' ? 'nav-tab-active' : ''; ?>"
 					href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'fusionredux-about' ), 'tools.php' ) ) ); ?>">
-					<?php esc_attr_e( "What's New", 'Avada' ); ?>
+					<?php esc_html_e( "What's New", 'Avada' ); ?>
 				</a> <a class="nav-tab <?php echo $selected == 'fusionredux-extensions' ? 'nav-tab-active' : ''; ?>"
 					href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'fusionredux-extensions' ), 'tools.php' ) ) ); ?>">
-					<?php esc_attr_e( 'Extensions', 'Avada' ); ?>
+					<?php esc_html_e( 'Extensions', 'Avada' ); ?>
 				</a> <a class="nav-tab <?php echo $selected == 'fusionredux-changelog' ? 'nav-tab-active' : ''; ?>"
 					href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'fusionredux-changelog' ), 'tools.php' ) ) ); ?>">
-					<?php esc_attr_e( 'Changelog', 'Avada' ); ?>
+					<?php esc_html_e( 'Changelog', 'Avada' ); ?>
 				</a> <a class="nav-tab <?php echo $selected == 'fusionredux-credits' ? 'nav-tab-active' : ''; ?>"
 					href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'fusionredux-credits' ), 'tools.php' ) ) ); ?>">
 					<?php _e( 'Credits', 'Avada' ); ?>
 				</a> <a class="nav-tab <?php echo $selected == 'fusionredux-support' ? 'nav-tab-active' : ''; ?>"
 					href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'fusionredux-support' ), 'tools.php' ) ) ); ?>">
-					<?php esc_attr_e( 'Support', 'Avada' ); ?>
+					<?php esc_html_e( 'Support', 'Avada' ); ?>
 				</a> <a class="nav-tab <?php echo $selected == 'fusionredux-status' ? 'nav-tab-active' : ''; ?>"
 					href="<?php echo esc_url( admin_url( add_query_arg( array( 'page' => 'fusionredux-status' ), 'tools.php' ) ) ); ?>">
-					<?php esc_attr_e( 'Status', 'Avada' ); ?>
+					<?php esc_html_e( 'Status', 'Avada' ); ?>
 				</a>
 			</h2>
 			<?php

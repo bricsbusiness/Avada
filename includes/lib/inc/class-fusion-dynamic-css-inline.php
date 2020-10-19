@@ -6,11 +6,6 @@
  * @since 1.0.0
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Handle generating the dynamic CSS.
  *
@@ -37,12 +32,19 @@ class Fusion_Dynamic_CSS_Inline {
 	public function __construct( $dynamic_css ) {
 
 		$this->dynamic_css = $dynamic_css;
+		$loading_action    = 'wp_head';
+		$priority          = 999;       
 
-		if ( Avada()->settings->get( 'media_queries_async' ) ) {
-			add_action( 'wp_enqueue_scripts', array( $this, 'add_inline_css' ) );
-			add_action( 'wp_head', array( $this, 'add_custom_css_to_wp_head' ), 999 );
+		if ( fusion_should_defer_styles_loading() ) {
+			$loading_action = 'wp_print_footer_scripts';
+			$priority       = 12;
+		}
+
+		if ( fusion_get_option( 'media_queries_async' ) ) {
+			add_action( 'wp_enqueue_scripts', [ $this, 'add_inline_css' ] );
+			add_action( $loading_action, [ $this, 'add_custom_css_to_wp_head' ], $priority );
 		} else {
-			add_action( 'wp_head', array( $this, 'add_inline_css_wp_head' ), 999 );
+			add_action( $loading_action, [ $this, 'add_inline_css_wp_head' ], $priority );
 		}
 	}
 
@@ -55,7 +57,17 @@ class Fusion_Dynamic_CSS_Inline {
 	 * @return void
 	 */
 	public function add_inline_css() {
-		wp_add_inline_style( 'avada-stylesheet', wp_strip_all_tags( apply_filters( 'fusion_library_inline_dynamic_css', $this->dynamic_css->make_css() ) ) );
+
+		if ( fusion_should_defer_styles_loading() && doing_action( 'wp_enqueue_scripts' ) ) {
+			add_action( 'wp_body_open', [ $this, 'add_inline_css' ] );
+			return;
+		}
+
+		if ( wp_style_is( 'fusion-builder-shortcodes' ) ) {
+			wp_add_inline_style( 'fusion-builder-shortcodes', wp_strip_all_tags( apply_filters( 'fusion_library_inline_dynamic_css', $this->dynamic_css->make_css() ) ) );
+		} else {
+			wp_add_inline_style( 'avada-stylesheet', wp_strip_all_tags( apply_filters( 'fusion_library_inline_dynamic_css', $this->dynamic_css->make_css() ) ) );
+		}
 	}
 
 	/**
@@ -71,7 +83,11 @@ class Fusion_Dynamic_CSS_Inline {
 		$custom_css = apply_filters( 'fusion_library_inline_custom_css', '' );
 		if ( $custom_css ) {
 			echo '<style id="fusion-stylesheet-custom-css" type="text/css">';
-			echo $custom_css; // WPCS: XSS ok.
+			/**
+			 * Security: The use of wp_strip_all_tags() here prevents malicious attempts
+			 * to close the <style> tag and open a <script> tag.
+			 */
+			echo wp_strip_all_tags( $custom_css ); // phpcs:ignore WordPress.Security.EscapeOutput
 			echo '</style>';
 		}
 	}
@@ -86,7 +102,11 @@ class Fusion_Dynamic_CSS_Inline {
 	 */
 	public function add_inline_css_wp_head() {
 		echo '<style id="fusion-stylesheet-inline-css" type="text/css">';
-		echo wp_strip_all_tags( apply_filters( 'fusion_library_inline_dynamic_css', $this->dynamic_css->make_css() ) ); // WPCS: XSS ok.
+		/**
+		 * Security: The use of wp_strip_all_tags() here prevents malicious attempts
+		 * to close the <style> tag and open a <script> tag.
+		 */
+		echo wp_strip_all_tags( apply_filters( 'fusion_library_inline_dynamic_css', $this->dynamic_css->make_css() ) ); // phpcs:ignore WordPress.Security.EscapeOutput
 		echo '</style>';
 	}
 }

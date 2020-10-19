@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.1.0
@@ -45,5 +45,3 @@ foreach ( $separator_styles_array as $separator_style ) {
 		<div class="fusion-content-sep<?php echo esc_attr( $separator_styles ); ?>"></div>
 		<div class="product-buttons-container clearfix">
 <?php endif; ?>
-<?php
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */

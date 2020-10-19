@@ -438,24 +438,24 @@ the specific language governing permissions and limitations under the Apache Lic
                 $.extend(params, {
                     url: url,
                     dataType: options.dataType,
-                    data: data,
-                    success: function (data) {
-                        // TODO - replace query.page with query so users have access to term, page, etc.
-                        // added query as third paramter to keep backwards compatibility
-                        var results = options.results(data, query.page, query);
-                        query.callback(results);
-                    },
-                    error: function(jqXHR, textStatus, errorThrown){
-                        var results = {
-                            hasError: true,
-                            jqXHR: jqXHR,
-                            textStatus: textStatus,
-                            errorThrown: errorThrown
-                        };
+                    data: data
+                } )
+                .done( function (data) {
+                    // TODO - replace query.page with query so users have access to term, page, etc.
+                    // added query as third paramter to keep backwards compatibility
+                    var results = options.results(data, query.page, query);
+                    query.callback(results);
+                } )
+                .fail( function(jqXHR, textStatus, errorThrown){
+                    var results = {
+                        hasError: true,
+                        jqXHR: jqXHR,
+                        textStatus: textStatus,
+                        errorThrown: errorThrown
+                    };
 
-                        query.callback(results);
-                    }
-                });
+                    query.callback(results);
+                } );
                 handler = transport.call(self, params);
             }, quietMillis);
         };

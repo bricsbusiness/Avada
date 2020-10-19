@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -37,7 +37,7 @@ class Avada_Upgrade_516 extends Avada_Upgrade_Abstract {
 	 * @since 5.1.6
 	 */
 	protected function migration_process() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		// Update portfolio archive layout, when set to grid.
 		$portfolio_archive_layout = Avada()->settings->get( 'portfolio_archive_layout' );

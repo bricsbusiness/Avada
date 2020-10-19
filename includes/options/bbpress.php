@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      4.0.0
@@ -31,6 +31,7 @@ function avada_options_section_bbpress( $sections ) {
 		'id'       => 'bpress_section',
 		'priority' => 3,
 		'icon'     => 'el-icon-person',
+		'alt_icon' => 'fusiona-user',
 		'fields'   => array(
 			'bbp_forum_base_font_size' => array(
 				'label'       => esc_html__( 'bbPress Forum Base Font Size', 'Avada' ),
@@ -38,6 +39,11 @@ function avada_options_section_bbpress( $sections ) {
 				'id'          => 'bbp_forum_base_font_size',
 				'default'     => '12px',
 				'type'        => 'dimension',
+				'css_vars'    => array(
+					array(
+						'name' => '--bbp_forum_base_font_size',
+					),
+				),
 			),
 			'bbp_forum_header_bg' => array(
 				'label'       => esc_html__( 'bbPress Forum Header Background Color', 'Avada' ),
@@ -45,6 +51,12 @@ function avada_options_section_bbpress( $sections ) {
 				'id'          => 'bbp_forum_header_bg',
 				'default'     => '#ebeaea',
 				'type'        => 'color-alpha',
+				'css_vars'    => array(
+					array(
+						'name' => '--bbp_forum_header_bg',
+						'callback' => [ 'sanitize_color' ],
+					),
+				),
 			),
 			'bbp_forum_header_font_color' => array(
 				'label'       => esc_html__( 'bbPress Forum Header Font Color', 'Avada' ),
@@ -52,6 +64,12 @@ function avada_options_section_bbpress( $sections ) {
 				'id'          => 'bbp_forum_header_font_color',
 				'default'     => '#747474',
 				'type'        => 'color-alpha',
+				'css_vars'    => array(
+					array(
+						'name' => '--bbp_forum_header_font_color',
+						'callback' => [ 'sanitize_color' ],
+					),
+				),
 			),
 			'bbp_forum_border_color' => array(
 				'label'       => esc_html__( 'bbPress Forum Border Color', 'Avada' ),
@@ -59,6 +77,12 @@ function avada_options_section_bbpress( $sections ) {
 				'id'          => 'bbp_forum_border_color',
 				'default'     => '#ebeaea',
 				'type'        => 'color-alpha',
+				'css_vars'    => array(
+					array(
+						'name' => '--bbp_forum_border_color',
+						'callback' => [ 'sanitize_color' ],
+					),
+				),
 			),
 		),
 	);

@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -48,29 +48,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<select id="fusion-saved-page-options-select" data-post_id="<?php echo esc_attr( get_the_ID() ); ?>" style="width:100%;">
 			<option value=""><?php esc_html_e( 'Select A Page Option Set', 'Avada' ); ?></option>
 			<?php
-			global $post;
-			$saved_post = $post;
-
-			$args = array(
-				'post_type'      => 'avada_page_options',
-				'posts_per_page' => -1,
-			);
-
-			$query = new WP_Query( $args );
+			$saved_po_datasets = get_option( 'avada_page_options', [] );
 			?>
-			<?php if ( $query->have_posts() ) : ?>
-				<?php while ( $query->have_posts() ) : ?>
-					<?php $query->the_post(); ?>
-					<option value="<?php the_ID(); ?>">
-						<?php the_title(); ?>
-					</option>
-				<?php endwhile; ?>
-
-			<?php endif; ?>
-
-			<?php $post = $saved_post ? $saved_post : $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride ?>
-			<?php wp_reset_postdata(); ?>
-			?>
+			<?php foreach ( $saved_po_datasets as $po_dataset ) : ?>
+				<option value="<?php echo esc_attr( $po_dataset['id'] ); ?>">
+					<?php echo esc_html( $po_dataset['title'] ); ?>
+				</option>
+			<?php endforeach; ?>
 		</select>
 
 		<p id="fusion-page-options-buttons-wrap">
@@ -87,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 	<div class="pyre_field">
 		<div>&nbsp;</div>
-		<a href="<?php echo esc_url_raw( wp_nonce_url( admin_url( 'admin-ajax.php?action=download-avada-po&post_id=' . $post->ID . '' ) ) ); ?>" id="fusion-page-options-export" class="button button-primary" data-post_id="<?php the_ID(); ?>">
+		<a href="<?php echo esc_url_raw( wp_nonce_url( admin_url( 'admin-ajax.php?action=download-avada-po&post_id=' . get_the_ID() . '' ) ) ); ?>" id="fusion-page-options-export" class="button button-primary" data-post_id="<?php the_ID(); ?>">
 			<?php esc_html_e( 'Export Page Options', 'Avada' ); ?>
 		</a>
 	</div>
@@ -111,9 +95,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 
-<div id="fusion-page-options-loader" style="display: none;">
-	<img src="<?php echo esc_url( admin_url( 'images/spinner.gif' ) ); ?>" />
-</div>
+<div id="fusion-page-options-loader" class="avada-db-loader" style="display: none;"></div>
 
 <input type="hidden" id="fusion-page-options-nonce" value="<?php echo esc_attr( wp_create_nonce( 'fusion-page-options-nonce' ) ); ?>" />
 

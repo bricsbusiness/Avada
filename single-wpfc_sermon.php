@@ -16,8 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php get_header(); ?>
 <?php $full_image = wp_get_attachment_image_src( get_post_thumbnail_id(), 'full' ); ?>
 <section id="content" <?php Avada()->layout->add_class( 'content_class' ); ?> <?php Avada()->layout->add_style( 'content_style' ); ?>>
-	<?php $post_pagination = get_post_meta( $post->ID, 'pyre_post_pagination', true ); ?>
-	<?php if ( ( Avada()->settings->get( 'blog_pn_nav' ) && 'no' !== $post_pagination ) || ( ! Avada()->settings->get( 'blog_pn_nav' ) && 'yes' === $post_pagination ) ) : ?>
+	<?php if ( fusion_get_option( 'blog_pn_nav' ) ) : ?>
 		<div class="single-navigation clearfix">
 			<?php previous_post_link( '%link', esc_html__( 'Previous', 'Avada' ) ); ?>
 			<?php next_post_link( '%link', esc_html__( 'Next', 'Avada' ) ); ?>
@@ -33,98 +32,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="fusion-post-title-meta-wrap">
 				<?php endif; ?>
 				<?php $title_size = ( false === avada_is_page_title_bar_enabled( $post->ID ) ? '1' : '2' ); ?>
-				<?php echo avada_render_post_title( $post->ID, false, '', $title_size ); // WPCS: XSS ok. ?>
+				<?php echo avada_render_post_title( $post->ID, false, '', $title_size ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				<?php if ( 'below_title' === Avada()->settings->get( 'blog_post_meta_position' ) ) : ?>
-					<?php echo avada_render_post_metadata( 'single' ); // WPCS: XSS ok. ?>
+					<?php echo avada_render_post_metadata( 'single' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					</div>
 				<?php endif; ?>
 			<?php elseif ( 'disabled' === Avada()->settings->get( 'blog_post_title' ) && Avada()->settings->get( 'disable_date_rich_snippet_pages' ) && Avada()->settings->get( 'disable_rich_snippet_title' ) ) : ?>
 				<span class="entry-title" style="display: none;"><?php the_title(); ?></span>
 			<?php endif; ?>
 
-			<?php if ( ! post_password_required( $post->ID ) ) : ?>
-				<?php if ( Avada()->settings->get( 'featured_images_single' ) ) : ?>
-					<?php $video = apply_filters( 'privacy_iframe_embed', get_post_meta( $post->ID, 'pyre_video', true ) ); ?>
-					<?php if ( 0 < avada_number_of_featured_images() || $video ) : ?>
-						<div class="fusion-flexslider flexslider fusion-flexslider-loading fusion-post-slideshow post-slideshow">
-							<ul class="slides">
-								<?php if ( $video ) : ?>
-									<li>
-										<div class="full-video">
-											<?php echo $video; // WPCS: XSS ok. ?>
-										</div>
-									</li>
-								<?php endif; ?>
-								<?php if ( has_post_thumbnail() && 'yes' != get_post_meta( $post->ID, 'pyre_show_first_featured_image', true ) ) : ?>
-									<?php $attachment_data = Avada()->images->get_attachment_data( get_post_thumbnail_id() ); ?>
-									<?php if ( is_array( $attachment_data ) ) : ?>
-										<li>
-											<?php if ( Avada()->settings->get( 'status_lightbox' ) && Avada()->settings->get( 'status_lightbox_single' ) ) : ?>
-												<a href="<?php echo esc_url_raw( $attachment_data['url'] ); ?>" rel="prettyPhoto[gallery<?php the_ID(); ?>]" title="<?php echo esc_attr( $attachment_data['caption_attribute'] ); ?>" data-title="<?php echo esc_attr( $attachment_data['title_attribute'] ); ?>" data-caption="<?php echo esc_attr( $attachment_data['caption_attribute'] ); ?>">
-													<?php /* translators: The link. */ ?>
-													<span class="screen-reader-text"><?php printf( esc_attr__( 'Go to "%s"', 'Avada' ), get_the_title( $post ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-													<img src="<?php echo esc_url_raw( $attachment_data['url'] ); ?>" alt="<?php echo esc_attr( $attachment_data['alt'] ); ?>" role="presentation" />
-												</a>
-											<?php else : ?>
-												<img src="<?php echo esc_url_raw( $attachment_data['url'] ); ?>" alt="<?php echo esc_attr( $attachment_data['alt'] ); ?>" role="presentation" />
-											<?php endif; ?>
-										</li>
-									<?php endif; ?>
-								<?php endif; ?>
-								<?php $i = 2; ?>
-								<?php while ( $i <= Avada()->settings->get( 'posts_slideshow_number' ) ) : ?>
-									<?php $attachment_new_id = fusion_get_featured_image_id( 'featured-image-' . $i, 'post' ); ?>
-									<?php if ( $attachment_new_id ) : ?>
-										<?php $attachment_data = Avada()->images->get_attachment_data( $attachment_new_id ); ?>
-										<?php if ( is_array( $attachment_data ) ) : ?>
-											<li>
-												<?php if ( Avada()->settings->get( 'status_lightbox' ) && Avada()->settings->get( 'status_lightbox_single' ) ) : ?>
-													<a href="<?php echo esc_url_raw( $attachment_data['url'] ); ?>" rel="prettyPhoto[gallery<?php the_ID(); ?>]" title="<?php echo esc_attr( $attachment_data['caption_attribute'] ); ?>" data-title="<?php echo esc_attr( $attachment_data['title_attribute'] ); ?>" data-caption="<?php echo esc_attr( $attachment_data['caption_attribute'] ); ?>">
-														<?php // Translators: The link. ?>
-														<span class="screen-reader-text"><?php printf( esc_attr__( 'Go to "%s"', 'Avada' ), get_the_title( $post ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-														<img src="<?php echo esc_url_raw( $attachment_data['url'] ); ?>" alt="<?php echo esc_attr( $attachment_data['alt'] ); ?>" role="presentation" />
-													</a>
-												<?php else : ?>
-													<img src="<?php echo esc_url_raw( $attachment_data['url'] ); ?>" alt="<?php echo esc_attr( $attachment_data['alt'] ); ?>" role="presentation" />
-												<?php endif; ?>
-											</li>
-										<?php endif; ?>
-									<?php endif; ?>
-									<?php $i++; ?>
-								<?php endwhile; ?>
-							</ul>
-						</div>
-					<?php endif; ?>
-				<?php endif; ?>
-			<?php endif; ?>
+			<?php avada_singular_featured_image(); ?>
+
 			<?php if ( 'below' === Avada()->settings->get( 'blog_post_title' ) ) : ?>
 				<?php if ( 'below_title' === Avada()->settings->get( 'blog_post_meta_position' ) ) : ?>
 					<div class="fusion-post-title-meta-wrap">
 				<?php endif; ?>
 				<?php $title_size = ( false === avada_is_page_title_bar_enabled( $post->ID ) ? '1' : '2' ); ?>
-				<?php echo avada_render_post_title( $post->ID, false, '', $title_size ); // WPCS: XSS ok. ?>
+				<?php echo avada_render_post_title( $post->ID, false, '', $title_size ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				<?php if ( 'below_title' === Avada()->settings->get( 'blog_post_meta_position' ) ) : ?>
-					<?php echo avada_render_post_metadata( 'single' ); // WPCS: XSS ok. ?>
+					<?php echo avada_render_post_metadata( 'single' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					</div>
 				<?php endif; ?>
 			<?php endif; ?>
 			<div class="post-content">
-				<?php echo Avada()->sermon_manager->get_sermon_content(); // WPCS: XSS ok. ?>
+				<?php echo Avada()->sermon_manager->get_sermon_content(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				<?php fusion_link_pages(); ?>
 			</div>
 			<?php if ( ! post_password_required( $post->ID ) ) : ?>
 				<?php if ( '' === Avada()->settings->get( 'blog_post_meta_position' ) || 'below_article' === Avada()->settings->get( 'blog_post_meta_position' ) || 'disabled' === Avada()->settings->get( 'blog_post_title' ) ) : ?>
-					<?php echo avada_render_post_metadata( 'single' ); // WPCS: XSS ok. ?>
+					<?php echo avada_render_post_metadata( 'single' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				<?php endif; ?>
 				<?php do_action( 'avada_before_additional_post_content' ); ?>
 				<?php avada_render_social_sharing(); ?>
-				<?php $author_info = get_post_meta( $post->ID, 'pyre_author_info', true ); ?>
+				<?php $author_info = fusion_get_page_option( 'author_info', $post->ID ); ?>
 				<?php if ( ( Avada()->settings->get( 'author_info' ) && 'no' !== $author_info ) || ( ! Avada()->settings->get( 'author_info' ) && 'yes' === $author_info ) ) : ?>
 					<div class="about-author">
 						<?php ob_start(); ?>
 						<?php the_author_posts_link(); ?>
 						<?php /* translators: The link. */ ?>
-						<?php $title = sprintf( __( 'About the Author: %s', 'Avada' ), ob_get_clean() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited ?>
+						<?php $title = sprintf( __( 'About the Author: %s', 'Avada' ), ob_get_clean() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride ?>
 						<?php $title_size = ( false === avada_is_page_title_bar_enabled( get_the_ID() ) ? '2' : '3' ); ?>
 						<?php Avada()->template->title_template( $title, $title_size ); ?>
 						<div class="about-author-container">
@@ -141,7 +87,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php avada_render_related_posts(); // Render Related Posts. ?>
 
 				<?php if ( Avada()->settings->get( 'blog_comments' ) ) : ?>
-					<?php wp_reset_postdata(); ?>
 					<?php comments_template(); ?>
 				<?php endif; ?>
 			<?php endif; ?>
@@ -149,7 +94,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php endif; ?>
 </section>
 <?php do_action( 'avada_after_content' ); ?>
-<?php
-get_footer();
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */
+<?php get_footer(); ?>

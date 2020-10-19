@@ -37,6 +37,10 @@
 		_create: function() {
 			this._super();
 
+			if ( ! jQuery( this.element[0] ).hasClass( 'fusion-builder-color-picker-hex' ) && ! jQuery( this.element[0] ).hasClass( 'fusion_options' ) ) {
+				return;
+			}
+
 			// Global option for check is mode rbga is enabled
 			this.options.alpha = this.element.data( 'alpha' ) || false;
 
@@ -204,16 +208,23 @@
 		},
 
 		_addPalettes: function() {
-			var container = jQuery( '<div class="iris-palette-container" />' ),
-			    palette   = jQuery( '<a class="iris-palette" tabindex="0" />' ),
-			    colors    = ['#000000', '#ffffff', '#f44336', '#E91E63', '#03A9F4', '#00BCD4', '#8BC34A', '#FFEB3B', '#FFC107', '#FF9800', '#607D8B'];
+			var container          = jQuery( '<div class="iris-palette-container" />' ),
+				palette            = jQuery( '<a class="iris-palette" tabindex="0" />' ),
+				colorPickerPalette = ['#000000', '#ffffff', '#f44336', '#E91E63', '#03A9F4', '#00BCD4', '#8BC34A', '#FFEB3B', '#FFC107', '#FF9800', '#607D8B'];
+
+			if ( 'undefined' !== typeof fusionColorPalette && 'undefined' !== typeof fusionColorPalette.color_palette ) {
+				colorPickerPalette = fusionColorPalette.color_palette.split( '|' );
+
+				// Add two default colors.
+				colorPickerPalette.unshift( '#000000', '#ffffff' );
+			}
 
 			// Do we have an existing container? Empty and reuse it.
 			if ( this.picker.find( '.iris-palette-container' ).length ) {
 				container = this.picker.find( '.iris-palette-container' ).detach().html( '' );
 			}
 
-			jQuery.each( colors, function( index, val ) {
+			jQuery.each( colorPickerPalette, function( index, val ) {
 				palette.clone().data( 'color', val )
 					.css( 'backgroundColor', val ).appendTo( container )
 					.height( 10 ).width( 10 );

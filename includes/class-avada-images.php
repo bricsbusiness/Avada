@@ -5,7 +5,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      3.8
@@ -59,34 +59,48 @@ class Avada_Images extends Fusion_Images {
 		// The parent-class constructor.
 		parent::__construct();
 
-		self::$grid_image_meta        = array();
-		self::$grid_accepted_widths   = array( '200', '400', '600', '800', '1200' );
-		self::$supported_grid_layouts = array( 'masonry', 'grid', 'timeline', 'large', 'portfolio_full', 'related-posts' );
+		self::$grid_image_meta        = [];
+		self::$grid_accepted_widths   = [ '200', '400', '600', '800', '1200' ];
+		self::$supported_grid_layouts = [ 'masonry', 'grid', 'timeline', 'large', 'portfolio_full', 'related-posts' ];
 
 		$options = get_option( Avada::get_option_name() );
 		if ( isset( $options['status_lightbox'] ) && $options['status_lightbox'] ) {
-			add_filter( 'wp_get_attachment_link', array( $this, 'prepare_lightbox_links' ), 10, 3 );
+			add_filter( 'wp_get_attachment_link', [ $this, 'prepare_lightbox_links' ], 10, 3 );
 		}
 
-		add_filter( 'jpeg_quality', array( $this, 'set_jpeg_quality' ) );
-		add_filter( 'wp_editor_set_quality', array( $this, 'set_jpeg_quality' ) );
+		add_filter( 'jpeg_quality', [ $this, 'set_jpeg_quality' ] );
+		add_filter( 'wp_editor_set_quality', [ $this, 'set_jpeg_quality' ] );
+		add_filter( 'big_image_size_threshold', [ $this, 'set_big_image_size_threshold' ] );
 
-		add_filter( 'fusion_library_content_break_point', array( $this, 'content_break_point' ) );
-		add_filter( 'fusion_library_content_width', array( $this, 'content_width' ) );
-		add_filter( 'fusion_library_main_image_breakpoint', array( $this, 'main_image_breakpoint' ) );
-		add_filter( 'fusion_library_image_base_size_width', array( $this, 'base_size_width' ), 10, 4 );
-		add_filter( 'fusion_library_grid_main_break_point', array( $this, 'grid_main_break_point' ) );
-		add_filter( 'fusion_library_image_grid_initial_sizes', array( $this, 'image_grid_initial_sizes' ), 10, 3 );
+		add_filter( 'fusion_library_content_break_point', [ $this, 'content_break_point' ] );
+		add_filter( 'fusion_library_content_width', [ $this, 'content_width' ] );
+		add_filter( 'fusion_library_main_image_breakpoint', [ $this, 'main_image_breakpoint' ] );
+		add_filter( 'fusion_library_image_base_size_width', [ $this, 'base_size_width' ], 10, 4 );
+		add_filter( 'fusion_library_grid_main_break_point', [ $this, 'grid_main_break_point' ] );
+		add_filter( 'fusion_library_image_grid_initial_sizes', [ $this, 'image_grid_initial_sizes' ], 10, 3 );
 	}
 
 	/**
-	 * Modify the image quality and set it to chosen Theme Options value.
+	 * Modify the image quality and set it to chosen Global Options value.
 	 *
 	 * @since 3.9
 	 * @return string The new image quality.
 	 */
 	public function set_jpeg_quality() {
 		return Avada()->settings->get( 'pw_jpeg_quality' );
+	}
+
+	/**
+	 * Modify WP's big image size threshold.
+	 *
+	 * @since 6.2.1
+	 * @return string The new threshold.
+	 */
+	public function set_big_image_size_threshold() {
+		$threshold = Avada()->settings->get( 'wp_big_image_size_threshold' );
+		$threshold = '0' === $threshold ? false : $threshold;
+
+		return $threshold;
 	}
 
 	/**
@@ -97,7 +111,7 @@ class Avada_Images extends Fusion_Images {
 	 * @return int
 	 */
 	public function content_break_point() {
-		$side_header_width = ( 'Top' === Avada()->settings->get( 'header_position' ) ) ? 0 : intval( Avada()->settings->get( 'side_header_width' ) );
+		$side_header_width = ( 'top' === fusion_get_option( 'header_position' ) ) ? 0 : intval( Avada()->settings->get( 'side_header_width' ) );
 		return $side_header_width + intval( Avada()->settings->get( 'content_break_point' ) );
 	}
 
@@ -121,7 +135,7 @@ class Avada_Images extends Fusion_Images {
 	 */
 	public function main_image_breakpoint() {
 		$main_break_point  = (int) Avada()->settings->get( 'grid_main_break_point' );
-		$side_header_width = ( 'Top' === Avada()->settings->get( 'header_position' ) ) ? 0 : intval( Avada()->settings->get( 'side_header_width' ) );
+		$side_header_width = ( 'top' === fusion_get_option( 'header_position' ) ) ? 0 : intval( Avada()->settings->get( 'side_header_width' ) );
 		return $main_break_point + $side_header_width;
 	}
 
@@ -190,11 +204,11 @@ class Avada_Images extends Fusion_Images {
 	 */
 	public function get_logo_data( $logo_option_name ) {
 
-		$logo_data = array(
+		$logo_data = [
 			'url'    => '',
 			'width'  => '',
 			'height' => '',
-		);
+		];
 
 		$logo_url = set_url_scheme( Avada()->settings->get( $logo_option_name, 'url' ) );
 		$logo_id  = Avada()->settings->get( $logo_option_name, 'id' );
@@ -239,22 +253,22 @@ class Avada_Images extends Fusion_Images {
 	 * Get normal and retina logo images in srcset.
 	 *
 	 * @since 5.3
-	 * @param string $normla_logo The name of the normal logo option.
+	 * @param string $normal_logo The name of the normal logo option.
 	 * @param string $retina_logo The name of the retina logo option.
 	 * @return array The logo data.
 	 */
-	public function get_logo_image_srcset( $normla_logo, $retina_logo ) {
+	public function get_logo_image_srcset( $normal_logo, $retina_logo ) {
 
-		$logo_srcset_data = array(
+		$logo_srcset_data = [
 			'url'       => '',
 			'srcset'    => '',
 			'style'     => '',
 			'is_retina' => false,
 			'width'     => '',
 			'height'    => '',
-		);
+		];
 
-		$logo_url                   = set_url_scheme( Avada()->settings->get( $normla_logo, 'url' ) );
+		$logo_url                   = set_url_scheme( Avada()->settings->get( $normal_logo, 'url' ) );
 		$logo_srcset_data['srcset'] = $logo_url . ' 1x';
 
 		// Get retina logo, if default one is not set.
@@ -269,7 +283,8 @@ class Avada_Images extends Fusion_Images {
 				$logo_srcset_data['style'] = ' style="max-height:' . $logo_data['height'] . 'px;height:auto;"';
 			}
 		} else {
-			$logo_data                     = $this->get_logo_data( $normla_logo );
+			$logo_data = $this->get_logo_data( $normal_logo );
+
 			$logo_srcset_data['style']     = '';
 			$logo_srcset_data['url']       = $logo_url;
 			$logo_srcset_data['is_retina'] = false;
@@ -300,12 +315,12 @@ class Avada_Images extends Fusion_Images {
 	public function render_placeholder_image( $featured_image_size = 'full' ) {
 		global $_wp_additional_image_sizes;
 
-		if ( in_array( $featured_image_size, array( 'full', 'fixed' ) ) ) {
+		if ( in_array( $featured_image_size, [ 'full', 'fixed' ], true ) ) {
 			$height = apply_filters( 'avada_set_placeholder_image_height', '150' );
 			$width  = '1500px';
 		} else {
-			@$height = $_wp_additional_image_sizes[ $featured_image_size ]['height'];
-			@$width  = $_wp_additional_image_sizes[ $featured_image_size ]['width'] . 'px';
+			$height = $_wp_additional_image_sizes[ $featured_image_size ]['height'];
+			$width  = $_wp_additional_image_sizes[ $featured_image_size ]['width'] . 'px';
 		}
 		?>
 		<div class="fusion-placeholder-image" data-origheight="<?php echo esc_attr( $height ); ?>" data-origwidth="<?php echo esc_attr( $width ); ?>" style="height:<?php echo esc_attr( $height ); ?>px;width:<?php echo esc_attr( $width ); ?>;"></div>

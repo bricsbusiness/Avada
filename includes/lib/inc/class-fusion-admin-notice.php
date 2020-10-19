@@ -6,11 +6,6 @@
  * @since 1.5
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Handle admin notices.
  *
@@ -27,7 +22,7 @@ class Fusion_Admin_Notice {
 	 * @since 1.5
 	 * @var array
 	 */
-	private static $already_added_ids = array();
+	private static $already_added_ids = [];
 
 	/**
 	 * The ID.
@@ -43,7 +38,7 @@ class Fusion_Admin_Notice {
 	 *
 	 * @access private
 	 * @since 1.5
-	 * @var string
+	 * @var array
 	 */
 	private $screen;
 
@@ -115,9 +110,10 @@ class Fusion_Admin_Notice {
 	 * @param string $dismiss_option The option to save in $dismiss_type (if using user-meta, then the meta-name).
 	 * @param array  $screen         An array of screen-IDs (the ID returned from the get_current_screen() function ).
 	 */
-	public function __construct( $id = '', $content = '', $show = true, $type = 'warning', $dismissible = true, $dismiss_type = 'user_meta', $dismiss_option = '', $screen = array() ) {
+	public function __construct( $id = '', $content = '', $show = true, $type = 'warning', $dismissible = true, $dismiss_type = 'user_meta', $dismiss_option = '', $screen = [] ) {
+
 		// Early exit if already added.
-		if ( in_array( $id, self::$already_added_ids ) ) {
+		if ( in_array( $id, self::$already_added_ids ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 			return;
 		}
 
@@ -143,10 +139,10 @@ class Fusion_Admin_Notice {
 		}
 
 		// Add the notice.
-		add_action( 'admin_notices', array( $this, 'the_notice' ) );
+		add_action( 'admin_notices', [ $this, 'the_notice' ] );
 
 		// Enqueue the script.
-		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ] );
 
 		// Mark as added.
 		self::$already_added_ids[] = $id;
@@ -170,8 +166,9 @@ class Fusion_Admin_Notice {
 		}
 		$this->show     = false;
 		$current_screen = get_current_screen();
+
 		foreach ( $this->screen as $screen ) {
-			if ( $current_screen['id'] === $screen ) {
+			if ( $current_screen->id === $screen ) {
 				$this->show = true;
 			}
 		}
@@ -209,9 +206,9 @@ class Fusion_Admin_Notice {
 	 * @return void Directly echoes the content.
 	 */
 	public function the_notice() {
-		$attrs = array(
-			'class' => 'notice fusion-notice notice-' . $this->type,
-		);
+		$attrs = [
+			'class' => 'avada-db-card avada-db-notice avada-db-notice-' . $this->type . ' notice fusion-notice notice-' . $this->type,
+		];
 		if ( $this->id ) {
 			$attrs['id'] = $this->id;
 		}
@@ -227,7 +224,7 @@ class Fusion_Admin_Notice {
 			$attrs_html .= ' ' . $key . '="' . esc_attr( $val ) . '"';
 		}
 
-		echo '<div' . $attrs_html . '>' . $this->content . '</div>'; // WPCS: XSS ok.
+		echo '<div' . $attrs_html . '>' . $this->content . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
 	/**
@@ -241,7 +238,7 @@ class Fusion_Admin_Notice {
 		wp_enqueue_script(
 			'fusion-admin-notices',
 			trailingslashit( Fusion_Scripts::$js_folder_url ) . 'general/fusion-admin-notice.js',
-			array( 'jquery', 'common' ),
+			[ 'jquery', 'common' ],
 			time(),
 			true
 		);

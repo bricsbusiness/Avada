@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      4.0.0
@@ -19,14 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Maintenance page.
  */
 class Avada_Maintenance {
-
-	/**
-	 * Determines if we should activate the maintenance mode or not.
-	 *
-	 * @access private
-	 * @var bool
-	 */
-	private $maintenance = false;
 
 	/**
 	 * The message that will be displayed to all non-admins.
@@ -65,11 +57,10 @@ class Avada_Maintenance {
 			return;
 		}
 
-		$this->maintenance   = $maintenance;
 		$this->users_warning = $users_warning;
 		$this->admin_warning = $admin_warning;
 
-		if ( is_admin() || ( in_array( $GLOBALS['pagenow'], array( 'wp-login.php', 'wp-register.php' ) ) ) ) {
+		if ( is_admin() || ( in_array( $GLOBALS['pagenow'], [ 'wp-login.php', 'wp-register.php' ], true ) ) ) {
 			return;
 		}
 
@@ -87,9 +78,9 @@ class Avada_Maintenance {
 		<div class="wrapper" style="width:800px;max-width:95%;background:#f7f7f7;border:1px solid #f2f2f2;border-radius:3px;margin:auto;margin-top:200px;">
 			<div class="inner" style="padding:2rem;font-size:1.2rem;color:#333;">
 				<?php if ( current_user_can( 'install_plugins' ) ) : // Current user is an admin. ?>
-					<p><?php echo $this->admin_warning; // WPCS: XSS ok. ?></p>
+					<p><?php echo $this->admin_warning; // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
 				<?php else : ?>
-					<p><?php echo $this->users_warning; // WPCS: XSS ok. ?></p>
+					<p><?php echo $this->users_warning; // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
 				<?php endif; ?>
 			</div>
 		</div>

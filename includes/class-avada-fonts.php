@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      3.8
@@ -26,7 +26,7 @@ class Avada_Fonts {
 	 * @access  public
 	 */
 	public function __construct() {
-		add_filter( 'upload_mimes', array( $this, 'mime_types' ) );
+		add_filter( 'upload_mimes', [ $this, 'mime_types' ] );
 	}
 
 	/**
@@ -37,11 +37,11 @@ class Avada_Fonts {
 	 */
 	public function mime_types( $mimes ) {
 
-		$mimes['ttf']   = $this->get_mime( 'ttf' );
-		$mimes['woff']  = $this->get_mime( 'woff' );
-		$mimes['svg']   = $this->get_mime( 'svg' );
-		$mimes['eot']   = $this->get_mime( 'eot' );
 		$mimes['woff2'] = 'font/woff2';
+		$mimes['woff']  = $this->get_mime( 'woff' );        
+		$mimes['ttf']   = $this->get_mime( 'ttf' );
+		$mimes['eot']   = $this->get_mime( 'eot' );     
+		$mimes['svg']   = $this->get_mime( 'svg' );
 
 		return $mimes;
 

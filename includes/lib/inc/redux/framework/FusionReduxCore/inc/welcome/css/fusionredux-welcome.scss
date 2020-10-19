@@ -198,7 +198,7 @@ $blue: #2ea2cc;
             display: inline-block;
             position: relative;
             text-align: center;
-            speak: none;
+            speak: never;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -520,7 +520,7 @@ p.fusionredux-actions {
             margin-bottom: 10px;
             width: 100%;
             box-sizing: border-box;
-            font-family: montserrat;
+            // font-family: montserrat;
             color: #2C3E50;
             font-size: 13px;
         }

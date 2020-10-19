@@ -23,13 +23,10 @@ if ( is_archive() ) {
 	$layout = Avada()->settings->get( 'search_layout' );
 }
 
-$featured_image_width  = get_post_meta( $post->ID, 'pyre_fimg_width', true );
-$featured_image_height = get_post_meta( $post->ID, 'pyre_fimg_height', true );
+$featured_image_width  = fusion_data()->post_meta( $post->ID )->get( 'fimg[width]', true );
+$featured_image_height = fusion_data()->post_meta( $post->ID )->get( 'fimg[height]', true );
 
-?>
-
-<?php
-if ( 'Grid' !== $layout && 'masonry' !== $layout && 'Timeline' !== $layout ) {
+if ( 'grid' !== $layout && 'masonry' !== $layout && 'timeline' !== $layout ) {
 	$styles = '';
 
 	if ( $featured_image_width && 'auto' !== $featured_image_width ) {
@@ -53,7 +50,7 @@ if ( 'Grid' !== $layout && 'masonry' !== $layout && 'Timeline' !== $layout ) {
 	}
 
 	if ( $styles ) {
-		echo '<style type="text/css">' . $styles . '</style>'; // WPCS: XSS ok.
+		echo '<style type="text/css">' . $styles . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 }
 
@@ -64,12 +61,12 @@ if ( is_archive() ) {
 } else {
 	$size = ( ! Avada()->template->has_sidebar() ) ? 'full' : 'blog-large';
 }
-$size = ( 'Medium' === $layout || 'Medium Alternate' === $layout ) ? 'blog-medium' : $size;
+$size = ( 'medium' === $layout || 'medium alternate' === $layout ) ? 'blog-medium' : $size;
 $size = ( $featured_image_height && $featured_image_width && 'auto' !== $featured_image_height && 'auto' !== $featured_image_width ) ? 'full' : $size;
 $size = ( 'auto' === $featured_image_height || 'auto' === $featured_image_width ) ? 'full' : $size;
-$size = ( 'Grid' === $layout || 'masonry' === $layout || 'Timeline' === $layout ) ? 'full' : $size;
+$size = ( 'grid' === $layout || 'masonry' === $layout || 'timeline' === $layout ) ? 'full' : $size;
 
-$video = apply_filters( 'privacy_iframe_embed', get_post_meta( get_the_ID(), 'pyre_video', true ) );
+$video = apply_filters( 'privacy_iframe_embed', fusion_get_page_option( 'video', get_the_ID() ) );
 ?>
 
 <?php if ( ( has_post_thumbnail() || $video ) && ! post_password_required( get_the_ID() ) ) : ?>
@@ -79,12 +76,12 @@ $video = apply_filters( 'privacy_iframe_embed', get_post_meta( get_the_ID(), 'py
 			<?php if ( $video ) : ?>
 				<li>
 					<div class="full-video">
-						<?php echo $video; // WPCS: XSS ok. ?>
+						<?php echo $video; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					</div>
 				</li>
 			<?php endif; ?>
 			<?php
-			if ( 'Grid' === $layout || 'masonry' === $layout ) {
+			if ( 'grid' === $layout || 'masonry' === $layout ) {
 
 				// Masonry layout, get the element orientation class.
 				$element_orientation_class = '';
@@ -99,33 +96,33 @@ $video = apply_filters( 'privacy_iframe_embed', get_post_meta( get_the_ID(), 'py
 				}
 
 				Avada()->images->set_grid_image_meta(
-					array(
-						'layout'       => strtolower( $layout ),
+					[
+						'layout'       => $layout,
 						'columns'      => $responsive_images_columns,
 						'gutter_width' => Avada()->settings->get( 'blog_archive_grid_column_spacing' ),
-					)
+					]
 				);
-			} elseif ( 'Timeline' === $layout ) {
+			} elseif ( 'timeline' === $layout ) {
 				Avada()->images->set_grid_image_meta(
-					array(
-						'layout'  => strtolower( $layout ),
+					[
+						'layout'  => $layout,
 						'columns' => '2',
-					)
+					]
 				);
 			} elseif ( false !== strpos( $layout, 'large' ) && 'full' === $size ) {
 				Avada()->images->set_grid_image_meta(
-					array(
-						'layout'  => strtolower( $layout ),
+					[
+						'layout'  => $layout,
 						'columns' => '1',
-					)
+					]
 				);
 			}
 			?>
 			<?php if ( has_post_thumbnail() ) : ?>
 				<?php if ( is_search() ) : ?>
-					<li><?php echo fusion_render_first_featured_image_markup( $post->ID, $size, $permalink, false, false, true ); // WPCS: XSS ok. ?></li>
+					<li><?php echo fusion_render_first_featured_image_markup( $post->ID, $size, $permalink, false, false, true ); // phpcs:ignore WordPress.Security.EscapeOutput ?></li>
 				<?php else : ?>
-					<li><?php echo fusion_render_first_featured_image_markup( $post->ID, $size, $permalink ); // WPCS: XSS ok. ?></li>
+					<li><?php echo fusion_render_first_featured_image_markup( $post->ID, $size, $permalink ); // phpcs:ignore WordPress.Security.EscapeOutput ?></li>
 				<?php endif; ?>
 			<?php endif; ?>
 			<?php $i = 2; ?>
@@ -142,11 +139,7 @@ $video = apply_filters( 'privacy_iframe_embed', get_post_meta( get_the_ID(), 'py
 									$image_markup = '<img src="' . $attachment_image[0] . '" alt="' . $attachment_data['alt'] . '" class="wp-image-' . $attachment_id . '" role="presentation"/>';
 									$image_markup = Avada()->images->edit_grid_image_src( $image_markup, get_the_ID(), $attachment_id, $size );
 									?>
-									<?php if ( function_exists( 'wp_make_content_images_responsive' ) ) : ?>
-										<?php echo wp_make_content_images_responsive( $image_markup ); // WPCS: XSS ok. ?>
-									<?php else : ?>
-										<?php echo $image_markup; // WPCS: XSS ok. ?>
-									<?php endif; ?>
+									<?php echo fusion_add_responsive_image_markup( $image_markup ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 								</a>
 								<a style="display:none;" href="<?php echo esc_url_raw( $attachment_data['url'] ); ?>" data-rel="iLightbox[gallery<?php echo (int) $post->ID; ?>]"  title="<?php echo esc_attr( $attachment_data['caption_attribute'] ); ?>" data-title="<?php echo esc_attr( $attachment_data['title_attribute'] ); ?>" data-caption="<?php echo esc_attr( $attachment_data['caption_attribute'] ); ?>">
 									<?php if ( $attachment_data['alt'] ) : ?>
@@ -159,10 +152,7 @@ $video = apply_filters( 'privacy_iframe_embed', get_post_meta( get_the_ID(), 'py
 				<?php endif; ?>
 				<?php $i++; ?>
 			<?php endwhile; ?>
-			<?php Avada()->images->set_grid_image_meta( array() ); ?>
+			<?php Avada()->images->set_grid_image_meta( [] ); ?>
 		</ul>
 	</div>
-	<?php
-endif;
-
-/* Omit closing PHP tag to avoid "Headers already sent" issues. */
+<?php endif; ?>

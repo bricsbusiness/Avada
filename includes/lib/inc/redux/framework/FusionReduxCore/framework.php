@@ -98,7 +98,7 @@
 
 						$is_plugin = false;
 						foreach ( get_plugins() as $key => $value ) {
-							if ( is_plugin_active( $key ) && strpos( $key, 'fusionredux-framework.php' ) !== false ) {
+							if ( fusion_is_plugin_activated( $key ) && strpos( $key, 'fusionredux-framework.php' ) !== false ) {
 								self::$_dir = trailingslashit( FusionRedux_Helpers::cleanFilePath( WP_CONTENT_DIR . '/plugins/' . plugin_dir_path( $key ) . 'FusionReduxCore/' ) );
 								$is_plugin  = true;
 							}
@@ -148,7 +148,6 @@
 			public $options = array(); // Option values
 			public $options_defaults = null; // Option defaults
 			public $notices = array(); // Option defaults
-			public $compiler_fields = array(); // Fields that trigger the compiler hook
 			public $required = array(); // Information that needs to be localized
 			public $required_child = array(); // Information that needs to be localized
 			public $localize_data = array(); // Information that needs to be localized
@@ -158,7 +157,6 @@
 			public $changed_values = array(); // Values that have been changed on save. Orig values.
 			public $output = array(); // Fields with CSS output selectors
 			public $outputCSS = null; // CSS that get auto-appended to the header
-			public $compilerCSS = null; // CSS that get sent to the compiler hook
 			public $customizerCSS = null; // CSS that goes to the customizer
 			public $fieldsValues = array(); //all fields values in an id=>value array so we can check dependencies
 			public $fieldsHidden = array(); //all fields that didn't pass the dependency test and are hidden
@@ -318,9 +316,6 @@
 					// Set the default values
 					$this->_default_cleanup();
 
-					// Internataionalization
-					$this->_internationalization();
-
 					$this->filesystem = FusionRedux_Filesystem::get_instance( $this );
 
 					//set fusionredux upload folder
@@ -332,11 +327,6 @@
 					// Grab database values
 					$this->get_options();
 
-					// Tracking
-					if ( isset( $this->args['allow_tracking'] ) && $this->args['allow_tracking'] && FusionRedux_Helpers::isTheme( __FILE__ ) ) {
-						$this->_tracking();
-					}
-
 					// Options page
 					add_action( 'admin_menu', array( $this, '_options_page' ) );
 
@@ -345,10 +335,11 @@
 						add_action( 'network_admin_menu', array( $this, '_options_page' ) );
 					}
 
-					// Admin Bar menu
-					add_action( 'admin_bar_menu', array(
+					// Admin Bar menu.
+					$admin_bar_name = 'admin_bar_';
+					add_action( $admin_bar_name . '_menu', array(
 						$this,
-						'_admin_bar_menu'
+						'_' . $admin_bar_name . '_add_menu'
 					), $this->args['admin_bar_priority'] );
 
 					// Register setting
@@ -372,26 +363,6 @@
 						add_action( 'admin_enqueue_scripts', array( $this, '_enqueue' ), 1 );
 					}
 
-					// Output dynamic CSS
-					// Frontend: Maybe enqueue dynamic CSS and Google fonts
-					if ( empty ( $this->args['output_location'] ) || in_array( 'frontend', $this->args['output_location'] ) ) {
-						add_action( 'wp_head', array( &$this, '_output_css' ), 150 );
-						add_action( 'wp_enqueue_scripts', array( &$this, '_enqueue_output' ), 150 );
-					}
-
-					// Login page: Maybe enqueue dynamic CSS and Google fonts
-					if ( in_array( 'login', $this->args['output_location'] ) ) {
-						add_action( 'login_head', array( &$this, '_output_css' ), 150 );
-						add_action( 'login_enqueue_scripts', array( &$this, '_enqueue_output' ), 150 );
-					}
-
-					// Admin area: Maybe enqueue dynamic CSS and Google fonts
-					if ( in_array( 'admin', $this->args['output_location'] ) ) {
-						add_action( 'admin_head', array( &$this, '_output_css' ), 150 );
-						add_action( 'admin_enqueue_scripts', array( &$this, '_enqueue_output' ), 150 );
-					}
-
-
 					add_action( 'wp_print_scripts', array( $this, 'vc_fixes' ), 100 );
 					add_action( 'admin_enqueue_scripts', array( $this, 'vc_fixes' ), 100 );
 
@@ -401,10 +372,10 @@
 							$this,
 							'save_network_page'
 						), 10, 0 );
-						add_action( 'admin_bar_menu', array( $this, 'network_admin_bar' ), 999 );
+						add_action( $action_name, array( $this, 'network_admin_bar' ), 999 );
 					}
 					// Ajax saving!!!
-					add_action( "wp_ajax_" . $this->args['opt_name'] . '_ajax_save', array( $this, "ajax_save" ) );
+					add_action( 'wp_ajax_' . $this->args['opt_name'] . '_ajax_save', array( $this, "ajax_save" ) );
 
 					// if ( $this->args['dev_mode'] == true || FusionRedux_Helpers::isLocalHost() == true ) {
 					// 	require_once 'core/dashboard.php';
@@ -490,8 +461,6 @@
 					// Changes global variable from $GLOBALS['YOUR_OPT_NAME'] to whatever you set here. false disables the global variable
 					'output'                    => true,
 					// Dynamically generate CSS
-					'compiler'                  => true,
-					// Initiate the compiler hook
 					'output_tag'                => true,
 					// Print Output Tag
 					'output_location'           => array( 'frontend' ),
@@ -607,38 +576,6 @@
 			}
 
 			/**
-			 * Load the plugin text domain for translation.
-			 *
-			 * @since    3.0.5
-			 */
-			private function _internationalization() {
-
-				/**
-				 * Locale for text domain
-				 * filter 'fusionredux/textdomain/{opt_name}'
-				 *
-				 * @param string     The locale of the blog or from the 'locale' hook
-				 * @param string     'fusionredux-framework'  text domain
-				 */
-
-				/**
-				 * Text domain of FB/Avada now used instead.
-                $locale = apply_filters( "fusionredux/textdomain/{$this->args['opt_name']}", get_locale(), 'fusionredux-framework' );
-
-                if ( strpos( $locale, '_' ) === false ) {
-                    if ( file_exists( self::$_dir . 'languages/' . strtolower( $locale ) . '_' . strtoupper( $locale ) . '.mo' ) ) {
-                        $locale = strtolower( $locale ) . '_' . strtoupper( $locale );
-                   }
-                }
-
-				$locale      = fusion_get_user_locale();
-				$text_domain = wp_normalize_path( FUSION_LIBRARY_PATH . '/inc/redux/framework/FusionReduxCore/languages/fusionredux-framework-' . $locale . '.mo' );
-				load_textdomain( 'fusionredux-framework', $text_domain );
-				 */
-			}
-// _internationalization()
-
-			/**
 			 * @return FusionReduxFramework
 			 */
 			public function get_instance() {
@@ -647,15 +584,6 @@
 			}
 
 // get_instance()
-
-			private function _tracking() {
-				if ( file_exists( dirname( __FILE__ ) . '/inc/tracking.php' ) ) {
-					require_once wp_normalize_path( dirname( __FILE__ ) . '/inc/tracking.php' );
-					$tracking = FusionRedux_Tracking::get_instance();
-					$tracking->load( $this );
-				}
-			}
-// _tracking()
 
 			/**
 			 * ->_get_default(); This is used to return the default value if default_show is set
@@ -738,13 +666,6 @@
 						// Last save key
 						$GLOBALS[ $this->args['global_variable'] ]['REDUX_LAST_SAVE'] = $this->transients['last_save'];
 					}
-					if ( isset ( $this->transients['last_compiler'] ) ) {
-						// Deprecated
-						$GLOBALS[ $this->args['global_variable'] ]['REDUX_COMPILER'] = $this->transients['last_compiler'];
-						// Last compiler hook key
-						$GLOBALS[ $this->args['global_variable'] ]['REDUX_LAST_COMPILER'] = $this->transients['last_compiler'];
-					}
-
 					return true;
 				}
 
@@ -1473,7 +1394,7 @@
 			 * @global      $menu , $submenu, $wp_admin_bar
 			 * @return      void
 			 */
-			public function _admin_bar_menu() {
+			public function _admin_bar_add_menu() {
 				global $menu, $submenu, $wp_admin_bar;
 
 				$ct         = wp_get_theme();
@@ -1561,137 +1482,7 @@
 					$wp_admin_bar->add_node( $nodeargs );
 				}
 			}
-// _admin_bar_menu()
-
-			/**
-			 * Output dynamic CSS at bottom of HEAD
-			 *
-			 * @since       3.2.8
-			 * @access      public
-			 * @return      void
-			 */
-			public function _output_css() {
-				if ( $this->args['output'] == false && $this->args['compiler'] == false ) {
-					return;
-				}
-
-				if ( isset ( $this->no_output ) ) {
-					return;
-				}
-
-				if ( ! empty ( $this->outputCSS ) && ( $this->args['output_tag'] == true || ( isset ( $_POST['customized'] ) ) ) ) {
-					echo '<style type="text/css" title="dynamic-css" class="options-output">' . $this->outputCSS . '</style>';
-				}
-			}
-
-			/**
-			 * Enqueue CSS and Google fonts for front end
-			 *
-			 * @since       1.0.0
-			 * @access      public
-			 * @return      void
-			 */
-			public function _enqueue_output() {
-				if ( $this->args['output'] == false && $this->args['compiler'] == false ) {
-					return;
-				}
-
-				/** @noinspection PhpUnusedLocalVariableInspection */
-				foreach ( $this->sections as $k => $section ) {
-					if ( isset ( $section['type'] ) && ( $section['type'] == 'divide' ) ) {
-						continue;
-					}
-
-					if ( isset ( $section['fields'] ) ) {
-						/** @noinspection PhpUnusedLocalVariableInspection */
-						foreach ( $section['fields'] as $fieldk => $field ) {
-							if ( isset ( $field['type'] ) && $field['type'] != "callback" ) {
-								$field_class = "FusionReduxFramework_{$field['type']}";
-								if ( ! class_exists( $field_class ) ) {
-
-									if ( ! isset ( $field['compiler'] ) ) {
-										$field['compiler'] = "";
-									}
-
-									/**
-									 * Field class file
-									 * filter 'fusionredux/{opt_name}/field/class/{field.type}
-									 *
-									 * @param       string        field class file
-									 * @param array $field        field config data
-									 */
-									$class_file = apply_filters( "fusionredux/{$this->args['opt_name']}/field/class/{$field['type']}", self::$_dir . "inc/fields/{$field['type']}/field_{$field['type']}.php", $field );
-
-									if ( $class_file && file_exists( $class_file ) && ! class_exists( $field_class ) ) {
-										/** @noinspection PhpIncludeInspection */
-										require_once wp_normalize_path( $class_file );
-									}
-								}
-
-								if ( ! empty ( $this->options[ $field['id'] ] ) && class_exists( $field_class ) && method_exists( $field_class, 'output' ) && $this->_can_output_css( $field ) ) {
-									$field = apply_filters( "fusionredux/field/{$this->args['opt_name']}/output_css", $field );
-
-									if ( ! empty ( $field['output'] ) && ! is_array( $field['output'] ) ) {
-										$field['output'] = array( $field['output'] );
-									}
-
-									$value   = isset ( $this->options[ $field['id'] ] ) ? $this->options[ $field['id'] ] : '';
-									$enqueue = new $field_class ( $field, $value, $this );
-
-									if ( ( ( isset ( $field['output'] ) && ! empty ( $field['output'] ) ) || ( isset ( $field['compiler'] ) && ! empty ( $field['compiler'] ) ) || $field['type'] == "typography" || $field['type'] == "icon_select" ) ) {
-										$enqueue->output();
-									}
-								}
-							}
-						}
-					}
-				}
-
-				// For use like in the customizer. Stops the output, but passes the CSS in the variable for the compiler
-				if ( isset ( $this->no_output ) ) {
-					return;
-				}
-
-				if ( ! empty ( $this->typography ) && ! empty ( $this->typography ) && filter_var( $this->args['output'], FILTER_VALIDATE_BOOLEAN ) ) {
-					$version    = ! empty ( $this->transients['last_save'] ) ? $this->transients['last_save'] : '';
-					$typography = new FusionReduxFramework_typography ( null, null, $this );
-
-					if ( $this->args['async_typography'] && ! empty ( $this->typography ) ) {
-						$families = array();
-						foreach ( $this->typography as $key => $value ) {
-							$families[] = $key;
-						}
-						?>
-						<link rel="dns-prefetch" href="//ajax.googleapis.com">
-						<link rel="dns-prefetch" href="//fonts.googleapis.com">
-						<link rel="dns-prefetch" href="//fonts.gstatic.com">
-						<script>
-							/* You can add more configuration options to webfontloader by previously defining the WebFontConfig with your options */
-							if ( typeof WebFontConfig === "undefined" ) {
-								WebFontConfig = new Object();
-							}
-							WebFontConfig['google'] = {families: [<?php echo $typography->makeGoogleWebfontString ( $this->typography ) ?>]};
-
-							(function() {
-								var wf = document.createElement( 'script' );
-								wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.3/webfont.js';
-								wf.type = 'text/javascript';
-								wf.async = 'true';
-								var s = document.getElementsByTagName( 'script' )[0];
-								s.parentNode.insertBefore( wf, s );
-							})();
-						</script>
-						<?php
-					} elseif ( ! $this->args['disable_google_fonts_link'] ) {
-						$protocol = ( ! empty ( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443 ) ? "https:" : "http:";
-
-						//echo '<link rel="stylesheet" id="options-google-fonts" title="" href="'.$protocol.$typography->makeGoogleWebfontLink( $this->typography ).'&amp;v='.$version.'" type="text/css" media="all" />';
-						wp_register_style( 'fusionredux-google-fonts-' . $this->args['opt_name'], $protocol . $typography->makeGoogleWebfontLink( $this->typography ), '', $version );
-						wp_enqueue_style( 'fusionredux-google-fonts-' . $this->args['opt_name'] );
-					}
-				}
-			}
-// _enqueue_output()
+// _admin_bar_add_menu()
 
 			/**
 			 * Enqueue CSS/JS for options page
@@ -2307,11 +2098,6 @@
 								$field['class'] .= " foldParent";
 							}
 
-							if ( ! empty ( $field['compiler'] ) ) {
-								$field['class'] .= " compiler";
-								$this->compiler_fields[ $field['id'] ] = 1;
-							}
-
 							if ( isset ( $field['unit'] ) && ! isset ( $field['units'] ) ) {
 								$field['units'] = $field['unit'];
 								unset ( $field['unit'] );
@@ -2367,42 +2153,6 @@
 
 				if ( $runUpdate && ! isset ( $this->never_save_to_db ) ) { // Always update the DB with new fields
 					$this->set_options( $this->options );
-				}
-
-				if ( isset ( $this->transients['run_compiler'] ) && $this->transients['run_compiler'] ) {
-
-					$this->no_output = true;
-					$this->_enqueue_output();
-
-
-					/**
-					 * action 'fusionredux-compiler-{opt_name}'
-					 *
-					 * @deprecated
-					 *
-					 * @param array  options
-					 * @param string CSS that get sent to the compiler hook
-					 */
-					do_action( "fusionredux-compiler-{$this->args['opt_name']}", $this->options, $this->compilerCSS, $this->transients['changed_values'] ); // REMOVE
-
-					/**
-					 * action 'fusionredux/options/{opt_name}a'
-					 *
-					 * @param array  options
-					 * @param string CSS that get sent to the compiler hook
-					 */
-					do_action( "fusionredux/options/{$this->args['opt_name']}/compiler", $this->options, $this->compilerCSS, $this->transients['changed_values'] );
-
-					/**
-					 * action 'fusionredux/options/{opt_name}/compiler/advanced'
-					 *
-					 * @param array  options
-					 * @param string CSS that get sent to the compiler hook, which sends the full FusionRedux object
-					 */
-					do_action( "fusionredux/options/{$this->args['opt_name']}/compiler/advanced", $this );
-
-					unset ( $this->transients['run_compiler'] );
-					$this->set_transients();
 				}
 			}
 // _register_settings()
@@ -2553,9 +2303,7 @@
 				// Import
 				if ( ( isset( $plugin_options['import_code'] ) && ! empty( $plugin_options['import_code'] ) ) || ( isset( $plugin_options['import_link'] ) && ! empty( $plugin_options['import_link'] ) ) ) {
 					$this->transients['last_save_mode'] = "import"; // Last save mode
-					$this->transients['last_compiler']  = $time;
 					$this->transients['last_import']    = $time;
-					$this->transients['run_compiler']   = 1;
 
 					if ( $plugin_options['import_code'] != '' ) {
 						$import = $plugin_options['import_code'];
@@ -2619,10 +2367,6 @@
 					 */
 					$plugin_options = apply_filters( "fusionredux/validate/{$this->args['opt_name']}/defaults", $this->options_defaults );
 
-					// Section reset
-					//setcookie('fusionredux-compiler-' . $this->args['opt_name'], 1, time() + 3000, '/');
-
-
 					$this->transients['changed_values'] = array();
 
 					if ( empty ( $this->options ) ) {
@@ -2635,9 +2379,7 @@
 						}
 					}
 
-					$this->transients['run_compiler']   = 1;
 					$this->transients['last_save_mode'] = "defaults"; // Last save mode
-					//setcookie('fusionredux-compiler-' . $this->args['opt_name'], 1, time() + 1000, "/");
 					//setcookie("fusionredux-saved-{$this->args['opt_name']}", 'defaults', time() + 1000, "/");
 
 					$this->set_transients(); // Update the transients
@@ -2659,10 +2401,6 @@
 							} else {
 								$plugin_options[ $field['id'] ] = "";
 							}
-
-							if ( isset ( $field['compiler'] ) ) {
-								$compiler = true;
-							}
 						}
 
 						$plugin_options = apply_filters( "fusionredux/validate/{$this->args['opt_name']}/defaults_section", $plugin_options );
@@ -2673,14 +2411,6 @@
 						if ( isset ( $plugin_options[ $key ] ) && $value != $plugin_options[ $key ] ) {
 							$this->transients['changed_values'][ $key ] = $value;
 						}
-					}
-
-					if ( isset ( $compiler ) ) {
-						//$this->run_compiler = true;
-						//setcookie('fusionredux-compiler-' . $this->args['opt_name'], 1, time()+1000, '/');
-						//$plugin_options['REDUX_COMPILER'] = time();
-						$this->transients['last_compiler'] = $time;
-						$this->transients['run_compiler']  = 1;
 					}
 
 					$this->transients['last_save_mode'] = "defaults_section"; // Last save mode
@@ -2739,13 +2469,6 @@
 					$this->transients['changed_values']
 				) );
 
-				if ( ! empty ( $plugin_options['compiler'] ) ) {
-					unset ( $plugin_options['compiler'] );
-
-					$this->transients['last_compiler'] = $time;
-					$this->transients['run_compiler']  = 1;
-				}
-
 				$this->transients['changed_values'] = array(); // Changed values since last save
 				foreach ( $this->options as $key => $value ) {
 					if ( isset ( $plugin_options[ $key ] ) && $value != $plugin_options[ $key ] ) {
@@ -2779,7 +2502,7 @@
 			public function ajax_save() {
 				if ( ! wp_verify_nonce( $_REQUEST['nonce'], "fusionredux_ajax_nonce" . $this->args['opt_name'] ) ) {
 					echo json_encode( array(
-						'status' => __( 'Invalid security credential.  Please reload the page and try again.', 'Avada' ),
+						'status' => __( 'Invalid security credential. Please reload the page and try again.', 'Avada' ),
 						'action' => ''
 					) );
 
@@ -2788,7 +2511,7 @@
 
 				if ( ! current_user_can( $this->args['page_permissions'] ) ) {
 					echo json_encode( array(
-						'status' => __( 'Invalid user capability.  Please reload the page and try again.', 'Avada' ),
+						'status' => __( 'Invalid user capability. Please reload the page and try again.', 'Avada' ),
 						'action' => ''
 					) );
 
@@ -2800,21 +2523,6 @@
 				if ( ! empty ( $_POST['data'] ) && ! empty ( $fusionredux->args['opt_name'] ) ) {
 
 					$values = array();
-					//if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
-					//    $process = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST);
-					//    while (list($key, $val) = each($process)) {
-					//        foreach ($val as $k => $v) {
-					//            unset($process[$key][$k]);
-					//            if (is_array($v)) {
-					//                $process[$key][stripslashes($k)] = $v;
-					//                $process[] = &$process[$key][stripslashes($k)];
-					//            } else {
-					//                $process[$key][stripslashes($k)] = stripslashes($v);
-					//            }
-					//        }
-					//    }
-					//    unset($process);
-					//}
 					$_POST['data'] = stripslashes( $_POST['data'] );
 
 					// Old method of saving, in case we need to go back! - kp
@@ -2824,10 +2532,6 @@
 					$values = $this->fusionredux_parse_str( $_POST['data'] );
 
 					$values = $values[ $fusionredux->args['opt_name'] ];
-
-					if ( function_exists( 'get_magic_quotes_gpc' ) && get_magic_quotes_gpc() ) {
-						$values = array_map( 'stripslashes_deep', $values );
-					}
 
 					if ( ! empty ( $values ) ) {
 
@@ -2853,10 +2557,6 @@
 								die ();
 							}
 
-							require_once wp_normalize_path( 'core/enqueue.php' );
-							$enqueue = new fusionreduxCoreEnqueue ( $fusionredux );
-							$enqueue->get_warnings_and_errors_array();
-
 							$return_array = array(
 								'status'   => 'success',
 								'options'  => $fusionredux->options,
@@ -2871,44 +2571,7 @@
 						echo json_encode( array( 'status' => __( 'Your panel has no fields. Nothing to save.', 'Avada' ) ) );
 					}
 				}
-				if ( isset ( $this->transients['run_compiler'] ) && $this->transients['run_compiler'] ) {
 
-					$this->no_output = true;
-					$this->_enqueue_output();
-
-					try {
-						/**
-						 * action 'fusionredux-compiler-{opt_name}'
-						 *
-						 * @deprecated
-						 *
-						 * @param array  options
-						 * @param string CSS that get sent to the compiler hook
-						 */
-						do_action( "fusionredux-compiler-{$this->args['opt_name']}", $this->options, $this->compilerCSS, $this->transients['changed_values'] ); // REMOVE
-
-						/**
-						 * action 'fusionredux/options/{opt_name}/compiler'
-						 *
-						 * @param array  options
-						 * @param string CSS that get sent to the compiler hook
-						 */
-						do_action( "fusionredux/options/{$this->args['opt_name']}/compiler", $this->options, $this->compilerCSS, $this->transients['changed_values'] );
-
-						/**
-						 * action 'fusionredux/options/{opt_name}/compiler/advanced'
-						 *
-						 * @param array  options
-						 * @param string CSS that get sent to the compiler hook, which sends the full FusionRedux object
-						 */
-						do_action( "fusionredux/options/{$this->args['opt_name']}/compiler/advanced", $this );
-					} catch ( Exception $e ) {
-						$return_array = array( 'status' => $e->getMessage() );
-					}
-
-					unset ( $this->transients['run_compiler'] );
-					$this->set_transients();
-				}
 				if ( isset( $return_array ) ) {
 					if ( $return_array['status'] == "success" ) {
 						require_once wp_normalize_path( dirname( __FILE__ ) . '/core/panel.php' );
@@ -3161,19 +2824,15 @@
 				} else if ( ! isset ( $section['subsection'] ) || $section['subsection'] != true ) {
 
 					// DOVY! REPLACE $k with $section['ID'] when used properly.
-					//$active = ( ( is_numeric($this->current_tab) && $this->current_tab == $k ) || ( !is_numeric($this->current_tab) && $this->current_tab === $k )  ) ? ' active' : '';
-					$subsections      = ( isset ( $sections[ ( $k + 1 ) ] ) && isset ( $sections[ ( $k + 1 ) ]['subsection'] ) && $sections[ ( $k + 1 ) ]['subsection'] == true ) ? true : false;
-					$subsectionsClass = $subsections ? ' hasSubSections' : '';
-					$subsectionsClass .= ( ! isset ( $section['fields'] ) || empty ( $section['fields'] ) ) ? ' empty_section' : '';
-					$extra_icon = $subsections ? '<span class="extraIconSubsections"><i class="el el-chevron-down">&nbsp;</i></span>' : '';
-					$string .= '<li id="' . esc_attr( $k . $suffix ) . '_section_group_li" class="fusionredux-group-tab-link-li' . esc_attr( $hide_section ) . esc_attr( $section['class'] ) . esc_attr( $subsectionsClass ) . '">';
-					$string .= '<a href="javascript:void(0);" id="' . esc_attr( $k . $suffix ) . '_section_group_li_a" class="fusionredux-group-tab-link-a" data-key="' . esc_attr( $k ) . '" data-rel="' . esc_attr( $k . $suffix ) . '" data-css-id="' . esc_attr( $section['id'] ) . '">' . $extra_icon . $icon . '<span class="group_title">' . wp_kses_post( $section['title'] ) . '</span></a>';
-
-					$nextK = $k;
 
 					// Make sure you can make this a subsection
+					$section_icon	  = $icon;
+					$subsections      = ( isset ( $sections[ ( $k + 1 ) ] ) && isset ( $sections[ ( $k + 1 ) ]['subsection'] ) && $sections[ ( $k + 1 ) ]['subsection'] == true ) ? true : false;
+					$subsections_HTML = "";
+					$subsections_count = 0;
+					$nextK = $k;
 					if ( $subsections ) {
-						$string .= '<ul id="' . esc_attr( $nextK . $suffix ) . '_section_group_li_subsections" class="subsection">';
+						$subsections_HTML .= '<ul id="' . esc_attr( $nextK . $suffix ) . '_section_group_li_subsections" class="subsection">';
 						$doLoop = true;
 
 						while ( $doLoop ) {
@@ -3195,7 +2854,10 @@
 
 								$hide_sub = '';
 								if ( isset ( $sections[ $nextK ]['hidden'] ) ) {
-									$hide_sub = ( $sections[ $nextK ]['hidden'] == true ) ? ' hidden ' : '';
+									$hide_sub = ( $sections[ $nextK ]['hidden'] == true ) ? 'hidden ' : '';
+									if ( $sections[ $nextK ]['hidden'] == true ) {
+										$subsections_count--;
+									}
 								}
 
 								if ( ( isset ( $this->args['icon_type'] ) && $this->args['icon_type'] == 'image' ) || ( isset ( $sections[ $nextK ]['icon_type'] ) && $sections[ $nextK ]['icon_type'] == 'image' ) ) {
@@ -3215,16 +2877,23 @@
 									$icon = str_replace( 'el-icon-', 'el el-', $icon );
 								}
 
-								$section[ $nextK ]['class'] = isset ( $section[ $nextK ]['class'] ) ? $section[ $nextK ]['class'] : '';
-								$string .= '<li id="' . esc_attr( $nextK . $suffix ) . '_section_group_li" class="fusionredux-group-tab-link-li ' . esc_attr( $hide_sub ) . esc_attr( $section[ $nextK ]['class'] ) . ( $icon ? ' hasIcon' : '' ) . '">';
-								$string .= '<a href="javascript:void(0);" id="' . esc_attr( $nextK . $suffix ) . '_section_group_li_a" class="fusionredux-group-tab-link-a" data-key="' . esc_attr( $nextK ) . '" data-rel="' . esc_attr( $nextK . $suffix ) . '" data-css-id="' . esc_attr( $sections[ $nextK ]['id'] ) . '">' . $icon . '<span class="group_title">' . wp_kses_post( $sections[ $nextK ]['title'] ) . '</span></a>';
-								$string .= '</li>';
+								$sections[ $nextK ]['class'] = isset ( $sections[ $nextK ]['class'] ) ? $sections[ $nextK ]['class'] : '';
+								$subsections_HTML .= '<li id="' . esc_attr( $nextK . $suffix ) . '_section_group_li" class="fusionredux-group-tab-link-li ' . esc_attr( $hide_sub ) . esc_attr( $sections[ $nextK ]['class'] ) . ( $icon ? ' hasIcon' : '' ) . '">';
+								$subsections_HTML .= '<a href="javascript:void(0);" id="' . esc_attr( $nextK . $suffix ) . '_section_group_li_a" class="fusionredux-group-tab-link-a" data-key="' . esc_attr( $nextK ) . '" data-rel="' . esc_attr( $nextK . $suffix ) . '" data-css-id="' . esc_attr( $sections[ $nextK ]['id'] ) . '">' . $icon . '<span class="group_title">' . wp_kses_post( $sections[ $nextK ]['title'] ) . '</span></a>';
+								$subsections_HTML .= '</li>';
+								$subsections_count++;
 							}
 						}
 
-						$string .= '</ul>';
+						$subsections_HTML .= '</ul>';
 					}
 
+					$subsectionsClass = 0 < $subsections_count ? ' hasSubSections' : '';
+					$subsectionsClass .= ( ! isset ( $section['fields'] ) || empty ( $section['fields'] ) ) ? ' empty_section' : '';
+					$extra_icon = 0 < $subsections_count ? '<span class="extraIconSubsections"><i class="el el-chevron-down">&nbsp;</i></span>' : '';
+					$string .= '<li id="' . esc_attr( $k . $suffix ) . '_section_group_li" class="fusionredux-group-tab-link-li' . esc_attr( $hide_section ) . esc_attr( $section['class'] ) . esc_attr( $subsectionsClass ) . '">';
+					$string .= '<a href="javascript:void(0);" id="' . esc_attr( $k . $suffix ) . '_section_group_li_a" class="fusionredux-group-tab-link-a" data-key="' . esc_attr( $k ) . '" data-rel="' . esc_attr( $k . $suffix ) . '" data-css-id="' . esc_attr( $section['id'] ) . '">' . $extra_icon . $section_icon . '<span class="group_title">' . wp_kses_post( $section['title'] ) . '</span></a>';
+					$string .=  0 < $subsections_count ? $subsections_HTML : '';
 					$string .= '</li>';
 				}
 
@@ -3566,49 +3235,6 @@
 				}
 			}
 // _field_input()
-
-			/**
-			 * Can Output CSS
-			 * Check if a field meets its requirements before outputting to CSS
-			 *
-			 * @param $field
-			 *
-			 * @return bool
-			 */
-			public function _can_output_css( $field ) {
-				$return = true;
-
-				$field = apply_filters( "fusionredux/field/{$this->args['opt_name']}/_can_output_css", $field );
-				if ( isset ( $field['force_output'] ) && $field['force_output'] == true ) {
-					return $return;
-				}
-
-				if ( ! empty ( $field['required'] ) ) {
-					if ( isset ( $field['required'][0] ) ) {
-						if ( ! is_array( $field['required'][0] ) && count( $field['required'] ) == 3 ) {
-							$parentValue = $GLOBALS[ $this->args['global_variable'] ][ $field['required'][0] ];
-							$checkValue  = $field['required'][2];
-							$operation   = $field['required'][1];
-							$return      = $this->compareValueDependencies( $parentValue, $checkValue, $operation );
-						} else if ( is_array( $field['required'][0] ) ) {
-							foreach ( $field['required'] as $required ) {
-								if ( ! is_array( $required[0] ) && count( $required ) == 3 ) {
-									$parentValue = $GLOBALS[ $this->args['global_variable'] ][ $required[0] ];
-									$checkValue  = $required[2];
-									$operation   = $required[1];
-									$return      = $this->compareValueDependencies( $parentValue, $checkValue, $operation );
-								}
-								if ( ! $return ) {
-									return $return;
-								}
-							}
-						}
-					}
-				}
-
-				return $return;
-			}
-// _can_output_css
 
 			/**
 			 * Checks dependencies between objects based on the $field['required'] array

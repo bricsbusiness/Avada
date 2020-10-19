@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -20,43 +20,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Avada_Autoload {
 
 	/**
-	 * The transient name.
+	 * Hardcoded classmap.
 	 *
 	 * @static
 	 * @access private
-	 * @since 5.0.0
-	 * @var string
-	 */
-	private static $transient_name = '';
-
-	/**
-	 * Stored paths.
-	 *
-	 * @static
-	 * @access private
-	 * @since 5.0.0
+	 * @since 6.0
 	 * @var array
 	 */
-	private static $cached_paths = array();
-
-	/**
-	 * Whether the cache needs updating or not.
-	 *
-	 * @static
-	 * @access private
-	 * @since 5.0.0
-	 * @var bool
-	 */
-	private static $update_cache = false;
-
-	/**
-	 * The path to the "includes" folder inside the theme.
-	 *
-	 * @access protected
-	 * @since 5.2.0
-	 * @var string
-	 */
-	protected $avada_includes_path;
+	private static $class_map;
 
 	/**
 	 * The class constructor.
@@ -65,44 +36,8 @@ class Avada_Autoload {
 	 */
 	public function __construct() {
 
-		// Set the transient name.
-		if ( empty( self::$transient_name ) ) {
-			self::$transient_name = 'avada_autoloader_paths_' . md5( __FILE__ );
-		}
-
-		$this->avada_includes_path = Avada::$template_dir_path . '/includes/';
-
-		// Get the cached paths array.
-		$this->get_cached_paths();
-
 		// Register our autoloader.
-		spl_autoload_register( array( $this, 'include_class_file' ) );
-
-		// Update caches.
-		add_action( 'shutdown', array( $this, 'update_cached_paths' ) );
-
-		// Make sure caches are reset when needed.
-		$database_version = get_option( 'avada_version', false );
-		$current_version  = Avada::get_theme_version();
-		if ( ! $database_version || version_compare( $database_version, $current_version, '<' ) ) {
-			$this->reset_cached_paths();
-		}
-		add_action( 'after_switch_theme', array( $this, 'reset_cached_paths' ) );
-		add_action( 'switch_theme', array( $this, 'reset_cached_paths' ) );
-
-	}
-
-	/**
-	 * Gets the cached paths.
-	 *
-	 * @access protected
-	 * @since 5.0.0
-	 * @return void
-	 */
-	protected function get_cached_paths() {
-
-		self::$cached_paths = get_site_transient( self::$transient_name );
-
+		spl_autoload_register( [ $this, 'include_class_file' ] );
 	}
 
 	/**
@@ -115,20 +50,32 @@ class Avada_Autoload {
 	 */
 	protected function get_path( $class_name ) {
 
-		$paths = array();
+		// If the class exists in our hardcoded array of classes
+		// then get the path and return it immediately.
+		if ( ! self::$class_map ) {
+			self::$class_map = $this->get_class_map();
+		}
+		if ( isset( self::$class_map[ $class_name ] ) ) {
+			include_once self::$class_map[ $class_name ];
+			return;
+		}
+
+		$template_dir_path = Avada::$template_dir_path;
+
+		$paths = [];
 		if ( 0 === stripos( $class_name, 'Avada' ) || 0 === stripos( $class_name, 'Fusion' ) ) {
 
 			$filename = 'class-' . strtolower( str_replace( '_', '-', $class_name ) ) . '.php';
 
-			$paths[] = $this->avada_includes_path . $filename;
+			$paths[] = $template_dir_path . '/includes/' . $filename;
 
-			$substr   = str_replace( array( 'Avada_', 'Fusion_' ), '', $class_name );
+			$substr   = str_replace( [ 'Avada_', 'Fusion_' ], '', $class_name );
 			$exploded = explode( '_', $substr );
 			$levels   = count( $exploded );
 
 			$previous_path = '';
 			for ( $i = 0; $i < $levels; $i++ ) {
-				$paths[]        = $this->avada_includes_path . $previous_path . strtolower( $exploded[ $i ] ) . '/' . $filename;
+				$paths[]        = $template_dir_path . '/includes/' . $previous_path . strtolower( $exploded[ $i ] ) . '/' . $filename;
 				$previous_path .= strtolower( $exploded[ $i ] ) . '/';
 			}
 
@@ -152,57 +99,68 @@ class Avada_Autoload {
 	 * @return void
 	 */
 	public function include_class_file( $class_name ) {
-
-		// If the path is cached, use it & early exit.
-		if ( isset( self::$cached_paths[ $class_name ] ) ) {
-			include_once self::$cached_paths[ $class_name ];
-			return;
-		}
-
-		// If we got this far, the path is not cached.
-		// We'll need to get it, and add it to the cache.
 		$path = $this->get_path( $class_name );
 
 		// Include the path.
 		if ( $path ) {
 			include_once $path;
-			// Add path to the array of paths to cache.
-			self::$cached_paths[ $class_name ] = $path;
-			// Make sure we update the caches.
-			self::$update_cache = true;
-			return;
 		}
 	}
 
 	/**
-	 * Update caches if needed.
+	 * Get a class-map for some standard classes.
 	 *
 	 * @access public
-	 * @since 5.0.0
-	 * @return void
+	 * @since 6.0
+	 * @return array
 	 */
-	public function update_cached_paths() {
-
-		// If we don't need to update the caches, early exit.
-		if ( false === self::$update_cache ) {
-			return;
-		}
-
-		// Cache for 30 seconds using transients.
-		set_site_transient( self::$transient_name, self::$cached_paths, 30 );
-
-	}
-
-	/**
-	 * Reset caches.
-	 *
-	 * @access public
-	 * @since 5.0.4
-	 * @return void
-	 */
-	public function reset_cached_paths() {
-
-		delete_site_transient( self::$transient_name );
-
+	public function get_class_map() {
+		$template_dir_path = Avada::$template_dir_path;
+		return [
+			'Fusion_Builder_Redux_Options'    => $template_dir_path . '/includes/class-fusion-builder-redux-options.php',
+			'Avada_Upgrade'                   => $template_dir_path . '/includes/class-avada-upgrade.php',
+			'Avada_Helper'                    => $template_dir_path . '/includes/class-avada-helper.php',
+			'Avada_Upgrade_400'               => $template_dir_path . '/includes/upgrade/class-avada-upgrade-400.php',
+			'Avada_Upgrade_Abstract'          => $template_dir_path . '/includes/upgrade/class-avada-upgrade-abstract.php',
+			'Avada_AvadaRedux_Migration'      => $template_dir_path . '/includes/class-avada-avadaredux-migration.php',
+			'Avada_Migrate'                   => $template_dir_path . '/includes/class-avada-migrate.php',
+			'Avada_Upgrade_500'               => $template_dir_path . '/includes/upgrade/class-avada-upgrade-500.php',
+			'Fusion_Builder_Migrate'          => $template_dir_path . '/includes/class-fusion-builder-migrate.php',
+			'Avada_Upgrade_600'               => $template_dir_path . '/includes/upgrade/class-avada-upgrade-600.php',
+			'Avada_Admin'                     => $template_dir_path . '/includes/class-avada-admin.php',
+			'Avada_Settings'                  => $template_dir_path . '/includes/class-avada-settings.php',
+			'Avada_Init'                      => $template_dir_path . '/includes/class-avada-init.php',
+			'Avada_Template'                  => $template_dir_path . '/includes/class-avada-template.php',
+			'Avada_Blog'                      => $template_dir_path . '/includes/class-avada-blog.php',
+			'Avada_Images'                    => $template_dir_path . '/includes/class-avada-images.php',
+			'Avada_Head'                      => $template_dir_path . '/includes/class-avada-head.php',
+			'Avada_Layout'                    => $template_dir_path . '/includes/class-avada-layout.php',
+			'Avada_GoogleMap'                 => $template_dir_path . '/includes/class-avada-googlemap.php',
+			'Avada_Remote_Installer'          => $template_dir_path . '/includes/class-avada-remote-installer.php',
+			'Avada_Slider_Revolution'         => $template_dir_path . '/includes/class-avada-slider-revolution.php',
+			'Avada_Sermon_Manager'            => $template_dir_path . '/includes/class-avada-sermon-manager.php',
+			'Avada_Privacy_Embeds'            => $template_dir_path . '/includes/class-avada-privacy-embeds.php',
+			'Avada_PWA'                       => $template_dir_path . '/includes/class-avada-pwa.php',
+			'Avada_Block_Editor'              => $template_dir_path . '/includes/class-avada-block-editor.php',
+			'Avada_Importer_Data'             => $template_dir_path . '/includes/importer/class-avada-importer-data.php',
+			'Avada_Multiple_Featured_Images'  => $template_dir_path . '/includes/class-avada-multiple-featured-images.php',
+			'Avada_Sidebars'                  => $template_dir_path . '/includes/class-avada-sidebars.php',
+			'Avada_Admin_Notices'             => $template_dir_path . '/includes/class-avada-admin-notices.php',
+			'Avada_Widget_Style'              => $template_dir_path . '/includes/class-avada-widget-style.php',
+			'Avada_Page_Options'              => $template_dir_path . '/includes/class-avada-page-options.php',
+			'Avada_Portfolio'                 => $template_dir_path . '/includes/class-avada-portfolio.php',
+			'Avada_Scripts'                   => $template_dir_path . '/includes/class-avada-scripts.php',
+			'Avada_EventsCalendar'            => $template_dir_path . '/includes/class-avada-eventscalendar.php',
+			'Avada_Google_Fonts'              => $template_dir_path . '/includes/class-avada-google-fonts.php',
+			'Fusion_Dynamic_CSS_From_Options' => $template_dir_path . '/includes/class-fusion-dynamic-css-from-options.php',
+			'Avada_Megamenu_Framework'        => $template_dir_path . '/includes/class-avada-megamenu-framework.php',
+			'Avada_Megamenu'                  => $template_dir_path . '/includes/class-avada-megamenu.php',
+			'Avada_Nav_Walker_Megamenu'       => $template_dir_path . '/includes/class-avada-nav-walker-megamenu.php',
+			'Avada_Dynamic_CSS'               => $template_dir_path . '/includes/class-avada-dynamic-css.php',
+			'Avada_Options'                   => $template_dir_path . '/includes/class-avada-options.php',
+			'Avada_Output_Callbacks'          => $template_dir_path . '/includes/class-avada-output-callbacks.php',
+			'Avada_AvadaRedux'                => $template_dir_path . '/includes/class-avada-avadaredux.php',
+			'Fusion_Deprecate_Pyre_PO'        => $template_dir_path . '/includes/class-fusion-deprecate-pyre-po.php',
+		];
 	}
 }

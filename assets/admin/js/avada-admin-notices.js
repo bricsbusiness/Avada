@@ -15,9 +15,9 @@
 			$optionName = $this.parent().attr( 'avada-data-dismissible' );
 
 			$data = {
-				'action': 'avada_dismiss_admin_notice',
-				'option_name': $optionName,
-				'nonce': avadaAdminNotices.nonce
+				action: 'avada_dismiss_admin_notice',
+				option_name: $optionName,
+				nonce: avadaAdminNotices.nonce
 			};
 
 			// Make ajax request.

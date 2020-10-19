@@ -1,15 +1,10 @@
 <?php
 /**
- * AMP methods for Avada & Fusion-Builder.
+ * AMP methods for Avada & Avada Builder.
  *
  * @package Fusion-Library
  * @since 1.8.1
  */
-
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
 
 /**
  * AMP methods.
@@ -26,7 +21,7 @@ class Fusion_AMP {
 	 * @since 1.8.1
 	 * @return bool
 	 */
-	public static function is_plugin_active() {
+	public static function is_plugin_activated() {
 
 		// Check for the "AMP" plugin.
 		if ( function_exists( 'is_amp_endpoint' ) ) {
@@ -57,7 +52,7 @@ class Fusion_AMP {
 	public static function is_amp_endpoint() {
 
 		// If an AMP plugin is not active then this is definitely not an AMP endpoint.
-		if ( ! self::is_plugin_active() ) {
+		if ( ! self::is_plugin_activated() ) {
 			return false;
 		}
 

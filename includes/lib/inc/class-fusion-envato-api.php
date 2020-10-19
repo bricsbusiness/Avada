@@ -5,11 +5,6 @@
  * @package Fusion_Envato_API
  */
 
-// Do not allow directly accessing this file.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit( 'Direct script access denied.' );
-}
-
 /**
  * Creates the Envato API connection.
  *
@@ -93,16 +88,16 @@ class Fusion_Envato_API {
 	 * @param  array  $args The arguments passed to `wp_remote_get`.
 	 * @return array  The HTTP response.
 	 */
-	public function request( $url, $args = array() ) {
-		$defaults = array(
-			'headers' => array(
+	public function request( $url, $args = [] ) {
+		$defaults = [
+			'headers'      => [
 				'Authorization' => 'Bearer ' . $this->token,
-				'User-Agent' => 'WordPress - Fusion Library',
-			),
-			'timeout' => 20,
+				'User-Agent'    => 'WordPress - Fusion Library',
+			],
+			'timeout'      => 20,
 			'headers_data' => false,
-		);
-		$args = wp_parse_args( $args, $defaults );
+		];
+		$args     = wp_parse_args( $args, $defaults );
 
 		if ( empty( $this->token ) ) {
 			return new WP_Error( 'api_token_error', __( 'An API token is required.', 'Avada' ) );
@@ -120,12 +115,12 @@ class Fusion_Envato_API {
 		}
 
 		$envato_string = '';
-		$headers = isset( $response['headers'] ) ? (array) $response['headers'] : array();
+		$headers       = isset( $response['headers'] ) ? (array) $response['headers'] : [];
 
 		if ( ! empty( $headers ) && isset( $headers[ "\0*\0" . 'data' ] ) ) {
 			$headers_data = $headers[ "\0*\0" . 'data' ];
-			$date = $headers_data['date'];
-			$cf_ray = $headers_data['cf-ray'];
+			$date         = $headers_data['date'];
+			$cf_ray       = $headers_data['cf-ray'];
 
 			$envato_string = '(Date: ' . $date . ' | CF-RAY: ' . $cf_ray . ')';
 		}
@@ -142,10 +137,10 @@ class Fusion_Envato_API {
 		}
 
 		if ( $args['headers_data'] && $envato_string ) {
-			return array(
+			return [
 				'headers_data' => $envato_string,
 				'body'         => $return,
-			);
+			];
 		}
 
 		return $return;
@@ -164,10 +159,10 @@ class Fusion_Envato_API {
 			return '';
 		}
 
-		$args = array(
+		$args = [
 			'deferred_download' => true,
-			'item_id' => $id,
-		);
+			'item_id'           => $id,
+		];
 		return add_query_arg( $args, esc_url( admin_url( 'admin.php?page=avada' ) ) );
 	}
 
@@ -180,12 +175,12 @@ class Fusion_Envato_API {
 	 * @param array $args The arguments passed to `wp_remote_get`.
 	 * @return bool|array The HTTP response.
 	 */
-	public function download( $id, $args = array() ) {
+	public function download( $id, $args = [] ) {
 		if ( empty( $id ) ) {
 			return false;
 		}
 
-		$url = 'https://api.envato.com/v2/market/buyer/download?item_id=' . $id . '&shorten_url=true';
+		$url      = 'https://api.envato.com/v2/market/buyer/download?item_id=' . $id . '&shorten_url=true';
 		$response = $this->request( $url, $args );
 
 		// @todo Find out which errors could be returned & handle them in the UI.
@@ -213,8 +208,8 @@ class Fusion_Envato_API {
 	 * @param array $args The arguments passed to `wp_remote_get`.
 	 * @return array      The HTTP response.
 	 */
-	public function item( $id, $args = array() ) {
-		$url = 'https://api.envato.com/v3/market/catalog/item?id=' . $id;
+	public function item( $id, $args = [] ) {
+		$url      = 'https://api.envato.com/v3/market/catalog/item?id=' . $id;
 		$response = $this->request( $url, $args );
 
 		if ( is_wp_error( $response ) || empty( $response ) ) {
@@ -240,8 +235,8 @@ class Fusion_Envato_API {
 	 * @param int   $page The page number if one is necessary.
 	 * @return array      The HTTP response.
 	 */
-	public function themes( $args = array(), $page = '' ) {
-		$themes = array();
+	public function themes( $args = [], $page = '' ) {
+		$themes = [];
 
 		$url  = 'https://api.envato.com/v3/market/buyer/list-purchases?filter_by=wordpress-themes';
 		$url .= ( $page ) ? '&page=' . $page : '';
@@ -271,7 +266,7 @@ class Fusion_Envato_API {
 	 * @return array       A normalized array of values.
 	 */
 	public function normalize_theme( $theme ) {
-		return array(
+		return [
 			'id'            => $theme['id'],
 			'name'          => ( ! empty( $theme['wordpress_theme_metadata']['theme_name'] ) ? $theme['wordpress_theme_metadata']['theme_name'] : '' ),
 			'author'        => ( ! empty( $theme['wordpress_theme_metadata']['author_name'] ) ? $theme['wordpress_theme_metadata']['author_name'] : '' ),
@@ -281,7 +276,7 @@ class Fusion_Envato_API {
 			'author_url'    => ( ! empty( $theme['author_url'] ) ? $theme['author_url'] : '' ),
 			'thumbnail_url' => ( ! empty( $theme['thumbnail_url'] ) ? $theme['thumbnail_url'] : '' ),
 			'rating'        => ( ! empty( $theme['rating'] ) ? $theme['rating'] : '' ),
-		);
+		];
 	}
 
 	/**
@@ -293,8 +288,8 @@ class Fusion_Envato_API {
 	 * @param int   $page The page number if one is necessary.
 	 * @return array      The HTTP response.
 	 */
-	public function plugins( $args = array(), $page = '' ) {
-		$plugins = array();
+	public function plugins( $args = [], $page = '' ) {
+		$plugins = [];
 
 		$url  = 'https://api.envato.com/v3/market/buyer/list-purchases?filter_by=wordpress-plugins';
 		$url .= ( $page ) ? '&page=' . $page : '';
@@ -322,7 +317,7 @@ class Fusion_Envato_API {
 	public function normalize_plugin( $plugin ) {
 		$requires = null;
 		$tested   = null;
-		$versions = array();
+		$versions = [];
 
 		// Set the required and tested WordPress version numbers.
 		foreach ( $plugin['attributes'] as $k => $v ) {
@@ -333,13 +328,13 @@ class Fusion_Envato_API {
 				}
 				if ( ! empty( $versions ) ) {
 					$requires = $versions[ count( $versions ) - 1 ];
-					$tested = $versions[0];
+					$tested   = $versions[0];
 				}
 				break;
 			}
 		}
 
-		return array(
+		return [
 			'id'              => $plugin['id'],
 			'name'            => ( ! empty( $plugin['wordpress_plugin_metadata']['plugin_name'] ) ? $plugin['wordpress_plugin_metadata']['plugin_name'] : '' ),
 			'author'          => ( ! empty( $plugin['wordpress_plugin_metadata']['author'] ) ? $plugin['wordpress_plugin_metadata']['author'] : '' ),
@@ -354,7 +349,7 @@ class Fusion_Envato_API {
 			'number_of_sales' => ( ! empty( $plugin['number_of_sales'] ) ? $plugin['number_of_sales'] : '' ),
 			'updated_at'      => ( ! empty( $plugin['updated_at'] ) ? $plugin['updated_at'] : '' ),
 			'rating'          => ( ! empty( $plugin['rating'] ) ? $plugin['rating'] : '' ),
-		);
+		];
 	}
 
 	/**
@@ -382,20 +377,20 @@ class Fusion_Envato_API {
 			$token = $this->token;
 		}
 		// The arguments for the request.
-		$args = array(
-			'headers' => array(
+		$args = [
+			'headers' => [
 				'Authorization' => 'Bearer ' . $token,
 				'User-Agent'    => 'WordPress - Fusion Library',
-			),
+			],
 			'timeout' => 20,
-		);
+		];
 		// Make the request to the Envato API.
 		$whoami = (array) $this->request( 'https://api.envato.com/whoami', $args );
 
 		if ( isset( $whoami['scopes'] ) && is_array( $whoami['scopes'] ) ) {
 			return $whoami['scopes'];
 		}
-		return array();
+		return [];
 	}
 
 	/**
@@ -413,14 +408,14 @@ class Fusion_Envato_API {
 			$scopes_ok = true;
 
 			// An array of the scopes we need.
-			$needed_scopes = array(
+			$needed_scopes = [
 				'purchase:download',
 				'purchase:list',
 				'purchase:verify',
-			);
+			];
 			// Check if all needed scopes exist.
 			foreach ( $needed_scopes as $needed_scope ) {
-				if ( ! in_array( $needed_scope, $scopes ) ) {
+				if ( ! in_array( $needed_scope, $scopes, true ) ) {
 					$scopes_ok = false;
 				}
 			}

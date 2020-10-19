@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  */
@@ -47,7 +47,7 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 		$this->migrate_flyout_menu_options();
 		$this->migrate_page_title_bar_options();
 
-		add_action( 'init', array( $this, 'migrate_shop_page_options' ) );
+		add_action( 'init', [ $this, 'migrate_shop_page_options' ] );
 
 	}
 
@@ -59,7 +59,7 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function migrate_nav_typography_settings() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		$options['nav_typography']['font-size'] = ( isset( $options['nav_font_size'] ) ) ? $options['nav_font_size'] : '14px';
 		$options['nav_typography']['color']     = ( isset( $options['menu_first_color'] ) ) ? $options['menu_first_color'] : '#333333';
@@ -78,17 +78,17 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function migrate_mobile_menu_typography_settings() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		if ( isset( $options['body_typography'] ) ) {
-			$options['mobile_menu_typography'] = array(
+			$options['mobile_menu_typography'] = [
 				'font-family'    => $options['body_typography']['font-family'],
 				'font-weight'    => $options['body_typography']['font-weight'],
 				'letter-spacing' => $options['body_typography']['letter-spacing'],
 				'font-size'      => ( isset( $options['mobile_menu_font_size'] ) ) ? $options['mobile_menu_font_size'] : '12px',
 				'line-height'    => ( isset( $options['mobile_menu_nav_height'] ) && $options['mobile_menu_nav_height'] ) ? absint( $options['mobile_menu_nav_height'] ) . 'px' : '35px',
 				'color'          => ( isset( $options['mobile_menu_font_color'] ) ) ? $options['mobile_menu_font_color'] : '#333333',
-			);
+			];
 		}
 
 		if ( isset( $options['mobile_menu_font_color'] ) ) {
@@ -106,7 +106,7 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function migrate_sliding_bar_settings() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		$options['slidingbar_border'] = ( isset( $options['slidingbar_top_border'] ) ) ? $options['slidingbar_top_border'] : '35px';
 
@@ -125,7 +125,7 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function migrate_portfolio_meta_font_size() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		$options['portfolio_meta_font_size'] = $options['h4_typography']['font-size'];
 
@@ -154,7 +154,7 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 				$header_bg_color = $color_obj->to_css( $mode );
 			}
 
-			$page_options = array(
+			$page_options = [
 				'fusion_tax_heading'       => '',
 				'slider_type'              => '',
 				'fusion_tax_slider'        => '',
@@ -169,16 +169,16 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 				'page_title_bg_retina'     => get_post_meta( $shop_page_id, 'pyre_page_title_bar_bg_retina', true ),
 				'page_title_height'        => get_post_meta( $shop_page_id, 'pyre_page_title_height', true ),
 				'page_title_mobile_height' => get_post_meta( $shop_page_id, 'pyre_page_title_mobile_height', true ),
-			);
+			];
 
-			$args = array(
-				'taxonomy'   => array(
+			$args = [
+				'taxonomy'   => [
 					'product_cat',
 					'product_tag',
-				),
+				],
 				'number'     => 0,
 				'hide_empty' => false,
-			);
+			];
 
 			$product_categories = get_terms( $args );
 
@@ -187,7 +187,7 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 					update_term_meta( $category->term_id, 'fusion_taxonomy_options', $page_options );
 				}
 			}
-		} // End if().
+		}
 	}
 
 	/**
@@ -198,7 +198,7 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function migrate_grid_separator_options() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		if ( isset( $options['separator_style_type'] ) ) {
 			$options['grid_separator_style_type'] = $options['separator_style_type'];
@@ -224,7 +224,7 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function migrate_flyout_menu_options() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		$options['flyout_nav_icons_padding'] = $options['nav_padding'];
 
@@ -239,7 +239,7 @@ class Avada_Upgrade_530 extends Avada_Upgrade_Abstract {
 	 * @return void
 	 */
 	private function migrate_page_title_bar_options() {
-		$options = get_option( $this->option_name, array() );
+		$options = get_option( $this->option_name, [] );
 
 		// Existing blog page option migrate to new format.
 		if ( isset( $options['blog_show_page_title_bar'] ) ) {

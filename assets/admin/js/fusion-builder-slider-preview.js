@@ -28,18 +28,18 @@ jQuery( document ).ready( function() {
 					elasticslider: $elasticSlider,
 					demoslider: $demoSlider
 				}
-			},
-			error: function( response ) {
-				if ( ! jQuery( '.fusion-builder-slider-helper' ).length ) {
-					jQuery( '#fusion_builder_container' ).prepend( response.responseText.slice( 0, -1 ) );
-				} else {
-					jQuery( '.fusion-builder-slider-helper' ).replaceWith( response.responseText.slice( 0, -1 ) );
-				}
-			},
-			success: function() {
-				if ( jQuery( '.fusion-builder-slider-helper' ).length ) {
-					jQuery( '.fusion-builder-slider-helper' ).remove();
-				}
+			}
+		} )
+		.fail( function( response ) {
+			if ( ! jQuery( '.fusion-builder-slider-helper' ).length ) {
+				jQuery( '#fusion_builder_container' ).prepend( response.responseText.slice( 0, -1 ) );
+			} else {
+				jQuery( '.fusion-builder-slider-helper' ).replaceWith( response.responseText.slice( 0, -1 ) );
+			}
+		} )
+		.done( function() {
+			if ( jQuery( '.fusion-builder-slider-helper' ).length ) {
+				jQuery( '.fusion-builder-slider-helper' ).remove();
 			}
 		} );
 	} );

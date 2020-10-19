@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      3.8
@@ -32,17 +32,25 @@ class Avada_Head {
 		add_action( 'wp_head', array( $this, 'the_meta' ) );
 		 */
 
-		add_action( 'wp_head', array( $this, 'insert_og_meta' ), 5 );
-		add_filter( 'language_attributes', array( $this, 'add_opengraph_doctype' ) );
+		add_filter( 'language_attributes', [ $this, 'add_opengraph_doctype' ] );
 
-		add_filter( 'document_title_separator', array( $this, 'document_title_separator' ) );
-		add_action( 'wp_head', array( $this, 'insert_favicons' ), 2 );
-		add_filter( 'theme_color_meta', array( $this, 'theme_color' ) );
+		add_filter( 'document_title_separator', [ $this, 'document_title_separator' ] );
 
+		add_filter( 'theme_color_meta', [ $this, 'theme_color' ] );
+
+		add_action( 'wp_head', [ $this, 'insert_favicons' ], 2 );
+		add_action( 'wp_head', [ $this, 'insert_og_meta' ], 5 );
 		remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head' );
 
 		if ( ! function_exists( '_wp_render_title_tag' ) ) {
-			add_action( 'wp_head', array( $this, 'render_title' ) );
+			add_action( 'wp_head', [ $this, 'render_title' ] );
+		}
+
+		add_action( 'wp_head', [ $this, 'set_user_agent' ], 1000 );
+
+		// wp_body_open function introduced in WP 5.2.
+		if ( function_exists( 'wp_body_open' ) ) {
+			add_action( 'avada_before_body_content', 'wp_body_open' );
 		}
 
 		/**
@@ -71,9 +79,26 @@ class Avada_Head {
 	 *
 	 * @access public
 	 * @since 5.0.0
+	 * @return void
 	 */
 	public function render_title() {
 		wp_title( '' );
+	}
+
+	/**
+	 * Set the user agent data attribute on the HTML tag.
+	 *
+	 * @access public
+	 * @since 6.0
+	 * @return void
+	 */
+	public function set_user_agent() {
+		?>
+		<script type="text/javascript">
+			var doc = document.documentElement;
+			doc.setAttribute( 'data-useragent', navigator.userAgent );
+		</script>
+		<?php
 	}
 
 	/**
@@ -114,13 +139,13 @@ class Avada_Head {
 		}
 		?>
 
-		<meta property="og:title" content="<?php echo esc_attr( strip_tags( str_replace( array( '"', "'" ), array( '&quot;', '&#39;' ), $post->post_title ) ) ); ?>"/>
+		<meta property="og:title" content="<?php echo esc_attr( strip_tags( str_replace( [ '"', "'" ], [ '&quot;', '&#39;' ], $post->post_title ) ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags ?>"/>
 		<meta property="og:type" content="article"/>
 		<meta property="og:url" content="<?php echo esc_url_raw( get_permalink() ); ?>"/>
 		<meta property="og:site_name" content="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"/>
 		<meta property="og:description" content="<?php echo esc_attr( Avada()->blog->get_content_stripped_and_excerpted( 55, $post->post_content ) ); ?>"/>
 
-		<?php if ( '' != $image ) : ?>
+		<?php if ( '' != $image ) : // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison ?>
 			<?php if ( is_array( $image ) ) : ?>
 				<?php if ( isset( $image['url'] ) ) : ?>
 					<meta property="og:image" content="<?php echo esc_url_raw( $image['url'] ); ?>"/>
@@ -139,7 +164,7 @@ class Avada_Head {
 	 * @access  public
 	 */
 	public function x_ua_meta() {
-		if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && ( false !== strpos( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ), 'MSIE' ) ) ) { // WPCS: sanitization ok.
+		if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && ( false !== strpos( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ), 'MSIE' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			echo '<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />';
 		}
 	}
@@ -174,18 +199,19 @@ class Avada_Head {
 
 		<?php if ( '' !== Avada()->settings->get( 'iphone_icon_retina', 'url' ) ) : ?>
 			<!-- For iPhone Retina display -->
-			<link rel="apple-touch-icon" sizes="114x114" href="<?php echo esc_url_raw( Avada()->settings->get( 'iphone_icon_retina', 'url' ) ); ?>">
+			<link rel="apple-touch-icon" sizes="180x180" href="<?php echo esc_url_raw( Avada()->settings->get( 'iphone_icon_retina', 'url' ) ); ?>">
 		<?php endif; ?>
 
 		<?php if ( '' !== Avada()->settings->get( 'ipad_icon', 'url' ) ) : ?>
 			<!-- For iPad -->
-			<link rel="apple-touch-icon" sizes="72x72" href="<?php echo esc_url_raw( Avada()->settings->get( 'ipad_icon', 'url' ) ); ?>">
+			<link rel="apple-touch-icon" sizes="152x152" href="<?php echo esc_url_raw( Avada()->settings->get( 'ipad_icon', 'url' ) ); ?>">
 		<?php endif; ?>
 
 		<?php if ( '' !== Avada()->settings->get( 'ipad_icon_retina', 'url' ) ) : ?>
 			<!-- For iPad Retina display -->
-			<link rel="apple-touch-icon" sizes="144x144" href="<?php echo esc_url_raw( Avada()->settings->get( 'ipad_icon_retina', 'url' ) ); ?>">
+			<link rel="apple-touch-icon" sizes="167x167" href="<?php echo esc_url_raw( Avada()->settings->get( 'ipad_icon_retina', 'url' ) ); ?>">
 		<?php endif; ?>
+
 		<?php
 
 	}
@@ -217,12 +243,12 @@ class Avada_Head {
 	 */
 	public function the_viewport() {
 
-		$is_ipad = (bool) ( isset( $_SERVER['HTTP_USER_AGENT'] ) && false !== strpos( $_SERVER['HTTP_USER_AGENT'], 'iPad' ) ); // WPCS: sanitization ok.
+		$is_ipad = (bool) ( isset( $_SERVER['HTTP_USER_AGENT'] ) && false !== strpos( $_SERVER['HTTP_USER_AGENT'], 'iPad' ) ); // phpcs:ignore WordPress.Security
 
 		$viewport = '';
-		if ( Avada()->settings->get( 'responsive' ) && $is_ipad ) {
+		if ( fusion_get_option( 'responsive' ) && $is_ipad ) {
 			$viewport .= '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />';
-		} elseif ( Avada()->settings->get( 'responsive' ) ) {
+		} elseif ( fusion_get_option( 'responsive' ) ) {
 			if ( Avada()->settings->get( 'mobile_zoom' ) ) {
 				$viewport .= '<meta name="viewport" content="width=device-width, initial-scale=1" />';
 			} else {
@@ -232,7 +258,7 @@ class Avada_Head {
 
 		$viewport = apply_filters( 'avada_viewport_meta', $viewport );
 
-		echo $viewport; // WPCS: XSS ok.
+		echo $viewport; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
 	/**

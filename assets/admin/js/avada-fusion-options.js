@@ -3,12 +3,102 @@ jQuery( document ).ready( function() {
 
 	var $rangeSlider,
 		$i,
-		fusionPageOptions;
+		fusionPageOptions,
+		fusionSelect2;
 
-	jQuery( '.pyre_field select:not(.hidden-sidebar)' ).select2( {
-		minimumResultsForSearch: 10,
-		dropdownCssClass: 'avada-select2'
+	fusionSelect2 = jQuery( '.pyre_field select:not(.hidden-sidebar):not([data-ajax])' ).filter( function() {
+		return ! jQuery( this ).closest( '.fusion-repeater-wrapper' ).length;
+	} ).select2( {
+		minimumResultsForSearch: 10
 	} );
+
+	jQuery.each( fusionSelect2, function() {
+		if ( 'undefined' !== typeof jQuery( this ).data( 'select2' ).dropdown ) {
+			if ( 'undefined' !== typeof jQuery( this ).data( 'select2' ).dropdown.$dropdown ) {
+				jQuery( this ).data( 'select2' ).dropdown.$dropdown.addClass( 'avada-select2' );
+			} else if ( 'undefined' !== typeof jQuery( this ).data( 'select2' ).dropdown.selector ) {
+				jQuery( jQuery( this ).data( 'select2' ).dropdown.selector ).addClass( 'avada-select2' );
+			}
+		}
+	} );
+
+	if ( 'undefined' !== typeof ajaxurl ) {
+
+		jQuery( '.pyre_field select[data-ajax]' ).filter( function() {
+			return ! jQuery( this ).closest( '.fusion-repeater-wrapper' ).length;
+		} ).each( function() {
+			var $select, ajax, ajaxParams, labels, initAjaxSelect, maxInput;
+
+			$select = jQuery( this );
+			ajax = $select.data( 'ajax' );
+			maxInput = $select.data( 'max-input' );
+			ajaxParams = $select.siblings( '.params' ).val();
+			labels = $select.siblings( '.initial-values' ).val();
+
+			ajaxParams = JSON.parse( ajaxParams );
+			labels = JSON.parse( _.unescape( labels ) );
+			initAjaxSelect 	= function() {
+				var ajaxSelect = $select.select2( {
+					width: '100%',
+					delay: 250,
+					minimumInputLength: 3,
+					maximumSelectionLength: maxInput,
+					ajax: {
+						url: ajaxurl,
+						dataType: 'json',
+						data: function ( params ) {
+							return {
+								action: ajax,
+								search: params.term,
+								params: ajaxParams,
+								fusion_po_nonce: jQuery( '#fusion-page-options-nonce' ).val()
+							};
+						}
+					}
+				} );
+
+				if ( 'undefined' !== typeof ajaxSelect.data( 'select2' ).dropdown ) {
+					if ( 'undefined' !== typeof ajaxSelect.data( 'select2' ).dropdown.$dropdown ) {
+						ajaxSelect.data( 'select2' ).dropdown.$dropdown.addClass( 'avada-select2' );
+					} else if ( 'undefined' !== typeof ajaxSelect.data( 'select2' ).dropdown.selector ) {
+						jQuery( ajaxSelect.data( 'select2' ).dropdown.selector ).addClass( 'avada-select2' );
+					}
+				}
+
+				ajaxSelect.data( 'select2' ).on( 'results:message', function() {
+					this.dropdown._resizeDropdown();
+					this.dropdown._positionDropdown();
+				} );
+
+				fusionSelect2.add( ajaxSelect );
+			};
+
+			// If there are initial values get labels else init ajax-select.
+			if ( labels ) {
+				jQuery.post( ajaxurl, {
+					action: ajax,
+					labels: labels,
+					params: ajaxParams,
+					fusion_po_nonce: jQuery( '#fusion-page-options-nonce' ).val()
+				}, function( data ) {
+					data = JSON.parse( data );
+					labels  = data.labels || [];
+
+					_.each( labels, function( label ) {
+						$select.append(
+							'<option value="' + label.id + '" selected="selected">' + label.text + '</option>'
+						);
+					} );
+
+					initAjaxSelect();
+
+				} );
+			} else {
+				initAjaxSelect();
+			}
+		} );
+
+	}
 
 	jQuery( '.pyre_field.avada-buttonset a' ).on( 'click', function( e ) {
 		var $radiosetcontainer;
@@ -61,7 +151,7 @@ jQuery( document ).ready( function() {
 		}
 
 		jQuery( this ).sortable();
-		jQuery( this ).on( 'sortupdate', function( event, ui ) {
+		jQuery( this ).on( 'sortupdate', function( event ) {
 			var sortContainer = jQuery( event.target ),
 				sortOrder = '';
 
@@ -79,9 +169,9 @@ jQuery( document ).ready( function() {
 		jQuery( this ).parents( '.pyre_metabox_field' ).find( '.fusion-reset-to-default' ).on( 'click', function( e ) {
 			var order    = jQuery( this ).data( 'default' ).split( ',' ),
 				sortable = jQuery( this ).parents( '.pyre_metabox_field' ).find( '.fusion-sortable-options' ),
-				first    = sortable.find( '[data-value="' + order[0] + '"]' ),
-				second   = sortable.find( '[data-value="' + order[1] + '"]' ),
-				third    = sortable.find( '[data-value="' + order[2] + '"]' );
+				first    = sortable.find( '[data-value="' + order[ 0 ] + '"]' ),
+				second   = sortable.find( '[data-value="' + order[ 1 ] + '"]' ),
+				third    = sortable.find( '[data-value="' + order[ 2 ] + '"]' );
 
 			sortable.prepend( first );
 			sortable.append( second );
@@ -130,25 +220,28 @@ jQuery( document ).ready( function() {
 
 		$container.find( 'span' ).each( function() {
 
-			var $value = jQuery( this ).data( 'value' ),
+			var $value      = jQuery( this ).data( 'value' ),
 				$comparison = jQuery( this ).data( 'comparison' ),
-				$field = jQuery( this ).data( 'field' );
+				$field      = jQuery( this ).data( 'field' ),
+				$target     = $container.closest( '.fusion-repeater-row' ).length ? $container.closest( '.fusion-repeater-row' ).find( '#pyre_' + $field ) : jQuery( '#pyre_' + $field );
 
-			$passed = avadaCheckDependency( jQuery( '#pyre_' + $field ).val(), $value, $comparison );
+			$passed = avadaCheckDependency( $target.val(), $value, $comparison );
 			return $passed;
 		} );
 		if ( $passed ) {
-			$container.parents( '.pyre_metabox_field' ).fadeIn( 300 );
+			$container.closest( '.pyre_metabox_field' ).fadeIn( 300 );
 		} else {
-			$container.parents( '.pyre_metabox_field' ).hide();
+			$container.closest( '.pyre_metabox_field' ).hide();
 		}
 	}
 
-	jQuery( '.avada-dependency' ).each( function() {
+	jQuery( '.avada-dependency' ).filter( function() {
+		return ! jQuery( this ).closest( '.fusion-repeater-row' ).length;
+	} ).each( function() {
 		avadaLoopDependencies( jQuery( this ) );
 	} );
-	jQuery( '[id*="pyre"]' ).on( 'change', function() {
-		var $id = jQuery( this ).attr( 'id' ),
+	jQuery( '[id*="pyre"]' ).on( 'change.dependency', function() {
+		var $id    = jQuery( this ).attr( 'id' ),
 			$field = $id.replace( 'pyre_', '' );
 		jQuery( 'span[data-field="' + $field + '"]' ).each( function() {
 			avadaLoopDependencies( jQuery( this ).parents( '.avada-dependency' ) );
@@ -163,8 +256,8 @@ jQuery( document ).ready( function() {
 				step: $step,
 				direction: $direction,
 				range: {
-					'min': $min,
-					'max': $max
+					min: $min,
+					max: $max
 				},
 				format: wNumb( {
 					decimals: $decimals
@@ -181,8 +274,8 @@ jQuery( document ).ready( function() {
 		if ( $rangeDefault ) {
 			$rangeDefault.on( 'click', function( e ) {
 				e.preventDefault();
-				$rangeSlider[$slide].noUiSlider.set( $defaultValue );
-				$hiddenValue.val( '' );
+				$rangeSlider[ $slide ].noUiSlider.set( $defaultValue );
+				$hiddenValue.val( '' ).trigger( 'fusion-changed' );
 				jQuery( this ).parent().addClass( 'checked' );
 			} );
 		}
@@ -191,10 +284,10 @@ jQuery( document ).ready( function() {
 		$slider.on( 'update', function( values, handle ) {
 			if ( $rangeDefault && $notFirst ) {
 				$rangeDefault.parent().removeClass( 'checked' );
-				$hiddenValue.val( values[handle] );
+				$hiddenValue.val( values[ handle ] ).trigger( 'fusion-changed' );
 			}
 			$notFirst = true;
-			jQuery( this.target ).closest( '.fusion-slider-container' ).prev().val( values[handle] );
+			jQuery( this.target ).closest( '.fusion-slider-container' ).prev().val( values[ handle ] );
 			jQuery( '#' + $targetId ).trigger( 'change' );
 			if ( jQuery( '#' + $targetId ).length ) {
 				jQuery( '#' + $targetId ).trigger( 'fusion-changed' );
@@ -207,11 +300,11 @@ jQuery( document ).ready( function() {
 		$rangeInput.on( 'keyup', function( values, handle ) {
 			if ( $rangeDefault ) {
 				$rangeDefault.parent().removeClass( 'checked' );
-				$hiddenValue.val( values[handle] );
+				$hiddenValue.val( values[ handle ] );
 			}
 
-			if ( this.value !== $rangeSlider[$slide].noUiSlider.get() ) {
-				$rangeSlider[$slide].noUiSlider.set( this.value );
+			if ( this.value !== $rangeSlider[ $slide ].noUiSlider.get() ) {
+				$rangeSlider[ $slide ].noUiSlider.set( this.value );
 			}
 		} );
 	}
@@ -224,11 +317,11 @@ jQuery( document ).ready( function() {
 		$i = 0;
 
 		// Method for retreiving decimal places from step
-		Number.prototype.countDecimals = function() {
+		Number.prototype.countDecimals = function() { // eslint-disable-line no-extend-native
 			if ( Math.floor( this.valueOf() ) === this.valueOf() ) {
 				return 0;
 			}
-			return this.toString().split( '.' )[1].length || 0;
+			return this.toString().split( '.' )[ 1 ].length || 0;
 		};
 
 		// Each slider on page, determine settings and create slider
@@ -303,6 +396,277 @@ jQuery( document ).ready( function() {
 
 			jQuery( '#fusion-page-options-export' ).on( 'click', self.exportOptions );
 
+			this.initRepeaters();
+
+		},
+
+		initRepeaters: function() {
+			var self = this;
+			jQuery( '.fusion-repeater-wrapper' ).each( function() {
+				self.initRepeater( jQuery( this ) );
+			} );
+		},
+
+		initRepeater: function( $element ) {
+			var self       = this,
+				$addButton = $element.find( '.fusion-add-row' ),
+				$defaults  = $element.find( '.fusion-repeater-default-fields' ).html(),
+				$rows      = $element.find( '.fusion-repeater-rows' ),
+				$value     = $element.find( '.repeater-value' ),
+				values     = $value.val(),
+				titleBind  = $value.data( 'bind' );
+
+			$rows.empty();
+			if ( 'string' === typeof values && '' !== values ) {
+				try {
+					values = JSON.parse( values );
+					self.insertOptionsWithValues( $element, values, titleBind );
+				} catch ( e ) {
+					console.warn( 'Something went wrong! Error triggered - ' + e );
+				}
+			}
+
+			// Add a repeater row on click.
+			$addButton.on( 'click', function( event ) {
+
+				event.preventDefault();
+
+				// Add the markup.
+				$rows.append( '<div class="fusion-repeater-row fusion-needs-init">' + $defaults + '</div>' );
+
+				// Auto open new row.
+				$rows.find( '.fusion-needs-init .fusion-row-fields' ).css( { display: 'block' } );
+
+				// Init the options and dependencies.
+				self.initOptions( $element );
+
+				// Updates value.
+				self.setRepeaterValue( $element );
+			} );
+
+			// Row remove button click.
+			$element.off( 'click.remove' ).on( 'click.remove', '.repeater-row-remove', function( event ) {
+
+				event.preventDefault();
+
+				// Remove visible row.
+				jQuery( event.target ).closest( '.fusion-repeater-row' ).remove();
+
+				// Update the hidden input value.
+				self.setRepeaterValue( $element );
+			} );
+
+			// Row remove button click.
+			$element.off( 'click.toggle' ).on( 'click.toggle', '.fusion-row-title', function( event ) {
+				if ( jQuery( event.target ).hasClass( 'repeater-row-remove' ) ) {
+					return;
+				}
+
+				// Toggle visibility of fields.
+				jQuery( event.target ).closest( '.fusion-repeater-row' ).find( '.fusion-row-fields' ).slideToggle( 300 );
+			} );
+
+			// Bind title to option if set.
+			if ( '' !== titleBind ) {
+				$element.on( 'change', '[id="pyre_' + titleBind + '"]', function( event ) {
+					self.setInputLabel( jQuery( event.target ) );
+				} );
+			}
+
+			// Any option change, need to update repeater value.
+			$element.on( 'change', '[id*="pyre"]', function() {
+				self.setRepeaterValue( $element );
+			} );
+		},
+
+		setInputLabel: function( $input ) {
+			var value  = $input.val(),
+				$title = $input.closest( '.fusion-repeater-row' ).find( 'h4' );
+
+			if ( $input.is( 'select' ) ) {
+				value = $input.find( 'option:selected' ).text();
+			}
+			$title.text( value );
+		},
+
+		insertOptionsWithValues: function( $wrapper, values, titleBind ) {
+			var self      = this,
+				$defaults = $wrapper.find( '.fusion-repeater-default-fields' ),
+				$rows     = $wrapper.find( '.fusion-repeater-rows' );
+
+			if ( 'object' === typeof values ) {
+				jQuery.each( values, function( key, valueObject ) {
+					var $newrow = jQuery( '<div class="fusion-repeater-row fusion-needs-init">' + $defaults.clone().html() + '</div>' );
+
+					jQuery.each( valueObject, function( valueKey, value ) {
+						var $input = $newrow.find( '#pyre_' + valueKey );
+						if ( '' !== value ) {
+							// Save values for ajax-select call
+							if ( $input.data( 'ajax' ) ) {
+								$input.siblings( '.initial-values' ).val( _.escape( JSON.stringify( value ) ) );
+							}
+							if ( $input.hasClass( 'button-set-value' ) ) {
+								$input.siblings( '.ui-state-active' ).removeClass( 'ui-state-active' );
+								$input.siblings( '[data-value="' + value + '"]' ).addClass( 'ui-state-active' );
+							}
+							$input.val( value );
+						}
+					} );
+					self.setInputLabel( $newrow.find( '#pyre_' + titleBind ) );
+					$rows.append( $newrow );
+				} );
+
+				this.initOptions( $wrapper );
+			}
+		},
+
+		setRepeaterValue: function( $wrapper ) {
+			var $value = $wrapper.find( '.repeater-value' ),
+				value  = [];
+
+			$wrapper.find( '.fusion-repeater-row' ).each( function() {
+				var values = {};
+
+				jQuery( this ).find( '[id*="pyre"]' ).each( function() {
+					var id   = jQuery( this ).attr( 'id' ).replace( 'pyre_', '' ),
+						val  = jQuery( this ).val();
+
+					if ( null !== val && '' !== val ) {
+						values[ id ] = jQuery( this ).val();
+					}
+				} );
+				value.push( values );
+			} );
+
+			$value.val( JSON.stringify( value ) );
+		},
+
+		initOptions: function( $wrapper ) {
+			var self = this;
+			$wrapper.find( '.fusion-repeater-rows .fusion-needs-init' ).each( function() {
+				jQuery( this ).removeClass( 'fusion-needs-init' );
+				self.initDependencies( jQuery( this ) );
+				self.initSelect( jQuery( this ) );
+				self.initRadios( jQuery( this ) );
+			} );
+		},
+
+		initDependencies: function( $wrapper ) {
+			$wrapper.find( '.avada-dependency' ).each( function() {
+				avadaLoopDependencies( jQuery( this ) );
+			} );
+			$wrapper.find( '[id*="pyre"]' ).off( 'change.dependency' ).on( 'change.dependency', function() {
+				var $id    = jQuery( this ).attr( 'id' ),
+					$field = $id.replace( 'pyre_', '' );
+
+				$wrapper.find( 'span[data-field="' + $field + '"]' ).each( function() {
+					avadaLoopDependencies( jQuery( this ).closest( '.avada-dependency' ) );
+				} );
+			} );
+		},
+
+		initRadios: function( $wrapper ) {
+			$wrapper.find( '.pyre_field.avada-buttonset a' ).on( 'click', function( e ) {
+				var $radiosetcontainer;
+
+				e.preventDefault();
+				$radiosetcontainer = jQuery( this ).parents( '.fusion-form-radio-button-set' );
+				$radiosetcontainer.find( '.ui-state-active' ).removeClass( 'ui-state-active' );
+				jQuery( this ).addClass( 'ui-state-active' );
+				$radiosetcontainer.find( '.button-set-value' ).val( $radiosetcontainer.find( '.ui-state-active' ).data( 'value' ) ).trigger( 'change' );
+			} );
+		},
+
+		initSelect: function( $wrapper ) {
+			fusionSelect2 = $wrapper.find( '.pyre_field select:not(.hidden-sidebar):not([data-ajax])' ).select2( {
+				minimumResultsForSearch: 10,
+				width: '100%'
+			} );
+
+
+			if ( 'undefined' !== typeof ajaxurl ) {
+
+				$wrapper.find( '.pyre_field select[data-ajax]' ).each( function() {
+					var $select, ajax, ajaxParams, labels, initAjaxSelect;
+
+					$select 		= jQuery( this );
+					ajax    		= $select.data( 'ajax' );
+					ajaxParams 		= $select.siblings( '.params' ).val();
+					labels 			= $select.siblings( '.initial-values' ).val();
+
+					ajaxParams 	= JSON.parse( ajaxParams );
+					labels 		= JSON.parse( _.unescape( labels ) );
+					initAjaxSelect 	= function() {
+						var ajaxSelect = $select.select2( {
+							width: '100%',
+							delay: 250,
+							minimumInputLength: 3,
+							ajax: {
+								url: ajaxurl,
+								dataType: 'json',
+								data: function ( params ) {
+									return {
+										action: ajax,
+										search: params.term,
+										params: ajaxParams,
+										fusion_po_nonce: jQuery( '#fusion-page-options-nonce' ).val()
+									};
+								}
+							}
+						} );
+
+						if ( 'undefined' !== typeof ajaxSelect.data( 'select2' ).dropdown ) {
+							if ( 'undefined' !== typeof ajaxSelect.data( 'select2' ).dropdown.$dropdown ) {
+								ajaxSelect.data( 'select2' ).dropdown.$dropdown.addClass( 'avada-select2' );
+							} else if ( 'undefined' !== typeof ajaxSelect.data( 'select2' ).dropdown.selector ) {
+								jQuery( ajaxSelect.data( 'select2' ).dropdown.selector ).addClass( 'avada-select2' );
+							}
+						}
+
+						ajaxSelect.data( 'select2' ).on( 'results:message', function() {
+							this.dropdown._resizeDropdown();
+							this.dropdown._positionDropdown();
+						} );
+
+						fusionSelect2.add( ajaxSelect );
+					};
+
+					// If there are initial values get labels else init ajax-select.
+					if ( labels ) {
+						jQuery.post( ajaxurl, {
+							action: ajax,
+							labels: labels,
+							params: ajaxParams,
+							fusion_po_nonce: jQuery( '#fusion-page-options-nonce' ).val()
+						}, function( data ) {
+							data = JSON.parse( data );
+							labels  = data.labels || [];
+
+							_.each( labels, function( label ) {
+								$select.append(
+									'<option value="' + label.id + '" selected="selected">' + label.text + '</option>'
+								);
+							} );
+
+							initAjaxSelect();
+
+						} );
+					} else {
+						initAjaxSelect();
+					}
+				} );
+
+			}
+
+			jQuery.each( fusionSelect2, function() {
+				if ( 'undefined' !== typeof jQuery( this ).data( 'select2' ).dropdown ) {
+					if ( 'undefined' !== typeof jQuery( this ).data( 'select2' ).dropdown.$dropdown ) {
+						jQuery( this ).data( 'select2' ).dropdown.$dropdown.addClass( 'avada-select2' );
+					} else if ( 'undefined' !== typeof jQuery( this ).data( 'select2' ).dropdown.selector ) {
+						jQuery( jQuery( this ).data( 'select2' ).dropdown.selector ).addClass( 'avada-select2' );
+					}
+				}
+			} );
 		},
 
 		exportOptions: function() {
@@ -337,7 +701,7 @@ jQuery( document ).ready( function() {
 					width: 400,
 					modal: true,
 					buttons: {
-						'OK': function() {
+						OK: function() {
 							poDialog.html( '' );
 							jQuery( this ).dialog( 'close' );
 						}
@@ -352,31 +716,30 @@ jQuery( document ).ready( function() {
 			jQuery.get( {
 				url: ajaxurl,
 				data: data,
-				dataType: 'json',
-				success: function( response ) {
-					var html;
+				dataType: 'json'
+			} ).done( function( response ) {
+				var html;
 
-					html  = '<option value="' + response.saved_post_id + '">';
-					html += response.saved_post_title;
-					html += '</option>';
+				html  = '<option value="' + response.saved_po_dataset_id + '">';
+				html += response.saved_po_dataset_title;
+				html += '</option>';
 
-					jQuery( '#fusion-saved-page-options-select' ).append( html );
+				jQuery( '#fusion-saved-page-options-select' ).append( html );
 
-					jQuery( '#fusion-new-page-options-name' ).val( '' );
+				jQuery( '#fusion-new-page-options-name' ).val( '' );
 
-					jQuery( '#fusion-page-options-loader' ).hide();
+				jQuery( '#fusion-page-options-loader' ).hide();
 
-				}
 			} );
 		},
 
 		importSavedOptions: function( e ) {
 			var data = {
-					action: 'fusion_page_options_import_saved',
-					fusion_po_nonce: jQuery( '#fusion-page-options-nonce' ).val(),
-					post_id: jQuery( '#fusion-saved-page-options-select' ).data( 'post_id' ),
-					saved_post_id: jQuery( '#fusion-saved-page-options-select' ).val()
-				};
+				action: 'fusion_page_options_import_saved',
+				fusion_po_nonce: jQuery( '#fusion-page-options-nonce' ).val(),
+				post_id: jQuery( '#fusion-saved-page-options-select' ).data( 'post_id' ),
+				saved_po_dataset_id: jQuery( '#fusion-saved-page-options-select' ).val()
+			};
 
 			e.preventDefault();
 
@@ -385,21 +748,19 @@ jQuery( document ).ready( function() {
 			jQuery.get( {
 				url: ajaxurl,
 				data: data,
-				dataType: 'json',
-				success: function( response ) {
-					updatePOPanel( response.custom_fields );
-					jQuery( '#fusion-page-options-loader' ).hide();
-				}
+				dataType: 'json'
+			} ).done( function( response ) {
+				updatePOPanel( response.custom_fields );
+				jQuery( '#fusion-page-options-loader' ).hide();
 			} );
-
 		},
 
 		deleteSaved: function( e ) {
-			var savedPostID = jQuery( '#fusion-saved-page-options-select' ).val(),
+			var savedPageOptionsDatasetID = jQuery( '#fusion-saved-page-options-select' ).val(),
 				data        = {
 					action: 'fusion_page_options_delete',
 					fusion_po_nonce: jQuery( '#fusion-page-options-nonce' ).val(),
-					saved_post_id: savedPostID
+					saved_po_dataset_id: savedPageOptionsDatasetID
 				};
 
 			e.preventDefault();
@@ -408,13 +769,12 @@ jQuery( document ).ready( function() {
 
 			jQuery.get( {
 				url: ajaxurl,
-				data: data,
-				success: function() {
-					jQuery( '#fusion-saved-page-options-select option[value="' +  savedPostID + '"]' ).remove();
-					jQuery( '#fusion-page-options-loader' ).hide();
+				data: data
+			} ).done( function() {
+				jQuery( '#fusion-saved-page-options-select option[value="' +  savedPageOptionsDatasetID + '"]' ).remove();
+				jQuery( '#fusion-page-options-loader' ).hide();
 
-					jQuery( '#fusion-page-options-buttons-wrap' ).fadeOut();
-				}
+				jQuery( '#fusion-page-options-buttons-wrap' ).fadeOut();
 			} );
 
 		},
@@ -443,7 +803,7 @@ jQuery( document ).ready( function() {
 						width: 400,
 						modal: true,
 						buttons: {
-							'OK': function() {
+							OK: function() {
 								poDialog.html( '' );
 								jQuery( this ).dialog( 'close' );
 							}
@@ -461,12 +821,10 @@ jQuery( document ).ready( function() {
 				cache: false,
 				dataType: 'json',
 				processData: false, // Don't process the files
-				contentType: false, // Set content type to false as jQuery will tell the server its a query string request
-				success: function( response ) {
-					updatePOPanel( response.custom_fields );
-					jQuery( '#fusion-page-options-loader' ).hide();
-				}
-
+				contentType: false // Set content type to false as jQuery will tell the server its a query string request
+			} ).done( function( response ) {
+				updatePOPanel( response.custom_fields );
+				jQuery( '#fusion-page-options-loader' ).hide();
 			} );
 		},
 
@@ -492,16 +850,8 @@ jQuery( document ).ready( function() {
 		jQuery.each( customFields, function( id, value ) {
 			var $el;
 
-			/**
-			 * Multiple sidebar plugin exception.
-			 */
-			if ( 'sbg_selected_sidebar' === id || 'sbg_selected_sidebar_replacement' === id || 'sbg_selected_sidebar_2' === id || 'sbg_selected_sidebar_2_replacement' === id ) {
-				$el = jQuery( 'select[data-fusion_id="' + id + '"]' );
-
-				$el.attr( 'value', value ).trigger( 'change' );
-
-				// Continue.
-				return true;
+			if ( ! id.includes( 'pyre_' ) ) {
+				id = 'pyre_' + id;
 			}
 
 			$el = jQuery( '#' + id );
@@ -513,6 +863,25 @@ jQuery( document ).ready( function() {
 				// Continue.
 				return true;
 			}
+
+			if ( $el.hasClass( 'repeater-value' ) ) {
+
+				$el.val( value );
+
+				fusionPageOptions.initRepeater( $el.closest( '.fusion-repeater-wrapper' ) );
+
+				// Continue.
+				return true;
+			}
+
+			if ( $el.hasClass( 'upload_field' ) ) {
+
+				$el.val( value.url );
+
+				// Continue.
+				return true;
+			}
+
 
 			$el.val( value );
 

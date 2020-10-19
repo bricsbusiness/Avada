@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      5.0.0
@@ -39,10 +39,10 @@ class Fusion_Builder_Redux_Options {
 		include_once wp_normalize_path( dirname( __FILE__ ) . '/options/shortcode_styling.php' );
 
 		// Determine if we're using the Avada theme.
-		add_action( 'after_setup_theme', array( $this, 'is_avada' ) );
+		add_action( 'after_setup_theme', [ $this, 'is_avada' ] );
 
 		// Add options to Avada.
-		add_filter( 'avada_options_sections', array( $this, 'add_sections' ), 50 );
+		add_filter( 'avada_options_sections', [ $this, 'add_sections' ], 50 );
 
 	}
 
@@ -66,12 +66,12 @@ class Fusion_Builder_Redux_Options {
 	 * @param array $sections Our Redux sections.
 	 * @return array
 	 */
-	public function add_sections( $sections = array() ) {
+	public function add_sections( $sections = [] ) {
 		global $fusion_builder_elements;
 
 		// Simplify the array.
 		if ( null !== $fusion_builder_elements ) {
-			$simplified_array = array();
+			$simplified_array = [];
 			foreach ( $fusion_builder_elements as $element ) {
 				if ( isset( $element['shortcode'] ) && isset( $element['name'] ) ) {
 					$simplified_array[ $element['shortcode'] ] = $element['name'];
@@ -85,7 +85,7 @@ class Fusion_Builder_Redux_Options {
 		// If we can't find the builder elements from the global var,
 		// use a hard-coded array.
 		if ( null === $fusion_builder_elements ) {
-			$fusion_builder_elements = array(
+			$fusion_builder_elements = [
 				'fusion_alert'                    => 'Alert',
 				'fusion_blog'                     => 'Blog',
 				'fusion_button'                   => 'Button',
@@ -98,9 +98,9 @@ class Fusion_Builder_Redux_Options {
 				'fusion_events'                   => 'Events',
 				'fusion_faq'                      => 'FAQ',
 				'fusion_flip_boxes'               => 'Flip Boxes',
-				'fusion_fontawesome'              => 'Font Awesome Icon',
-				'fusion_fusionslider'             => 'Fusion Slider',
+				'fusion_fusionslider'             => 'Avada Slider',
 				'fusion_map'                      => 'Google Map',
+				'fusion_fontawesome'              => 'Icon',
 				'fusion_images'                   => 'Image Carousel',
 				'fusion_imageframe'               => 'Image Frame',
 				'layerslider'                     => 'Layer Slider',
@@ -133,7 +133,7 @@ class Fusion_Builder_Redux_Options {
 				'fusion_products_slider'          => 'Woo Carousel',
 				'fusion_woo_shortcodes'           => 'Woo Shortcodes',
 				'fusion_youtube'                  => 'Youtube',
-			);
+			];
 		}
 
 		$option_name = 'fusion_builder_options';

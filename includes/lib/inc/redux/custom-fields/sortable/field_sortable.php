@@ -82,7 +82,7 @@ if ( ! class_exists( 'FusionReduxFramework_sortable' ) ) {
 				true
 			);
 			wp_enqueue_style(
-				'fusionredux-field-dimensions-css',
+				'fusionredux-field-sortable-css',
 				trailingslashit( FUSION_LIBRARY_URL ) . 'inc/redux/custom-fields/sortable/field_sortable.css',
 				array(),
 				$fusion_library_latest_version,

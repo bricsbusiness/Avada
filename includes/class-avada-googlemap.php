@@ -4,7 +4,7 @@
  *
  * @author     ThemeFusion
  * @copyright  (c) Copyright by ThemeFusion
- * @link       http://theme-fusion.com
+ * @link       https://theme-fusion.com
  * @package    Avada
  * @subpackage Core
  * @since      3.8.5
@@ -42,10 +42,10 @@ class Avada_GoogleMap {
 	 */
 	public function __construct() {
 
-		add_filter( 'fusion_attr_avada-google-map', array( $this, 'attr' ) );
-		add_action( 'wp_ajax_fusion_cache_map', array( $this, 'fusion_cache_map' ) );
-		add_action( 'wp_ajax_nopriv_fusion_cache_map', array( $this, 'fusion_cache_map' ) );
-		add_action( 'avada_after_page_title_bar', array( $this, 'before_main_container' ) );
+		add_filter( 'fusion_attr_avada-google-map', [ $this, 'attr' ] );
+		add_action( 'wp_ajax_fusion_cache_map', [ $this, 'fusion_cache_map' ] );
+		add_action( 'wp_ajax_nopriv_fusion_cache_map', [ $this, 'fusion_cache_map' ] );
+		add_action( 'avada_after_page_title_bar', [ $this, 'before_main_container' ] );
 	}
 
 	/**
@@ -58,7 +58,7 @@ class Avada_GoogleMap {
 	public static function set_shortcode_defaults( $defaults, $args ) {
 
 		if ( empty( $args ) || ! is_array( $args ) ) {
-			$args = array();
+			$args = [];
 		}
 
 		$args = shortcode_atts( $defaults, $args );
@@ -83,7 +83,7 @@ class Avada_GoogleMap {
 	 */
 	public static function calc_color_brightness( $color ) {
 
-		if ( in_array( strtolower( $color ), array( 'black', 'navy', 'purple', 'maroon', 'indigo', 'darkslategray', 'darkslateblue', 'darkolivegreen', 'darkgreen', 'darkblue' ) ) ) {
+		if ( in_array( strtolower( $color ), [ 'black', 'navy', 'purple', 'maroon', 'indigo', 'darkslategray', 'darkslateblue', 'darkolivegreen', 'darkgreen', 'darkblue' ], true ) ) {
 			$brightness_level = 0;
 		} elseif ( 0 === strpos( $color, '#' ) ) {
 			$color            = fusion_hex2rgb( $color );
@@ -103,7 +103,7 @@ class Avada_GoogleMap {
 	 * @param  array  $attributes Attributes for HTML tag.
 	 * @return string
 	 */
-	public static function attributes( $slug, $attributes = array() ) {
+	public static function attributes( $slug, $attributes = [] ) {
 
 		$out  = '';
 		$attr = apply_filters( "fusion_attr_{$slug}", $attributes );
@@ -122,7 +122,7 @@ class Avada_GoogleMap {
 
 		return trim( $out );
 
-	} // end attr().
+	}
 
 	/**
 	 * JS API render method.
@@ -139,7 +139,7 @@ class Avada_GoogleMap {
 
 		if ( $address ) {
 			$addresses       = explode( '|', $address );
-			$infobox_content = ( ! in_array( $map_style, array( 'default', 'theme' ) ) ) ? html_entity_decode( $infobox_content ) : '';
+			$infobox_content = ( ! in_array( $map_style, [ 'default', 'theme' ], true ) ) ? html_entity_decode( $infobox_content ) : '';
 
 			$infobox_content_array = ( $infobox_content ) ? explode( '|', $infobox_content ) : '';
 			$icon_array            = ( $icon && 'default' !== $infobox ) ? explode( '|', $icon ) : '';
@@ -173,8 +173,7 @@ class Avada_GoogleMap {
 				if ( 0 === $color_obj->alpha ) {
 					$overlay_color = '';
 				} elseif ( 1 > $color_obj->alpha ) {
-					$lighter       = $color_obj->get_new( 'lightness', $color_obj->lightness + absint( 100 * ( 1 - $color_obj->alpha ) ) );
-					$overlay_color = $lighter->to_css( 'hex' );
+					$overlay_color = $color_obj->get_new( 'lightness', $color_obj->lightness + absint( 100 * ( 1 - $color_obj->alpha ) ) )->to_css( 'hex' );
 				}
 			}
 
@@ -226,10 +225,10 @@ class Avada_GoogleMap {
 			$cached_addresses = get_option( 'fusion_map_addresses' );
 
 			foreach ( self::$args['address'] as $key => $address ) {
-				$json_addresses[] = array(
+				$json_addresses[] = [
 					'address'         => $address,
 					'infobox_content' => self::$args['infobox_content'][ $key ],
-				);
+				];
 
 				if ( isset( $icon_array ) && is_array( $icon_array ) ) {
 					$json_addresses[ $key ]['marker'] = $icon_array[ $key ];
@@ -272,10 +271,10 @@ class Avada_GoogleMap {
 				var map_<?php echo esc_attr( $map_id ); ?>;
 				var markers = [];
 				var counter = 0;
-				var fusionMapNonce = '<?php echo wp_create_nonce( 'avada_admin_ajax' ); // WPCS: XSS ok. ?>';
+				var fusionMapNonce = '<?php echo wp_create_nonce( 'avada_admin_ajax' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>';
 				function fusion_run_map_<?php echo esc_attr( $map_id ); ?>() {
 					jQuery('#<?php echo esc_attr( $map_id ); ?>').fusion_maps({
-						addresses: <?php echo $json_addresses; // WPCS: XSS ok. ?>,
+						addresses: <?php echo $json_addresses; // phpcs:ignore WordPress.Security.EscapeOutput ?>,
 						address_pin: <?php echo ( 'yes' === $address_pin ) ? 'true' : 'false'; ?>,
 						animations: <?php echo ( 'yes' === $animation ) ? 'true' : 'false'; ?>,
 						infobox_background_color: '<?php echo esc_attr( $infobox_background_color ); ?>',
@@ -343,7 +342,7 @@ class Avada_GoogleMap {
 		}
 
 		$defaults = $this->set_shortcode_defaults(
-			array(
+			[
 				'api_type'                 => 'js',
 				'embed_address'            => '',
 				'embed_map_type'           => '',
@@ -367,7 +366,7 @@ class Avada_GoogleMap {
 				'width'                    => '100%',
 				'zoom'                     => '14',
 				'zoom_pancontrol'          => 'yes',
-			),
+			],
 			$args
 		);
 
@@ -421,20 +420,20 @@ class Avada_GoogleMap {
 		check_ajax_referer( 'avada_admin_ajax', 'security' );
 
 		// Check that the user has the right permissions.
-		if ( ! current_user_can( 'switch_themes' ) ) {
+		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			return;
 		}
 
 		$addresses_to_cache = get_option( 'fusion_map_addresses' );
-		$post_addresses     = isset( $_POST['addresses'] ) ? wp_unslash( $_POST['addresses'] ) : array(); // WPCS: sanitization ok.
+		$post_addresses     = isset( $_POST['addresses'] ) ? wp_unslash( $_POST['addresses'] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		foreach ( $post_addresses as $address ) {
 
 			if ( isset( $address['latitude'] ) && isset( $address['longitude'] ) ) {
-				$addresses_to_cache[ trim( $address['address'] ) ] = array(
+				$addresses_to_cache[ trim( $address['address'] ) ] = [
 					'address'   => trim( $address['address'] ),
 					'latitude'  => esc_attr( $address['latitude'] ),
 					'longitude' => esc_attr( $address['longitude'] ),
-				);
+				];
 
 				if ( isset( $address['geocoded_address'] ) && $address['geocoded_address'] ) {
 					$addresses_to_cache[ trim( $address['address'] ) ]['address'] = $address['geocoded_address'];
@@ -464,7 +463,7 @@ class Avada_GoogleMap {
 
 		if ( is_page_template( 'contact.php' ) && Avada()->settings->get( 'status_gmap' ) && $is_address_set ) {
 
-			$map_args = array(
+			$map_args = [
 				'api_type'                 => esc_html( Avada()->settings->get( 'gmap_api_type' ) ),
 				'embed_address'            => esc_html( Avada()->settings->get( 'gmap_embed_address' ) ),
 				'embed_map_type'           => esc_html( Avada()->settings->get( 'gmap_embed_map_type' ) ),
@@ -486,9 +485,9 @@ class Avada_GoogleMap {
 				'scale'                    => ( Avada()->settings->get( 'map_scale' ) ) ? 'yes' : 'no',
 				'zoom_pancontrol'          => ( Avada()->settings->get( 'map_zoomcontrol' ) ) ? 'yes' : 'no',
 				'popup'                    => ( ! Avada()->settings->get( 'map_popup' ) ) ? 'yes' : 'no',
-			);
+			];
 
-			echo '<div id="fusion-gmap-container">' . $this->render_map( $map_args ) . '</div>'; // WPCS: XSS ok.
+			echo '<div id="fusion-gmap-container">' . $this->render_map( $map_args ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput
 		}
 	}
 }
